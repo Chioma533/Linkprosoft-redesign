@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "../layouts/landing/Navbar";
+import Navbar from "../components/layout/landing/Navbar";
 import Hero from "../components/landing/Hero";
 import PopularCategories from "../components/landing/PopularCategories";
 import WhyChooseUs from "../components/landing/WhyChooseUs";
@@ -13,9 +13,7 @@ const LandingPage = () => {
 
   return (
     <div className="min-h-screen bg-white text-gray-950 flex flex-col font-sans">
-      {/* Navigation Header */}
       <Navbar />
-
       {/* Main Content Sections */}
       <main className="flex-1 flex flex-col gap-12 md:gap-16">
         <Hero searchVal={searchQuery} onSearchChange={setSearchQuery} />
@@ -26,7 +24,6 @@ const LandingPage = () => {
         <Faq />
       </main>
 
-      {/* Footer */}
       <Footer />
     </div>
   );

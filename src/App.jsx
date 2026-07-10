@@ -1,16 +1,25 @@
 import LandingPage from './pages/LandingPage';
+import SignupPage from './pages/SignupPage';
+import DashboardPage from './pages/DashboardPage';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
   return (
-    <Router>
-    <div className="min-h-screen bg-white text-gray-900">
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-      </Routes>
-    </div>
-    </Router>
-  )
-}
+    <AuthProvider>
+      <Router>
+        <div className="min-h-screen bg-white text-gray-900 font-sans">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/signup" element={<SignupPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
+          </Routes>
+          <Toaster position="top-right" reverseOrder={false} />
+        </div>
+      </Router>
+    </AuthProvider>
+  );
+};
 
-export default App
+export default App;

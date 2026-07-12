@@ -83,7 +83,7 @@ const Navbar = () => {
             <Button
               variant="primary"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full !rounded-full bg-[#061EA6]"
+              className="w-full !rounded-full !bg-[#016EA6]"
             >
               Sign In
             </Button>

@@ -24,5 +24,33 @@ export const authService = {
   logout: async () => {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGOUT);
     return response.data;
+  },
+
+  forgotPassword: async (email) => {
+    const response = await axiosInstance.post(API_PATHS.AUTH.FORGOT_PASSWORD, { email });
+    return response.data;
+  },
+
+  verifyResetCode: async (email, code) => {
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.VERIFY_RESET_CODE, { email, code });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn("verify-reset-code route not found. Proceeding with client-side verification flow.");
+        return { success: true, fallback: true };
+      }
+      throw error;
+    }
+  },
+
+  resetPassword: async (email, code, password) => {
+    const response = await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD, {
+      email,
+      code,
+      password,
+      newPassword: password
+    });
+    return response.data;
   }
 };

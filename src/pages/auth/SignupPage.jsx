@@ -2,30 +2,48 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { useAuth } from "../context/AuthContext";
-import RoleSelection from "../features/auth/components/RoleSelection";
-import SignupForm from "../features/auth/components/SignupForm";
-import OtpVerification from "../features/auth/components/OtpVerification";
-import WelcomeSuccess from "../features/auth/components/WelcomeSuccess";
+import { useAuth } from "../../context/AuthContext";
+import RoleSelection from "../../features/auth/components/RoleSelection";
+import SignupForm from "../../features/auth/components/SignupForm";
+import OtpVerification from "../../features/auth/components/OtpVerification";
+import WelcomeSuccess from "../../features/auth/components/WelcomeSuccess";
+import ProfessionalTypeSelection from "../../features/auth/components/ProfessionalTypeSelection";
 
 const SignupPage = () => {
   const navigate = useNavigate();
   const { signup, verifyOtp } = useAuth();
 
-  const [step, setStep] = useState("role-selection"); // role-selection, signup-form, otp-verification, success
-  const [role, setRole] = useState("employer"); // default to employer ('I'm looking to hire')
+  const [step, setStep] = useState("role-selection"); // role-selection, professional-type, signup-form, otp-verification, success
+  const [role, setRole] = useState("professional"); // default to professional
+  const [professionalType, setProfessionalType] = useState(null); // digital or none-digital
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
   const handleNextStep = () => {
     if (step === "role-selection") {
+      if (role === "professional") {
+        setStep("professional-type");
+      } else {
+        setStep("signup-form");
+      }
+    } else if (step === "professional-type") {
       setStep("signup-form");
     }
   };
 
   const handleBackToRole = () => {
-    setStep("role-selection");
+    if (step === "signup-form") {
+      if (role === "professional") {
+        setStep("professional-type");
+      } else {
+        setStep("role-selection");
+      }
+    } else if (step === "professional-type") {
+      setStep("role-selection");
+    } else {
+      setStep("role-selection");
+    }
     setApiError("");
   };
 
@@ -33,7 +51,11 @@ const SignupPage = () => {
     setIsLoading(true);
     setApiError("");
     try {
-      await signup(formData);
+      const payload = {
+        ...formData,
+        ...(role === "professional" ? { professionalType } : {})
+      };
+      await signup(payload);
       setEmail(formData.email);
       toast.success("Account created successfully! Verification code sent.");
       setStep("otp-verification");
@@ -93,6 +115,25 @@ const SignupPage = () => {
               className="w-full"
             >
               <RoleSelection role={role} onChangeRole={setRole} onNext={handleNextStep} />
+            </motion.div>
+          )}
+
+          {step === "professional-type" && (
+            <motion.div
+              key="professional-type"
+              variants={slideVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="w-full"
+            >
+              <ProfessionalTypeSelection
+                professionalType={professionalType}
+                onChangeType={setProfessionalType}
+                onNext={handleNextStep}
+                onBack={handleBackToRole}
+              />
             </motion.div>
           )}
 

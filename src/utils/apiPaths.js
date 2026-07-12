@@ -5,7 +5,10 @@ export const API_PATHS = {
         SIGNUP: "/api/auth/signup",
         LOGIN: "api/auth/login",
         LOGOUT: "api/auth/logout",
-        VERIFY: "api/auth/verify"
+        VERIFY: "api/auth/verify",
+        FORGOT_PASSWORD: "api/auth/forgot-password",
+        VERIFY_RESET_CODE: "api/auth/verify-reset-code",
+        RESET_PASSWORD: "api/auth/reset-password"
     },
     PROFILE:{
         GET_PROFILE: "api/profile",

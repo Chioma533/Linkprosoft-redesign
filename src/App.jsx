@@ -1,6 +1,7 @@
 import LandingPage from './pages/LandingPage';
-import SignupPage from './pages/SignupPage';
-import DashboardPage from './pages/DashboardPage';
+import SignupPage from './pages/auth/SignupPage';
+import LoginPage from "./pages/auth/LoginPage"
+import DashboardPage from './pages/professionals/DashboardPage';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
@@ -13,6 +14,8 @@ const App = () => {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/login" element={<LoginPage />} />
+
             <Route path="/dashboard" element={<DashboardPage />} />
           </Routes>
           <Toaster position="top-right" reverseOrder={false} />

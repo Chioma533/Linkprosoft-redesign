@@ -79,6 +79,33 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const forgotPassword = async (email) => {
+    try {
+      const data = await authService.forgotPassword(email);
+      return data;
+    } catch (error) {
+      throw error.response?.data?.message || error.message || "Request failed";
+    }
+  };
+
+  const verifyResetCode = async (email, code) => {
+    try {
+      const data = await authService.verifyResetCode(email, code);
+      return data;
+    } catch (error) {
+      throw error.response?.data?.message || error.message || "Code verification failed";
+    }
+  };
+
+  const resetPassword = async (email, code, password) => {
+    try {
+      const data = await authService.resetPassword(email, code, password);
+      return data;
+    } catch (error) {
+      throw error.response?.data?.message || error.message || "Password reset failed";
+    }
+  };
+
   const value = {
     user,
     token,
@@ -88,6 +115,9 @@ export const AuthProvider = ({ children }) => {
     verifyOtp,
     login,
     logout,
+    forgotPassword,
+    verifyResetCode,
+    resetPassword,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

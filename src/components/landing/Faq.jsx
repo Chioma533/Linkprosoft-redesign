@@ -43,7 +43,7 @@ const Faq = () => {
       {/* Header */}
       <div className="w-[90%] flex flex-col items-start gap-2">
         <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 leading-tight">
-          Frequently <span className="text-[#061EA6]">asked questions</span>
+          Frequently <span className="text-[#016EA6]">asked questions</span>
         </h2>
       </div>
 

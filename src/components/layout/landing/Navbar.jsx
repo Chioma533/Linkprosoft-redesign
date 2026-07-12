@@ -44,7 +44,11 @@ const Navbar = () => {
             Sign up
           </Link>
           <Button variant="primary" size="sm" rounded="lg" className="!rounded-full px-6 py-2 !bg-[#016EA6] text-white hover:bg-[#061EA6]/90 transition-colors font-medium">
-            Sign In 
+            <Link
+                to="/login"
+              >
+                Sign In
+            </Link>
           </Button>
         </div>
 
@@ -85,7 +89,11 @@ const Navbar = () => {
               onClick={() => setMobileMenuOpen(false)}
               className="w-full !rounded-full !bg-[#016EA6]"
             >
-              Sign In
+              <Link
+                to="/login"
+              >
+                Sign In
+              </Link>
             </Button>
           </div>
         </div>

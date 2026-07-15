@@ -2,7 +2,7 @@ import { useState } from "react";
 import { FiMail, FiLock, FiUser } from "react-icons/fi";
 import Input from "../../../components/common/Input";
 import Button from "../../../components/common/Button";
-import AuthLayout from "../../../components/layout/AuthLayout";
+import AuthLayout from "../../../layouts/AuthLayout";
 
 const LoginForm = ({ onSubmit, onForgotPassword, isLoading, error }) => {
   const [credentials, setCredentials] = useState({
@@ -88,7 +88,7 @@ const LoginForm = ({ onSubmit, onForgotPassword, isLoading, error }) => {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full !rounded-full !bg-[#016EA6] hover:!bg-[#016EA6]/95 py-3.5 text-base shadow-sm font-medium tracking-wide mt-4"
+          className="w-full rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide mt-4"
         >
           {isLoading ? "Signing in..." : "Sign in"}
         </Button>

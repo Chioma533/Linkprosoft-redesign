@@ -112,7 +112,7 @@ const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="w-full max-w-[480px] mx-auto px-4 md:px-0 flex flex-col items-center py-8 md:py-12"
+      className="w-full max-w-120 mx-auto px-4 md:px-0 flex flex-col items-center py-8 md:py-12"
     >
       <motion.div
         variants={shakeVariants}
@@ -176,7 +176,7 @@ const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
           <Button
             type="submit"
             disabled={isLoading || otp.some((v) => v === "")}
-            className="w-full !rounded-full !bg-[#016EA6] hover:!bg-[#016EA6]/95 py-3.5 text-base shadow-sm font-medium tracking-wide"
+            className="w-full rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide"
           >
             {isLoading ? "Verifying..." : "Continue"}
           </Button>

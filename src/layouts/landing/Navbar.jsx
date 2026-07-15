@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
-import Logo from "../../../assets/images/logo2.jpg";
-import Button from "../../common/Button";
+import Logo from "../../assets/images/logo2.jpg";
+import Button from "../../components/common/Button";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);

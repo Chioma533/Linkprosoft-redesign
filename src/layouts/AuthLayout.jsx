@@ -1,6 +1,6 @@
 import React from 'react'
 import { motion } from "framer-motion";
-import WorkerImage from "../../assets/images/handyman.jfif";
+import WorkerImage from "../assets/images/handyman.jfif";
 import { FiUserPlus } from 'react-icons/fi';
 
 

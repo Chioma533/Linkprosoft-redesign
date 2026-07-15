@@ -47,7 +47,7 @@ const ProfessionalTypeSelection = ({ professionalType, onChangeType, onNext, onB
       ),
     },
     {
-      id: "non-digital",
+      id: "non_digital",
       title: "None-digital professional",
       description: "Carpenter, Painter, e.t.c.",
       illustration: (

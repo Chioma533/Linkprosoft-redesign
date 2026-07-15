@@ -2,9 +2,10 @@ import { useState } from "react";
 import { FiUser, FiMail, FiLock} from "react-icons/fi";
 import Input from "../../../components/common/Input";
 import Button from "../../../components/common/Button";
-import AuthLayout from "../../../components/layout/AuthLayout";
+import AuthLayout from "../../../layouts/AuthLayout";
+import PasswordStrengthMeter from "./PasswordStrengthMeter";
 
-const SignupForm = ({ role, onSubmit, isLoading }) => {
+const SignupForm = ({ onSubmit, isLoading }) => {
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -42,7 +43,7 @@ const SignupForm = ({ role, onSubmit, isLoading }) => {
   const handleSignUp = (e) => {
     e.preventDefault();
     if (validate()) {
-      onSubmit({ ...formData, role });
+      onSubmit(formData);
     }
   };
 
@@ -95,11 +96,13 @@ const SignupForm = ({ role, onSubmit, isLoading }) => {
             leftIcon={FiLock}
             required
           />
+          {/* password strength checker */}
+          <PasswordStrengthMeter password={formData.password} />
 
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full !rounded-full !bg-[#016EA6] hover:!bg-[#016EA6]/95 py-3.5 text-base shadow-sm font-medium tracking-wide mt-2"
+            className="w-full rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide mt-2"
           >
             {isLoading ? "Creating account..." : "Create account"}
           </Button>

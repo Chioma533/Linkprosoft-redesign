@@ -3,22 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-hot-toast";
 import { useAuth } from "../../context/AuthContext";
-import RoleSelection from "../../features/auth/components/RoleSelection";
-import SignupForm from "../../features/auth/components/SignupForm";
-import OtpVerification from "../../features/auth/components/OtpVerification";
-import WelcomeSuccess from "../../features/auth/components/WelcomeSuccess";
-import ProfessionalTypeSelection from "../../features/auth/components/ProfessionalTypeSelection";
+import RoleSelection from "../../components/auth/components/RoleSelection";
+import SignupForm from "../../components/auth/components/SignupForm";
+import OtpVerification from "../../components/auth/components/OtpVerification";
+import WelcomeSuccess from "../../components/auth/components/WelcomeSuccess";
+import ProfessionalTypeSelection from "../../components/auth/components/ProfessionalTypeSelection";
+import { useAuthStore } from "../../store/authStore";
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  const { signup, verifyOtp } = useAuth();
 
   const [step, setStep] = useState("role-selection"); // role-selection, professional-type, signup-form, otp-verification, success
   const [role, setRole] = useState("professional"); // default to professional
   const [professionalType, setProfessionalType] = useState(null); // digital or none-digital
   const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const {signup, verifyOtp, isLoading, error} = useAuthStore();
 
   const handleNextStep = () => {
     if (step === "role-selection") {
@@ -48,28 +48,34 @@ const SignupPage = () => {
   };
 
   const handleSignupSubmit = async (formData) => {
-    setIsLoading(true);
-    setApiError("");
     try {
+      console.log("Received formData:", formData);
       const payload = {
-        ...formData,
-        ...(role === "professional" ? { professionalType } : {})
+        full_name: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        passwordConfirm: formData.password,
+
+        role,
+
+        professional_type: role === "professional" ? professionalType : undefined,
       };
+
+      console.log("Signup Payload:", payload);
+
       await signup(payload);
+
       setEmail(formData.email);
+      
       toast.success("Account created successfully! Verification code sent.");
       setStep("otp-verification");
     } catch (err) {
       const errMsg = typeof err === "string" ? err : "Signup failed. Please try again.";
-      setApiError(errMsg);
       toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleOtpSubmit = async (code) => {
-    setIsLoading(true);
     setApiError("");
     try {
       await verifyOtp(email, code);
@@ -79,8 +85,6 @@ const SignupPage = () => {
       const errMsg = typeof err === "string" ? err : "Verification failed. Invalid code.";
       setApiError(errMsg);
       toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -102,7 +106,7 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen bg-[#EBF3FA]/40 flex flex-col justify-center items-center py-10 px-4">
-      <div className="w-full max-w-[1000px] flex justify-center">
+      <div className="w-full max-w-250 flex justify-center">
         <AnimatePresence mode="wait">
           {step === "role-selection" && (
             <motion.div

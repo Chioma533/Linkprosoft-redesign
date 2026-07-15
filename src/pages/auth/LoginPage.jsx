@@ -2,41 +2,38 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { useAuth } from "../../context/AuthContext";
-import LoginForm from "../../features/auth/components/LoginForm";
-import ForgotPassword from "../../features/auth/components/ForgotPassword";
-import EnterResetCode from "../../features/auth/components/EnterResetCode";
-import CreateNewPassword from "../../features/auth/components/CreateNewPassword";
-import ResetSuccess from "../../features/auth/components/ResetSuccess";
+import LoginForm from "../../components/auth/components/LoginForm";
+import ForgotPassword from "../../components/auth/components/ForgotPassword";
+import EnterResetCode from "../../components/auth/components/EnterResetCode";
+import CreateNewPassword from "../../components/auth/components/CreateNewPassword";
+import ResetSuccess from "../../components/auth/components/ResetSuccess";
+import { useAuthStore } from "../../store/authStore";
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, forgotPassword, verifyResetCode, resetPassword } = useAuth();
-
   const [step, setStep] = useState("login"); // login, forgot-password, enter-code, create-password, reset-success
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState("");
 
+  const { login, forgotPassword, verifyResetCode, resetPassword, isLoading, error } = useAuthStore();
+
   const handleLoginSubmit = async (credentials) => {
-    setIsLoading(true);
-    setApiError("");
-    try {
-      await login(credentials);
-      toast.success("Welcome back!");
-      navigate("/dashboard");
-    } catch (err) {
-      const errMsg = typeof err === "string" ? err : "Login failed. Please verify your credentials.";
-      setApiError(errMsg);
-      toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
-    }
+   try{
+    await login(credentials);
+
+    toast.success("Welcome back!");
+
+    navigate("/dashboard");
+   }catch(err){
+    toast.error(
+      err.response?.data?.message || err || "Login failed. Please verify your credentials."
+    );  
+   }
+
   };
 
   const handleForgotPasswordSubmit = async (targetEmail) => {
-    setIsLoading(true);
     setApiError("");
     try {
       await forgotPassword(targetEmail);
@@ -47,13 +44,10 @@ const LoginPage = () => {
       const errMsg = typeof err === "string" ? err : "Failed to send reset code. Please try again.";
       setApiError(errMsg);
       toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleVerifyResetCodeSubmit = async (otpCode) => {
-    setIsLoading(true);
     setApiError("");
     try {
       await verifyResetCode(email, otpCode);
@@ -64,13 +58,10 @@ const LoginPage = () => {
       const errMsg = typeof err === "string" ? err : "Invalid code. Please try again.";
       setApiError(errMsg);
       toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleResetPasswordSubmit = async (newPassword) => {
-    setIsLoading(true);
     setApiError("");
     try {
       await resetPassword(email, code, newPassword);
@@ -80,8 +71,6 @@ const LoginPage = () => {
       const errMsg = typeof err === "string" ? err : "Failed to reset password. Please try again.";
       setApiError(errMsg);
       toast.error(errMsg);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -114,7 +103,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen bg-[#EBF3FA]/40 flex flex-col justify-center items-center py-10 px-4">
-      <div className="w-full max-w-[1000px] flex justify-center">
+      <div className="w-full max-w-250 flex justify-center">
         <AnimatePresence mode="wait">
           {step === "login" && (
             <motion.div
@@ -130,7 +119,7 @@ const LoginPage = () => {
                 onSubmit={handleLoginSubmit}
                 onForgotPassword={() => setStep("forgot-password")}
                 isLoading={isLoading}
-                error={apiError}
+                error={error}
               />
             </motion.div>
           )}
@@ -149,7 +138,7 @@ const LoginPage = () => {
                 onSubmit={handleForgotPasswordSubmit}
                 onClose={handleCloseReset}
                 isLoading={isLoading}
-                error={apiError}
+                error={error}
               />
             </motion.div>
           )}

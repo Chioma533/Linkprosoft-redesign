@@ -1,736 +1,298 @@
-# Linkprosoft Frontend Development Guidelines
+# Linkprosoft Frontend Development Guide
 
-You are contributing to a production-grade React application built with Vite and Tailwind CSS.
+## Tech Stack
 
-## General Principles
-
-- Follow the existing folder structure exactly. Do not create new architectural patterns unless explicitly requested.
-- Keep the codebase clean, scalable, and easy to maintain.
-- Prioritize readability over clever implementations.
-- Follow modern React best practices.
+* React 19
+* Vite
+* Tailwind CSS
+* React Router
+* Zustand
+* Axios
+* Framer Motion
+* React Hot Toast
 
 ---
 
-## Component Architecture
+# Project Folder Structure
 
-- Any component that is likely to be used more than once **must be extracted into a reusable component immediately.**
-- Avoid duplicated JSX.
-- Components should be composable.
-- UI components should be generic and configurable through props.
+Use this structure exactly.
+
+```
+src/
+│
+├── api/
+│
+├── assets/
+│   ├── images/
+│   ├── icons/
+│
+├── components/
+│   ├── common/
+│   ├── layout/
+│   └── ui/
+│
+├── config/
+│
+├── constants/
+│
+├── hooks/
+│
+├── layouts/
+│
+├── pages/
+│
+├── routes/
+│
+├── services/
+│
+├── stores/
+│
+├── utils/
+│
+└── App.jsx
+```
+
+Do not introduce a Feature-Based Architecture unless explicitly instructed.
+
+---
+
+# State Management
+
+This project uses **Zustand** as the global state management solution.
+
+Do **NOT** introduce Redux or Context API for application state.
+
+Context should only be used if React itself requires it (for example, third-party providers).
+
+Global state belongs inside Zustand stores.
 
 Examples:
 
-- Button
-- Input
-- Modal
-- Card
-- Badge
-- Avatar
-- Empty State
-- Loading Spinner
-- Search Input
-- Pagination
-- Table
+* authStore
+* dashboardStore
+* notificationStore
+* projectStore
 
----
-
-## API-Driven UI
-
-Assume all displayed data comes from APIs.
-
-- Never hardcode business data inside components.
-- Design components around data received from APIs.
-- Support loading, empty, success, and error states.
-- When APIs are unavailable, use mock objects that mirror the expected API response.
-
----
-
-## Production Mindset
-
-Every feature should include:
-
-- Loading states
-- Error handling
-- Empty states
-- Responsive design
-- Accessibility where applicable
-- Semantic HTML
-- Clean component composition
-
-Avoid placeholder implementations that would require major rewrites later.
-
----
-
-## Code Organization
-
-- No page/component should exceed **200 lines**.
-- If a file approaches 200 lines, extract logical sections into child components.
-- Keep related code together.
-
----
-
-## Business Logic
-
-Business logic **should remain close to the page or feature that owns it.**
-
-Do **not** move business logic into unrelated utility folders simply for the sake of abstraction.
-
-Examples of business logic include:
-
-- form submission
-- filters
-- pagination
-- searching
-- sorting
-- modal state
-- page-specific calculations
-
-If the logic is only used by one page, keep it with that page.
-
-Extract logic only when:
-
-- it is reused by multiple pages
-- it becomes complex enough to deserve a custom hook
-- it represents shared application behavior
-
----
-
-## API Layer
-
-All backend communication should go through the existing API/service layer.
-
-Components should never make raw fetch or axios requests directly.
-
----
-
-## State Management
-
-- Keep state as local as possible.
-- Lift state only when necessary.
-- Avoid unnecessary global state.
-
----
-
-## Styling
-
-Use Tailwind CSS exclusively.
-
-- Prefer reusable utility combinations.
-- Maintain consistent spacing.
-- Maintain consistent typography.
-- Follow the existing design system.
-
----
-
-## Naming
-
-Use clear descriptive names.
+Keep page-specific UI state local.
 
 Examples:
 
-EmployerDashboard.jsx
+* modal visibility
+* selected tab
+* search input
+* filters
+* pagination
 
-ProfessionalCard.jsx
-
-JobApplicationTable.jsx
-
-CompanyProfileForm.jsx
-
-Avoid vague names like:
-
-Component1
-
-DataCard
-
-Temp
-
-Test
+Do not move local state into Zustand unnecessarily.
 
 ---
 
-## Performance
+# API Layer
 
-- Memoize only when necessary.
-- Avoid unnecessary re-renders.
-- Lazy load large pages where appropriate.
-- Avoid premature optimization.
+Every backend request must go through the Service layer.
 
----
+Flow:
 
-## Quality
-
-Before producing code, verify that:
-
-- It follows the existing project structure.
-- It does not duplicate existing components.
-- Reusable UI has been extracted.
-- The page remains under 200 lines.
-- Business logic stays with the owning feature unless genuinely shared.
-- The code is production-ready rather than a quick prototype.
-
-# Linkprosoft Frontend Architecture Rules
-
-These rules are mandatory for every new feature, component, page, hook, or API integration.
-
----
-
-# 1. Folder Responsibilities
-
-Every directory has a single responsibility.
-
-## api/
-
-Responsible for:
-
-* API client configuration
-* Authentication interceptors
-* Endpoint definitions
-* Feature service files
-
-Never place UI or business logic here.
-
----
-
-## features/
-
-Each feature owns its business logic.
-
-A feature may contain:
-
-* pages
-* components
-* hooks
-* constants
-* helpers
-
-Business logic should remain inside its owning feature unless shared by multiple features.
-
----
-
-## components/
-
-Contains reusable presentation components only.
-
-Examples:
-
-* Button
-* Input
-* Select
-* SearchBar
-* Modal
-* Card
-* EmptyState
-* Avatar
-* Spinner
-* Badge
-
-Components should never contain business logic.
-
----
-
-## layouts/
-
-Responsible for application layouts.
-
-Examples:
-
-LandingLayout
-
-EmployerLayout
-
-ProfessionalLayout
-
-Each layout owns:
-
-* Navbar
-* Sidebar
-* Footer
-* Layout wrappers
-
----
-
-## hooks/
-
-Contains reusable custom hooks.
-
-Examples:
-
-useDebounce
-
-usePagination
-
-useModal
-
-useSearch
-
-useInfiniteScroll
-
-Never create hooks used by only one component.
-
----
-
-## context/
-
-Contains global application state only.
-
-Examples:
-
-Authentication
-
-Theme
-
-User Session
-
-Permissions
-
-Notifications
-
-Never store page-specific state inside Context.
-
----
-
-## constants/
-
-Contains application constants.
-
-Examples:
-
-Routes
-
-Roles
-
-Status values
-
-Validation messages
-
-Static configuration
-
-Never place business logic here.
-
----
-
-## config/
-
-Contains project configuration.
-
-Examples:
-
-Environment
-
-Navigation configuration
-
-Sidebar configuration
-
-Table configuration
-
-Feature flags
-
----
-
-## utils/
-
-Pure helper functions only.
-
-Utilities should never call APIs.
-
-Utilities should never modify React state.
-
----
-
-# 2. Reusable Component Rules
-
-Before creating any component ask:
-
-"Can another page use this?"
-
-If YES
-
-Extract immediately.
-
-Examples:
-
-Button
-
-Input
-
-Search Input
-
-Password Input
-
-OTP Input
-
-TextArea
-
-Checkbox
-
-Radio
-
-Select
-
-Modal
-
-Dialog
-
-Drawer
-
-Alert
-
-Toast
-
-Pagination
-
-Table
-
-Empty State
-
-Loader
-
-Skeleton
-
-Avatar
-
-Badge
-
-Tag
-
-Stat Card
-
-Metric Card
-
-No duplicated JSX is allowed.
-
----
-
-# 3. Forms
-
-Every form should be API-ready.
-
-Forms should support:
-
-loading
-
-validation
-
-disabled state
-
-server validation
-
-success state
-
-error state
-
-future API integration
-
-Avoid hardcoded submit handlers.
-
-Every form should expose clean payloads ready for backend submission.
-
----
-
-# 4. Input System
-
-All inputs must be built on a shared Input component.
-
-Every specialized input should extend the shared Input.
-
-Examples:
-
-Text Input
-
-Email Input
-
-Password Input
-
-Phone Input
-
-Search Input
-
-OTP Input
-
-Verification Code Input
-
-TextArea
-
-Date Picker
-
-Select
-
-The Input component should support:
-
-label
-
-placeholder
-
-error message
-
-helper text
-
-required
-
-disabled
-
-loading
-
-left icon
-
-right icon
-
-password toggle
-
-API validation state
-
-React Hook Form compatibility
-
-className overrides
-
-forwardRef
-
-No page should create its own custom input unless absolutely necessary.
-
----
-
-# 5. API Integration
-
-Build every screen assuming APIs already exist. (login and signup apis already exists)
-
-Never hardcode business data.
-
-Every page should consume services.
-
-Components never call fetch or axios directly.
-
-Example flow:
-
+```
 Component
-
-↓
-
-Feature Hook
-
-↓
-
-API Service
-
-↓
-
-API Client
-
-↓
-
+        ↓
+Page
+        ↓
+Service
+        ↓
+axios
+        ↓
 Backend
+```
+
+Components must never import Axios directly.
+
+Pages should never call Axios directly.
 
 ---
 
-# 6. Authentication Architecture
+# Services
 
-Authentication screens should be production-ready.
+Each service owns one backend resource.
 
-Include support for:
+Examples:
 
-Login
-
-Registration
-
-Forgot Password
-
-Reset Password
-
-Email Verification
-
-Phone Verification
-
-OTP Verification
-
-Session persistence
-
-Protected routes
-
-Token refresh
-
-Loading states
-
-Error handling
-
-Role-based redirects
-
-Even if backend endpoints are not yet available.
-
----
-
-# 7. Feature Architecture
-
-Every major feature should remain self-contained.
-
-Example:
-api/
-
-assets/
-
-features/
-
-routes/
-
-pages/
-
-components/
-   |___common
-   |___layout
-   |___ui
-
-hooks/
-
-constants/
-
-context/
-
-config/
-
-utils/
-
-Avoid mixing employer code with professional code.
-
----
-
-# 8. Page Responsibilities
-
-Pages orchestrate features.
-
-Pages should:
-
-call hooks
-
-compose components
-
-manage page state
-
-coordinate API calls
-
-Pages should NOT contain massive JSX blocks.
-
-Pages should NOT contain reusable UI.
-
-Maximum page size:
-
-200 lines.
-
----
-
-# 9. Component Responsibilities
-
-Components should:
-
-display data
-
-emit events
-
-receive props
-
-remain reusable
-
-Avoid API calls inside components.
-
-Avoid application state inside components.
-
----
-
-# 10. Error Handling
-
-Every async operation should handle:
-
-loading
-
-success
-
-empty
-
-error
-
-retry
-
-offline state
-
-Never ignore promise failures.
-
----
-
-# 11. Naming Convention
-
-Components
-
-PascalCase
-
-Button.jsx
-
-SearchBar.jsx
-
-EmployerNavbar.jsx
-
-Hooks
-
-camelCase beginning with use
-
-useAuth
-
-useEmployer
-
-useSearch
-
-Services
-
-camelCase ending with Service
-
+```
 authService.js
+
+projectService.js
 
 profileService.js
 
-Files should describe their responsibility.
+notificationService.js
+```
 
-Avoid generic names.
+Services should only contain API communication.
 
----
-
-# 12. Scalability
-
-Code should be written assuming:
-
-100+ pages
-
-50+ API endpoints
-
-multiple developers
-
-future mobile application
-
-future admin dashboard
-
-future internationalization
-
-Avoid architecture that only works for today's requirements.
+Never place UI logic inside services.
 
 ---
 
-# 13. Final Validation
+# Zustand Stores
 
-Before generating any code verify:
+Stores manage global application state.
 
-✓ Existing reusable component cannot solve the problem.
+Stores may:
 
-✓ Business logic stays inside its feature.
+* call services
+* update state
+* expose actions
 
-✓ API layer is respected.
+Stores should NOT contain UI rendering logic.
 
-✓ Folder responsibilities are respected.
+Example:
 
-✓ No duplicated JSX exists.
+```
+stores/
 
-✓ Page remains below 200 lines.
+authStore.js
 
-✓ UI is API-ready.
+dashboardStore.js
 
-✓ Components remain reusable.
+projectStore.js
+```
 
-✓ Code is production-ready.
+---
 
-Do not optimize for speed of generation.
+# Components
 
-Optimize for maintainability, scalability, readability, and long-term development.
+Components are reusable UI.
+
+Components should:
+
+* receive props
+* emit callbacks
+* remain reusable
+* remain presentation-focused
+
+Components should NOT:
+
+* call APIs
+* manage global application state
+* contain business rules
+
+---
+
+# Pages
+
+Pages coordinate the application.
+
+Pages should:
+
+* compose reusable components
+* call Zustand actions
+* coordinate navigation
+* manage page-specific state
+
+Pages should not exceed **200 lines**.
+
+If a page becomes too large, extract reusable sections into components.
+
+---
+
+# Mock Data
+
+Until backend APIs are completed, use realistic mock data.
+
+Mock data should mirror backend response structures.
+
+Do not hardcode mock data directly inside components.
+
+Keep mock data isolated so it can easily be replaced with API responses later.
+
+---
+
+# Authentication
+
+Authentication uses:
+
+* Zustand
+* authService
+* axiosInstance
+
+Support:
+
+* Login
+* Signup
+* Forgot Password
+* Reset Password
+* OTP Verification
+* Session Persistence
+* Protected Routes
+* Role-Based Access
+
+---
+
+# Styling
+
+Use Tailwind CSS exclusively.
+
+Maintain:
+
+* consistent spacing
+* typography
+* colors
+* responsive layouts
+* accessibility
+
+---
+
+# Naming
+
+Components:
+
+```
+ProfessionalCard.jsx
+DashboardSidebar.jsx
+NotificationDropdown.jsx
+```
+
+Stores:
+
+```
+authStore.js
+dashboardStore.js
+projectStore.js
+```
+
+Services:
+
+```
+authService.js
+projectService.js
+```
+
+Hooks:
+
+```
+useDebounce.js
+usePagination.js
+```
+
+Avoid generic names like:
+
+* temp
+* data
+* helper1
+* component2
+
+---
+
+# Code Quality Checklist
+
+Before generating code, verify that:
+
+* Existing reusable components are reused where possible.
+* No duplicate JSX is introduced.
+* Pages remain under 200 lines.
+* Components stay reusable.
+* Business logic stays close to the page unless globally shared.
+* APIs are accessed only through services.
+* Global state is managed with Zustand.
+* Components do not make API calls directly.
+* Code is production-ready, maintainable, and scalable.

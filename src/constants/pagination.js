@@ -1,0 +1,6 @@
+export const PAGINATION = {
+  BROWSE_JOBS: 6,
+  MY_JOBS: 8,
+  TRANSACTIONS: 10,
+  NOTIFICATIONS: 15,
+};

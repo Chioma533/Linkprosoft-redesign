@@ -27,7 +27,7 @@ const PremiumSubpage = () => {
   return (
     <div className="bg-white border border-gray-100/50 shadow-sm rounded-3xl overflow-hidden max-w-5xl mx-auto flex flex-col md:flex-row animate-fade-in relative min-h-[500px]">
       {/* Left Column: Comparisons */}
-      <div className="flex-1 p-8 bg-gray-50/50 border-r border-gray-50 flex flex-col justify-between">
+      <div className="flex-1 p-8 bg-gray-50/50 border-b md:border-r border-gray-100 md:border-b-0 flex flex-col justify-between">
         <div>
           {/* User count header */}
           <div className="flex items-center gap-3 mb-8">

@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSearch, FiMessageSquare, FiBell, FiChevronDown, FiLogOut, FiUser } from "react-icons/fi";
+import { FiSearch, FiMessageSquare, FiBell, FiChevronDown, FiLogOut, FiUser, FiMenu } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 
-const DashboardNavbar = ({ title }) => {
+const DashboardNavbar = ({ title, onMenuClick }) => {
   const { user, logout } = useAuthStore();
   const { messages, notifications, setActiveTab } = useDashboardStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -28,10 +28,17 @@ const DashboardNavbar = ({ title }) => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-40">
+    <header className="h-20 bg-white border-b-2 border-[#016EA6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
       {/* Title */}
-      <div className="flex items-center gap-4">
-        <h1 className="text-xl font-bold text-gray-900 capitalize">{title.replace("-", " ")}</h1>
+      <div className="flex items-center gap-2 sm:gap-4">
+        <button
+          onClick={onMenuClick}
+          className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+          title="Toggle Sidebar"
+        >
+          <FiMenu className="w-5 h-5" />
+        </button>
+        <h1 className="text-lg md:text-xl font-bold text-gray-900 capitalize truncate">{title.replace("-", " ")}</h1>
       </div>
 
       {/* Center Search */}
@@ -45,7 +52,7 @@ const DashboardNavbar = ({ title }) => {
       </div>
 
       {/* Right Side Options */}
-      <div className="flex items-center gap-6">
+      <div className="flex items-center gap-3 sm:gap-6">
         {/* Messages Alert */}
         <button
           onClick={() => setActiveTab("chat")}
@@ -58,7 +65,7 @@ const DashboardNavbar = ({ title }) => {
         </button>
 
         {/* Notifications Alert */}
-        <button className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer">
+        <button className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer hidden md:block">
           <FiBell className="w-5 h-5" />
           {unreadNotificationsCount > 0 && (
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
@@ -81,7 +88,7 @@ const DashboardNavbar = ({ title }) => {
                 <FiUser className="w-5 h-5" />
               )}
             </div>
-            <div className="hidden sm:block text-left">
+            <div className="hidden md:block text-left">
               <p className="text-xs font-semibold text-gray-900 leading-tight">
                 {user?.fullName || user?.full_name || "Samuel Owoniyi"}
               </p>
@@ -89,7 +96,7 @@ const DashboardNavbar = ({ title }) => {
                 {user?.role || "Professional"}
               </p>
             </div>
-            <FiChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+            <FiChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 hidden md:block ${dropdownOpen ? "rotate-180" : ""}`} />
           </button>
 
           {/* Dropdown Menu */}

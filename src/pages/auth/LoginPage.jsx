@@ -8,6 +8,7 @@ import EnterResetCode from "../../components/auth/components/EnterResetCode";
 import CreateNewPassword from "../../components/auth/components/CreateNewPassword";
 import ResetSuccess from "../../components/auth/components/ResetSuccess";
 import { useAuthStore } from "../../store/authStore";
+import { getDashboardRoute } from "../../utils/getDashboardRoute";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -20,11 +21,9 @@ const LoginPage = () => {
 
   const handleLoginSubmit = async (credentials) => {
    try{
-    await login(credentials);
-
+  const response = await login(credentials);
     toast.success("Welcome back!");
-
-    navigate("/dashboard");
+    navigate(getDashboardRoute(response.data.user.role));
    }catch(err){
     toast.error(
       err.response?.data?.message || err || "Login failed. Please verify your credentials."

@@ -62,8 +62,8 @@ const ApplicationsSubpage = () => {
           {/* Filters Row */}
           <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
             <h3 className="text-base font-bold text-gray-900">All jobs</h3>
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-              <div className="relative">
+            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+              <div className="relative w-full sm:w-auto">
                 <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
@@ -77,7 +77,7 @@ const ApplicationsSubpage = () => {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
+                className="w-full sm:w-auto pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
               >
                 <option value="">All categories</option>
                 <option value="Carpentry">Carpentry</option>
@@ -88,7 +88,7 @@ const ApplicationsSubpage = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
+                className="w-full sm:w-auto pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
               >
                 <option value="">All Status</option>
                 <option value="Under review">Under review</option>
@@ -96,7 +96,7 @@ const ApplicationsSubpage = () => {
                 <option value="Rejected">Rejected</option>
               </select>
 
-              <button className="bg-[#016EA6] hover:bg-[#061EA6] text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer text-center">
+              <button className="w-full sm:w-auto bg-[#016EA6] hover:bg-[#061EA6] text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer text-center">
                 Apply filter
               </button>
             </div>

@@ -76,7 +76,7 @@ const WalletSubpage = () => {
           <div>
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
               <h3 className="text-base font-bold text-gray-900">Recent Transaction</h3>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
                 <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors">
                   <Filter className="w-3.5 h-3.5" />
                   <span>Filter</span>

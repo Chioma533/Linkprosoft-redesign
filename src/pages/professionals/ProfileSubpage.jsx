@@ -43,9 +43,9 @@ const ProfileSubpage = () => {
         </div>
 
         {/* Profile Info Container */}
-        <div className="px-8 pb-8 relative">
+        <div className="px-4 md:px-8 pb-6 md:pb-8 relative">
           {/* Avatar floating */}
-          <div className="absolute -top-16 left-8 flex items-end gap-5">
+          <div className="absolute -top-16 left-4 md:left-8 flex items-end gap-5">
             <div className="w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] text-white flex items-center justify-center font-extrabold text-2xl relative shadow-md">
               SM
               <span className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center" title="100% Job Success">
@@ -66,7 +66,7 @@ const ProfileSubpage = () => {
               <p className="text-xs text-gray-500 mt-1 font-semibold">
                 A professional Plumber with vast years of experience and proven track records
               </p>
-              <div className="flex items-center gap-4 text-[10px] text-gray-400 font-semibold mt-3">
+              <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-400 font-semibold mt-3">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3.5 h-3.5" />
                   <span>Lekki Lagos</span>
@@ -170,7 +170,7 @@ const ProfileSubpage = () => {
         {/* Gallery */}
         <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-gray-900 mb-2">Portfolio</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {portfolio.map((port) => (
               <div key={port.id} className="group relative rounded-2xl overflow-hidden aspect-video bg-slate-100 border border-gray-100 flex flex-col justify-end p-4">
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent z-10 opacity-80 group-hover:opacity-100 transition-opacity" />

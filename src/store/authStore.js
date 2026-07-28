@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { authService } from "../api/services/authService";
+import {toast} from "react-hot-toast"
+
 
 export const useAuthStore = create((set) => ({
   user: JSON.parse(localStorage.getItem("user")) || null,
@@ -50,7 +52,7 @@ export const useAuthStore = create((set) => ({
     try {
     const response = await authService.login(credentials);
       
-      console.log("LOGIN RESPONSE:", response);
+      // console.log("LOGIN RESPONSE:", response);
      
       const authData = response.data;
 
@@ -63,7 +65,7 @@ export const useAuthStore = create((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-      console.log("STORE:", useAuthStore.getState());
+      // console.log("STORE:", useAuthStore.getState());
 
       return response;
     } catch (error) {

@@ -20,6 +20,7 @@ export const API_PATHS = {
     DELETE_SKILLS: "api/skills/:id",
     UPDATE_SKILLS: "api/skills/:id",
   },
+
   JOBS: {
     GET_JOBS: "api/jobs",
     ADD_JOB: "api/jobs",

@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Search, Phone, ShieldAlert, Smile, Mic, Paperclip, Send, User } from "lucide-react";
+import { Search, Phone, ShieldAlert, Smile, Mic, Paperclip, Send, User, ArrowLeft } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ChatSubpage = () => {
   const { user } = useAuthStore();
+  const [isChatOpenMobile, setIsChatOpenMobile] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -66,7 +67,7 @@ const ChatSubpage = () => {
   return (
     <div className="bg-white border border-gray-100/50 shadow-sm rounded-3xl h-[calc(100vh-140px)] overflow-hidden flex animate-fade-in">
       {/* Left panel: Threads list */}
-      <div className="w-80 border-r border-gray-100 flex flex-col h-full bg-white shrink-0">
+      <div className={`${isChatOpenMobile ? "hidden md:flex" : "flex"} w-full md:w-80 border-r border-gray-100 flex flex-col h-full bg-white shrink-0`}>
         {/* Filters buttons */}
         <div className="p-4 border-b border-gray-50 space-y-3">
           <div className="flex gap-2">
@@ -95,6 +96,7 @@ const ChatSubpage = () => {
           {conversations.map((convo, idx) => (
             <div
               key={idx}
+              onClick={() => setIsChatOpenMobile(true)}
               className={`flex items-start justify-between p-3 rounded-2xl cursor-pointer transition-colors ${
                 convo.active ? "bg-sky-50/50 border border-sky-100/10" : "hover:bg-gray-50"
               }`}
@@ -122,10 +124,17 @@ const ChatSubpage = () => {
       </div>
 
       {/* Right panel: Active Chat */}
-      <div className="flex-1 flex flex-col h-full bg-[#FAFCFE]/50">
+      <div className={`${isChatOpenMobile ? "flex" : "hidden md:flex"} flex-1 flex flex-col h-full bg-[#FAFCFE]/50`}>
         {/* Chat Thread Header */}
         <div className="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsChatOpenMobile(false)}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-50 md:hidden cursor-pointer flex items-center justify-center shrink-0"
+              title="Back to conversations list"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </button>
             <div className="w-10 h-10 rounded-full bg-sky-100/50 flex items-center justify-center relative font-bold text-gray-700 text-sm">
               MS
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-white" />

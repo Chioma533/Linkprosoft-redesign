@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import LandscapeImage from "../../assets/images/IMG-20260704-WA0194.jpg"; // The colorful landscape illustration
+import LandscapeImage from "../../assets/images/footerBg.jpg"; // The colorful landscape illustration
 
 const Footer = () => {
   const handleSearchSubmit = (e) => {
@@ -9,8 +9,13 @@ const Footer = () => {
   return (
     <footer className="w-full bg-white px-4 md:px-12 py-10">
       {/* Outer Card Wrapper */}
+        <div className="w-full relative z-0 -mx-6 md:-mx-16 flex justify-center overflow-hidden h-24 md:h-36 lg:h-44 mt-auto">
+         <img
+            src={LandscapeImage}
+            alt="Landscape illustration"
+            className="w-full min-w-[1000px]  object-cover object-top absolute bottom-0 select-none pointer-events-none"
+          />
       <div className="max-w-[95%] mx-auto bg-[#016EA6] text-white rounded-[2.5rem] pt-12 md:pt-16 pb-0 px-6 md:px-16 overflow-hidden relative flex flex-col justify-between">
-        
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-12 relative z-10 w-full mb-12 md:mb-16">
           
@@ -77,14 +82,8 @@ const Footer = () => {
 
         </div>
 
-        {/* Bottom Graphic: Landscape Hills Illustration */}
-        <div className="w-full relative z-0 -mx-6 md:-mx-16 flex justify-center overflow-hidden h-24 md:h-36 lg:h-44 mt-auto">
-          <img
-            src={LandscapeImage}
-            alt="Landscape illustration"
-            className="w-full min-w-[1000px] object-cover object-top absolute bottom-0 select-none pointer-events-none"
-          />
-        </div>
+        </div> 
+      
 
       </div>
     </footer>

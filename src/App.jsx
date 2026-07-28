@@ -1,11 +1,13 @@
 import LandingPage from './pages/LandingPage';
 import SignupPage from './pages/auth/SignupPage';
 import LoginPage from "./pages/auth/LoginPage"
-import DashboardPage from './pages/professionals/DashboardPage';
+import ProfessionalDashboardPage from './pages/professionals/ProfessionalDashboardPage';
 import PrivateRoutes from './routes/PrivateRoutes';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
+import EmployerDashboardPage from './pages/employer/EmployerDashboardPage';
+import AdminDahboardPage from './pages/admin/AdminDahboardPage';
 
 const App = () => {
   return (
@@ -17,9 +19,17 @@ const App = () => {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
 
-            <Route element={<PrivateRoutes />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
+            <Route element={<PrivateRoutes allowedRoles={['professional']} />}>
+              <Route path="/professional/dashboard" element={<ProfessionalDashboardPage />} />
             </Route>
+
+            <Route element={<PrivateRoutes allowedRoles={['employer']} />}>
+              <Route path="/employer/dashboard" element={<EmployerDashboardPage />} />
+            </Route>
+
+            <Route element={<PrivateRoutes allowedRoles={['admin']} />}>
+              <Route path="/admin/dashboard" element={<AdminDahboardPage />} />
+            </Route>  
           </Routes>
           <Toaster position="top-right" reverseOrder={false} />
         </div>

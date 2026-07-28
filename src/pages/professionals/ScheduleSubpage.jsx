@@ -36,9 +36,9 @@ const ScheduleSubpage = () => {
 
         {/* Schedule List */}
         <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h3 className="text-base font-bold text-gray-900">Today's Schedule</h3>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors">
                 This week
               </button>

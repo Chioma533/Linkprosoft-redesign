@@ -30,39 +30,53 @@ const WalletSubpage = () => {
       </div>
 
       {/* Blue Header Wallet Banner */}
-      <div className="bg-gradient-to-r from-[#013554] via-[#01507B] to-[#016EA6] p-8 rounded-3xl text-white shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-gradient-to-r from-[#013554] via-[#01507B] to-[#016EA6] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden flex flex-col gap-6 md:flex-row md:items-center justify-between">
         {/* Background Grid Accent */}
         <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200 via-transparent to-transparent" />
         
-        <div className="space-y-4 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-xl text-xs font-semibold backdrop-blur-xs border border-white/10">
-            <span className="text-sm">🇳🇬</span>
-            <span>NGN</span>
-          </div>
-          <div>
-            <span className="text-xs text-sky-200 font-medium tracking-wide">Total Balance</span>
-            <div className="flex items-center gap-3 mt-1">
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
-                {showBalance ? "₦ 500,000" : "₦ ••••••••"}
-              </h1>
-              <button 
-                onClick={() => setShowBalance(!showBalance)}
-                className="p-1.5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
-              >
-                {showBalance ? <EyeOff className="w-5 h-5 text-sky-200" /> : <Eye className="w-5 h-5 text-sky-200" />}
+        {/* Flex container wrapping layout */}
+        <div className="flex flex-col gap-6 w-full md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-4 w-full">
+            {/* Top row for mobile or standard logo row */}
+            <div className="flex items-center justify-between w-full md:w-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-xl text-xs font-semibold backdrop-blur-xs border border-white/10">
+                <span className="text-sm">🇳🇬</span>
+                <span>NGN</span>
+              </div>
+              
+              {/* Mobile-only Withdraw Button */}
+              <button className="md:hidden bg-white text-[#013554] hover:bg-sky-50 px-4 py-2 rounded-full text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer">
+                <span>Withdraw funds</span>
+                <ArrowUpRight className="w-3.5 h-3.5" />
               </button>
             </div>
-          </div>
-        </div>
 
-        <button className="bg-white text-[#013554] hover:bg-sky-50 px-6 py-3.5 rounded-full text-sm font-bold shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center gap-2 relative z-10 cursor-pointer active:scale-95">
-          <ArrowUpRight className="w-4 h-4" />
-          <span>Withdraw funds</span>
-        </button>
+            <div>
+              <span className="text-xs text-sky-200 font-medium tracking-wide">Total Balance</span>
+              <div className="flex items-center gap-3 mt-1">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+                  {showBalance ? "₦ 500,000" : "₦ ••••••••"}
+                </h1>
+                <button 
+                  onClick={() => setShowBalance(!showBalance)}
+                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                >
+                  {showBalance ? <EyeOff className="w-5 h-5 text-sky-200" /> : <Eye className="w-5 h-5 text-sky-200" />}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop-only Withdraw Button */}
+          <button className="hidden md:flex bg-white text-[#013554] hover:bg-sky-50 px-6 py-3.5 rounded-full text-sm font-bold shadow-md hover:shadow-lg transition-all duration-300 items-center justify-center gap-2 relative z-10 cursor-pointer active:scale-95">
+            <ArrowUpRight className="w-4 h-4" />
+            <span>Withdraw funds</span>
+          </button>
+        </div>
       </div>
 
       {/* Row of Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         <StatsCard title="Available Balance" value="₦500,000" icon={Wallet} iconColor="text-blue-500" iconBg="bg-blue-50" />
         <StatsCard title="Pending Earnings" value="₦59,000" icon={Clock} iconColor="text-orange-500" iconBg="bg-orange-50" />
         <StatsCard title="Total Earnings" value="₦1.8M" icon={DollarSign} iconColor="text-green-500" iconBg="bg-green-50" />
@@ -89,10 +103,8 @@ const WalletSubpage = () => {
                   <Plus className="w-3.5 h-3.5" />
                   <span>List a service</span>
                 </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
+                 {/* Desktop Table View */}
+            <div className="overflow-x-auto hidden md:block">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-gray-50 text-gray-400 font-semibold">
@@ -130,6 +142,51 @@ const WalletSubpage = () => {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile Card List View */}
+            <div className="md:hidden space-y-4">
+              {transactions.map((tx, idx) => (
+                <div key={idx} className="bg-white p-5 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Icon Container */}
+                      <div className="w-12 h-12 bg-[#EBF3FA] text-[#016EA6] rounded-2xl flex items-center justify-center shrink-0">
+                        <Wallet className="w-5 h-5" />
+                      </div>
+                      
+                      {/* Transaction Info */}
+                      <div className="space-y-0.5">
+                        <h4 className="font-bold text-gray-900 text-sm leading-snug">
+                          {tx.type === "Withdrawal" ? "Funds Withdrawal" : "Job Payment"}
+                        </h4>
+                        <div className="text-[11px] text-gray-400 font-medium">
+                          <span>{tx.client}</span>
+                          <span className="mx-1.5">•</span>
+                          <span>Carpentry</span>
+                        </div>
+                        <div className="text-[10px] text-gray-400 flex items-center gap-1 font-medium">
+                          <span>{tx.date}</span>
+                          <span>•</span>
+                          <span>9:00 am</span>
+                        </div>
+                        <div className="text-xs font-bold text-gray-800 pt-1">
+                          {formatCurrency(tx.amount)}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Status Badge */}
+                    <div className="shrink-0">
+                      <span className={`px-2.5 py-1 rounded-lg font-bold text-[10px] ${
+                        tx.status === "Successful" ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-500"
+                      }`}>
+                        {tx.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -213,6 +270,8 @@ const WalletSubpage = () => {
           ))}
         </div>
       </div>
+    </div>
+    </div>
     </div>
   );
 };

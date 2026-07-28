@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSearch, FiMessageSquare, FiBell, FiChevronDown, FiLogOut, FiUser, FiMenu } from "react-icons/fi";
+import { FiSearch, FiMessageSquare, FiBell, FiChevronDown, FiLogOut, FiUser, FiMenu, FiChevronLeft } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 
@@ -31,13 +31,34 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
     <header className="h-20 bg-white border-b-2 border-[#016EA6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
       {/* Title */}
       <div className="flex items-center gap-2 sm:gap-4">
-        <button
-          onClick={onMenuClick}
-          className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer flex items-center justify-center"
-          title="Toggle Sidebar"
-        >
-          <FiMenu className="w-5 h-5" />
-        </button>
+        {title === "profile" ? (
+          <>
+            {/* Mobile Back Button */}
+            <button
+              onClick={() => setActiveTab("overview")}
+              className="p-2 text-gray-500 hover:text-gray-900 bg-sky-50 hover:bg-sky-100 rounded-xl transition-all cursor-pointer flex md:hidden items-center justify-center shrink-0"
+              title="Back to Overview"
+            >
+              <FiChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            {/* Desktop Menu Button */}
+            <button
+              onClick={onMenuClick}
+              className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer hidden md:flex items-center justify-center"
+              title="Toggle Sidebar"
+            >
+              <FiMenu className="w-5 h-5" />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={onMenuClick}
+            className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+            title="Toggle Sidebar"
+          >
+            <FiMenu className="w-5 h-5" />
+          </button>
+        )}
         <h1 className="text-lg md:text-xl font-bold text-gray-900 capitalize truncate">{title.replace("-", " ")}</h1>
       </div>
 

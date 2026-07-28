@@ -1,6 +1,8 @@
 import React from "react";
-import { MapPin, Calendar, Edit3, Briefcase, Award, Star, ThumbsUp, ShieldCheck } from "lucide-react";
+import { MapPin, Calendar, Edit3, Briefcase, Award, Star, ThumbsUp, ShieldCheck, Check } from "lucide-react";
 import StatsCard from "../../components/ui/StatsCard";
+import coverImg from "../../assets/images/IMG-20260704-WA0194.jpg";
+import avatarImg from "../../assets/images/handyman.jfif";
 
 const ProfileSubpage = () => {
   const skills = ["Carpentry", "Installation", "Tv console", "Wardrobe", "Chairs", "Tables"];
@@ -38,18 +40,19 @@ const ProfileSubpage = () => {
       {/* Cover Banner & Profile Card */}
       <div className="bg-white rounded-3xl border border-gray-100/50 shadow-sm overflow-hidden">
         {/* Whale Cover Banner Mock */}
-        <div className="h-48 bg-gradient-to-r from-slate-900 via-sky-950 to-slate-900 relative">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-sky-800/20 via-transparent to-transparent" />
+        <div className="h-48 relative overflow-hidden">
+          <img src={coverImg} className="w-full h-full object-cover" alt="Cover" />
+          <div className="absolute inset-0 bg-black/15" />
         </div>
 
         {/* Profile Info Container */}
         <div className="px-4 md:px-8 pb-6 md:pb-8 relative">
           {/* Avatar floating */}
           <div className="absolute -top-16 left-4 md:left-8 flex items-end gap-5">
-            <div className="w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] text-white flex items-center justify-center font-extrabold text-2xl relative shadow-md">
-              SM
-              <span className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center" title="100% Job Success">
-                <Star className="w-3.5 h-3.5 fill-current text-white" />
+            <div className="w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] relative shadow-md overflow-hidden shrink-0">
+              <img src={avatarImg} className="w-full h-full object-cover" alt="Avatar" />
+              <span className="absolute bottom-1 right-1 w-6 h-6 bg-[#016EA6] rounded-full border-2 border-white flex items-center justify-center" title="100% Job Success">
+                <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />
               </span>
             </div>
           </div>
@@ -99,7 +102,7 @@ const ProfileSubpage = () => {
         {/* Performance indicators */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-gray-900 mb-2">Performance</h3>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-2 gap-4">
             <div className="flex flex-col items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/30 text-center">
               <div className="w-12 h-12 rounded-full border-4 border-emerald-400 flex items-center justify-center font-bold text-xs text-emerald-500">
                 100%
@@ -131,7 +134,7 @@ const ProfileSubpage = () => {
         {/* Skills and Services */}
         <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm space-y-4">
           <h3 className="text-sm font-bold text-gray-900">Skills and Services</h3>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-2 gap-2.5">
             {skills.map((skill, idx) => (
               <span key={idx} className="px-4 py-2 border border-gray-100 bg-gray-50/50 hover:bg-gray-50 rounded-xl text-center text-xs font-semibold text-gray-500 transition-colors">
                 {skill}
@@ -159,9 +162,9 @@ const ProfileSubpage = () => {
         </div>
       </div>
 
-      <div className="text-center pt-2">
-        <button className="px-6 py-2.5 border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer">
-          View All Details
+      <div className="text-center pt-2 px-4 sm:px-0">
+        <button className="w-full sm:w-auto px-6 py-2.5 border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer">
+          View all details
         </button>
       </div>
 

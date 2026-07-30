@@ -8,7 +8,8 @@ import {
   CheckSquare,
   X,
   Users,
-  Bell
+  Bell,
+  MessageCircle,
 } from "lucide-react";
 import Logo from "../../assets/images/logo2.jpg";
 import { useAuthStore } from "../../store/authStore";
@@ -26,6 +27,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         { id: "overview", name: "Overview", icon: Home },
         { id: "manage-jobs", name: "Manage jobs", icon: Briefcase },
         { id: "browse-professionals", name: "Browse Professionals", icon: Users },
+        { id: "messages", name: "Messages", icon: MessageCircle },
         { id: "wallet", name: "Wallet", icon: Wallet },
       ];
     }

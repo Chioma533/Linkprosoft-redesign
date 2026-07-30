@@ -5,6 +5,7 @@ import EmployerManageJobsSubpage from "./EmployerManageJobsSubpage";
 import EmployerJobDetailsSubpage from "./EmployerJobDetailsSubpage";
 import EmployerOpenDisputeSubpage from "./EmployerOpenDisputeSubpage";
 import EmployerBrowseProfessionalsSubpage from "./EmployerBrowseProfessionalsSubpage";
+import EmployerMessagesSubpage from "./EmployerMessagesSubpage";
 import WalletSubpage from "../professionals/WalletSubpage";
 import { useDashboardStore } from "../../store/dashboardStore";
 
@@ -38,6 +39,10 @@ const EmployerDashboardPage = () => {
             onBack={() => setActiveTab("job-details")}
           />
         );
+
+      case "messages":
+        return <EmployerMessagesSubpage />;
+        
       case "browse-professionals":
         return <EmployerBrowseProfessionalsSubpage />;
       case "wallet":

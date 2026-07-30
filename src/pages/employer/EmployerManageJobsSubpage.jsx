@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiSearch, FiBriefcase, FiClock, FiCheckCircle, FiXCircle, FiPlus } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
 import StatsCard from "../../components/ui/StatsCard";
+import PostJobWizard from "./PostJobWizard";
 
 const EmployerManageJobsSubpage = ({ onViewProject }) => {
   const { user } = useAuthStore();
@@ -10,6 +11,7 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeSubTab, setActiveSubTab] = useState("All");
+  const [showWizard, setShowWizard] = useState(false);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -78,7 +80,9 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
             Manage your active projects, track milestones, and review top professional candidates for your upcoming installations.
           </p>
         </div>
-        <button className="flex items-center justify-center gap-2 bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 px-6 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all self-start sm:self-center cursor-pointer">
+        <button
+          onClick={() => setShowWizard(true)}
+          className="flex items-center justify-center gap-2 bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 px-6 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all self-start sm:self-center cursor-pointer">
           <FiPlus className="w-4 h-4" />
           <span>Post a Job</span>
         </button>
@@ -195,6 +199,14 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
           </div>
         )}
       </div>
+
+      {/* Post a Job Wizard */}
+      {showWizard && (
+        <PostJobWizard
+          onClose={() => setShowWizard(false)}
+          onSuccess={() => setShowWizard(false)}
+        />
+      )}
     </div>
   );
 };

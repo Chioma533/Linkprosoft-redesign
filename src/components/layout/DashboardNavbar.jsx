@@ -5,7 +5,7 @@ import { useDashboardStore } from "../../store/dashboardStore";
 
 const DashboardNavbar = ({ title, onMenuClick }) => {
   const { user, logout } = useAuthStore();
-  const { messages, notifications, setActiveTab } = useDashboardStore();
+  const { messages, notifications, setActiveTab, selectedJob, previousTab } = useDashboardStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -50,6 +50,14 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
               <FiMenu className="w-5 h-5" />
             </button>
           </>
+        ) : title === "project-details" ? (
+          <button
+            onClick={() => setActiveTab(previousTab || "my-jobs")}
+            className="p-2 text-gray-500 hover:text-gray-900 bg-sky-50 hover:bg-sky-100 rounded-xl transition-all cursor-pointer flex items-center justify-center shrink-0"
+            title="Back"
+          >
+            <FiChevronLeft className="w-5 h-5 text-gray-600" />
+          </button>
         ) : (
           <button
             onClick={onMenuClick}
@@ -59,7 +67,9 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
             <FiMenu className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-lg md:text-xl font-bold text-gray-900 capitalize truncate">{title.replace("-", " ")}</h1>
+        <h1 className="text-lg md:text-xl font-bold text-gray-900 capitalize truncate">
+          {title === "project-details" ? (selectedJob?.title || "Wardrobe Installation") : title.replace("-", " ")}
+        </h1>
       </div>
 
       {/* Center Search */}

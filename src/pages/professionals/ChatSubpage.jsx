@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Search, Phone, ShieldAlert, Smile, Mic, Paperclip, Send, User, ArrowLeft } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { motion, AnimatePresence } from "framer-motion";
+import avatarImg from "../../assets/images/handyman.jfif";
 
 // Premium double checkmark graphic component
 const DoubleCheckSVG = ({ colorClass = "text-gray-400" }) => (
@@ -86,7 +87,7 @@ const ChatSubpage = () => {
               Unread
             </button>
             <button className="px-4 py-1.5 border border-gray-100 text-gray-400 hover:text-gray-900 rounded-full text-xs font-semibold">
-              Archives <span className="bg-blue-50 text-[#016EA6] px-1.5 py-0.5 rounded-full text-[9px] font-bold">23</span>
+              Archives <span className="bg-blue-50 text-[#016EA6] px-1.5 py-0.5 rounded-full text-[9px] font-bold">28</span>
             </button>
             <button className="px-4 py-1.5 border border-gray-100 text-gray-400 hover:text-gray-900 rounded-full text-xs font-semibold">
               Blocked
@@ -113,8 +114,8 @@ const ChatSubpage = () => {
               }`}
             >
               <div className="flex gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center font-bold text-gray-600 text-xs shrink-0 overflow-hidden relative">
-                  <User className="w-5 h-5 text-gray-400" />
+                <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 overflow-hidden relative">
+                  <img src={avatarImg} className="w-full h-full object-cover" alt="Avatar" />
                 </div>
                 <div className="min-w-0">
                   <h4 className="text-xs font-bold text-gray-800 leading-tight">{convo.name}</h4>
@@ -146,8 +147,8 @@ const ChatSubpage = () => {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <div className="w-10 h-10 rounded-full bg-sky-100/50 flex items-center justify-center relative font-bold text-gray-700 text-sm">
-              MS
+            <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 relative">
+              <img src={avatarImg} className="w-full h-full object-cover" alt="Avatar" />
               <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-white" />
             </div>
             <div>
@@ -206,25 +207,25 @@ const ChatSubpage = () => {
 
         {/* Text Area Footer */}
         <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-100 flex items-center gap-3">
-          <button type="button" className="p-2 hover:bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl cursor-pointer">
-            <Smile className="w-5 h-5" />
-          </button>
-          <input
-            type="text"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Type Something"
-            className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all"
-          />
-          <button type="button" className="p-2 hover:bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl cursor-pointer">
-            <Mic className="w-5 h-5" />
-          </button>
-          <button type="button" className="p-2 hover:bg-gray-50 text-gray-400 hover:text-gray-600 rounded-xl cursor-pointer">
-            <Paperclip className="w-5 h-5" />
-          </button>
+          <div className="flex-1 bg-gray-50 border border-gray-100 rounded-full px-4 py-2 flex items-center gap-2.5 shadow-2xs">
+            <Smile className="w-5 h-5 text-gray-400 cursor-pointer shrink-0" />
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder="Type Something"
+              className="flex-1 text-xs outline-none bg-transparent text-gray-800"
+            />
+            <button type="button" className="text-gray-400 hover:text-gray-600 shrink-0 cursor-pointer">
+              <Mic className="w-4.5 h-4.5" />
+            </button>
+            <button type="button" className="text-gray-400 hover:text-gray-600 shrink-0 cursor-pointer">
+              <Paperclip className="w-4.5 h-4.5" />
+            </button>
+          </div>
           <button
             type="submit"
-            className="p-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl shadow-md transition-all cursor-pointer hover:shadow-lg active:scale-95 flex items-center justify-center shrink-0"
+            className="w-10 h-10 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full flex items-center justify-center shrink-0 shadow-md active:scale-95 transition-all cursor-pointer hover:shadow-lg"
           >
             <Send className="w-4 h-4" />
           </button>

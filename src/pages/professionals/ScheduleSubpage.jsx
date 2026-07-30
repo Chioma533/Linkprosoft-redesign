@@ -5,7 +5,7 @@ import StatsCard from "../../components/ui/StatsCard";
 import CalendarWidget from "../../components/ui/CalendarWidget";
 
 const ScheduleSubpage = () => {
-  const { schedules } = useDashboardStore();
+  const { schedules, setSelectedJob, setPreviousTab, setActiveTab } = useDashboardStore();
   const [selectedDate, setSelectedDate] = useState("2026-07-02");
 
   // Filter schedules by selected date
@@ -72,7 +72,23 @@ const ScheduleSubpage = () => {
                       <td className="py-4 font-semibold text-gray-400">{sch.location}</td>
                       <td className="py-4 font-semibold text-gray-800">{sch.client}</td>
                       <td className="py-4 text-right">
-                        <button className="bg-sky-50 hover:bg-[#016EA6] text-[#016EA6] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer inline-flex items-center gap-1">
+                        <button
+                          onClick={() => {
+                            setSelectedJob({
+                              id: sch.id,
+                              orderId: sch.orderId,
+                              title: sch.jobTitle,
+                              location: sch.location,
+                              client: sch.client,
+                              budget: 500000,
+                              category: "Carpentry",
+                              status: "Active"
+                            });
+                            setPreviousTab("schedule");
+                            setActiveTab("project-details");
+                          }}
+                          className="bg-sky-50 hover:bg-[#016EA6] text-[#016EA6] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer inline-flex items-center gap-1"
+                        >
                           <span>View Details</span>
                           <FiChevronRight className="w-3.5 h-3.5" />
                         </button>

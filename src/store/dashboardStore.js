@@ -11,10 +11,14 @@ export const useDashboardStore = create((set, get) => ({
   metrics: null,
   schedules: [],
   activeTab: "overview", // overview, browse-jobs, my-jobs, applications, schedule, wallet
+  selectedJob: null,
+  previousTab: "overview",
   isLoading: false,
   error: null,
 
   setActiveTab: (tab) => set({ activeTab: tab }),
+  setSelectedJob: (job) => set({ selectedJob: job }),
+  setPreviousTab: (tab) => set({ previousTab: tab }),
 
   fetchDashboardData: async () => {
     set({ isLoading: true, error: null });

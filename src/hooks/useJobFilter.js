@@ -5,6 +5,8 @@ export const useJobFilter = (jobs = []) => {
   const [dateFilter, setDateFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [budgetFilter, setBudgetFilter] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("")
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
@@ -12,10 +14,16 @@ export const useJobFilter = (jobs = []) => {
         job.title.toLowerCase().includes(search.toLowerCase()) ||
         job.description.toLowerCase().includes(search.toLowerCase());
 
+      const matchesCategory = categoryFilter
+        ? job.category.toLowerCase().includes(categoryFilter.toLowerCase())
+        : true;
+
       const matchesLocation = locationFilter
-        ? job.location
-            .toLowerCase()
-            .includes(locationFilter.toLowerCase())
+        ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
+        : true;
+      
+        const matchesStatus = statusFilter
+        ? job.status.toLowerCase().includes(statusFilter.toLowerCase())
         : true;
 
       const matchesBudget = (() => {
@@ -28,26 +36,15 @@ export const useJobFilter = (jobs = []) => {
 
         const [min, max] = budgetFilter.split("-").map(Number);
 
-        return (
-          Number(job.budget) >= min &&
-          Number(job.budget) <= max
-        );
+        return Number(job.budget) >= min && Number(job.budget) <= max;
       })();
 
       // We'll add the date filter later
       return (
-        matchesSearch &&
-        matchesLocation &&
-        matchesBudget
+        matchesSearch && matchesCategory && matchesLocation && matchesBudget && matchesStatus
       );
     });
-  }, [
-    jobs,
-    search,
-    locationFilter,
-    budgetFilter,
-    dateFilter,
-  ]);
+  }, [jobs, search, locationFilter, budgetFilter, categoryFilter, dateFilter]);
 
   return {
     search,
@@ -61,6 +58,12 @@ export const useJobFilter = (jobs = []) => {
 
     budgetFilter,
     setBudgetFilter,
+
+    categoryFilter,
+    setCategoryFilter,
+
+    statusFilter,
+    setStatusFilter,
 
     filteredJobs,
   };

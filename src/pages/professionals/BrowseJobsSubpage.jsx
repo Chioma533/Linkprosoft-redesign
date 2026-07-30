@@ -11,7 +11,6 @@ import JobCard from "../../components/ui/JobCard";
 import { toast } from "react-hot-toast";
 import WelcomeHeader from "../../components/common/WelcomeHeader";
 import DashboardStats from "../../components/common/DashboardStats";
-import { formatCurrency } from "../../utils/formatCurrency";
 import SearchInput from "../../components/filters/SearchInput";
 import FilterSelect from "../../components/filters/FilterSelect";
 import {
@@ -61,6 +60,7 @@ const BrowseJobsSubpage = () => {
       iconBg: "bg-amber-50",
     },
   ];
+  
   const {
     search,
     setSearch,
@@ -94,7 +94,7 @@ const BrowseJobsSubpage = () => {
           onChange={setSearch}
           placeholder="Search Jobs"
           debounce={500}
-          className="w-[130px] xs:w-[150px] sm:w-auto shrink-0"
+          className="w-32.5 xs:w-[150px] sm:w-auto shrink-0"
         />
 
         {/* Location Dropdown */}
@@ -103,7 +103,7 @@ const BrowseJobsSubpage = () => {
           value={locationFilter}
           onChange={setLocationFilter}
           options={locationOptions}
-          className="w-[110px] xs:w-[125px] sm:w-auto shrink-0"
+          className="w-27.5 xs:w-[125px] sm:w-auto shrink-0"
         />
 
         {/* Date Posted */}
@@ -112,7 +112,7 @@ const BrowseJobsSubpage = () => {
           value={dateFilter}
           onChange={setDateFilter}
           options={dateOptions}
-          className="w-[115px] xs:w-[130px] sm:w-auto shrink-0"
+          className="w-28.75 xs:w-[130px] sm:w-auto shrink-0"
         />
 
         {/* Budget */}

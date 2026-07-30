@@ -37,3 +37,19 @@ export const budgetOptions = [
   },
 ];
 
+export const categoryOptions = [
+  { label: "Category", value: "" },
+  { label: "Plumbing", value: "Plumbing" },
+  { label: "Carpentry", value: "Carpentry" },
+  { label: "Electrical", value: "Electrical" },
+  { label: "Painting", value: "Painting" },
+  { label: "Cleaning", value: "Cleaning" },
+];
+
+export const statusOptions = [
+  { label: " All Status", value: "" },
+  { label: "Active", value: "Active" },
+  { label: "Pending", value: "Pending" },
+  { label: "Completed", value: "Completed" },
+  { label: "Cancelled", value: "Cancelled" },
+];

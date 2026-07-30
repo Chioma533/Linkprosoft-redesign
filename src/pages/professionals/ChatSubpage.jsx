@@ -3,6 +3,14 @@ import { Search, Phone, ShieldAlert, Smile, Mic, Paperclip, Send, User, ArrowLef
 import { useAuthStore } from "../../store/authStore";
 import { motion, AnimatePresence } from "framer-motion";
 
+// Premium double checkmark graphic component
+const DoubleCheckSVG = ({ colorClass = "text-gray-400" }) => (
+  <svg className={`w-3.5 h-3.5 ${colorClass}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 6L7 16l-3-3" opacity="0.6" />
+    <path d="M22 6L12 16l-2-2" />
+  </svg>
+);
+
 const ChatSubpage = () => {
   const { user } = useAuthStore();
   const [isChatOpenMobile, setIsChatOpenMobile] = useState(false);
@@ -19,14 +27,16 @@ const ChatSubpage = () => {
       sender: "Samuel",
       text: "Hello Daniel! 👋 Thanks for reaching out. Yes, I'm available tomorrow afternoon. How many light fixtures do you need installed?",
       time: "9:12 AM",
-      isMe: true
+      isMe: true,
+      status: "read"
     },
     {
       id: 3,
       sender: "Samuel",
       text: "Where are you located?",
       time: "9:12 AM",
-      isMe: true
+      isMe: true,
+      status: "delivered"
     }
   ]);
   const [inputText, setInputText] = useState("");
@@ -49,7 +59,8 @@ const ChatSubpage = () => {
       sender: "Samuel",
       text: inputText,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      isMe: true
+      isMe: true,
+      status: "delivered"
     };
 
     setMessages([...messages, newMsg]);
@@ -175,9 +186,18 @@ const ChatSubpage = () => {
                 >
                   {msg.text}
                 </div>
-                <span className="text-[8px] font-semibold text-gray-400 mt-1 px-1">
-                  {msg.time}
-                </span>
+                <div className={`flex items-center gap-1 mt-1 px-1 ${msg.isMe ? "justify-end" : "justify-start"}`}>
+                  <span className="text-[8px] font-semibold text-gray-400">
+                    {msg.time}
+                  </span>
+                  {msg.isMe && (
+                    msg.status === "read" ? (
+                      <DoubleCheckSVG colorClass="text-sky-400" />
+                    ) : (
+                      <DoubleCheckSVG colorClass="text-gray-400" />
+                    )
+                  )}
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>

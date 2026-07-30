@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { FiSearch, FiChevronRight } from "react-icons/fi";
+import { FiSearch, FiChevronRight, FiMapPin, FiCalendar, FiChevronDown } from "react-icons/fi";
 import { useDashboardStore } from "../../store/dashboardStore";
 import StatsCard from "../../components/ui/StatsCard";
+import MobileJobCard from "../../components/ui/MobileJobCard";
+import { useState } from "react";
 
 const ApplicationsSubpage = () => {
   const { applications } = useDashboardStore();
@@ -49,20 +50,55 @@ const ApplicationsSubpage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard title="Applications Sent" value="100" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <StatsCard title="Application Sent" value="100" />
         <StatsCard title="Under review" value="88" />
         <StatsCard title="Accepted" value="500" />
         <StatsCard title="Rejected" value="20" />
       </div>
 
+      {/* Mobile Horizontally Scrollable Filters */}
+      <div className="flex sm:hidden bg-white p-3 rounded-2xl border border-gray-100/50 shadow-sm flex-row gap-2 items-center overflow-x-auto scrollbar-none w-full">
+        {/* Search Jobs */}
+        <div className="relative w-[130px] shrink-0">
+          <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3" />
+          <input
+            type="text"
+            placeholder="Search Jobs"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-7 pr-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] outline-none focus:border-[#016EA6] focus:bg-white transition-all font-medium text-gray-800"
+          />
+        </div>
+        {/* Location */}
+        <div className="relative shrink-0 w-[110px]">
+          <FiMapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
+          <select className="w-full pl-7 pr-4 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] outline-none cursor-pointer text-gray-500 font-semibold appearance-none bg-transparent">
+            <option value="">Location</option>
+            <option value="Lekki">Lekki, Lagos</option>
+            <option value="Ikeja">Ikeja, Lagos</option>
+          </select>
+          <FiChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
+        </div>
+        {/* Date posted */}
+        <div className="relative shrink-0 w-[115px]">
+          <FiCalendar className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
+          <select className="w-full pl-7 pr-4 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] outline-none cursor-pointer text-gray-500 font-semibold appearance-none bg-transparent">
+            <option value="">Date posted</option>
+            <option value="today">Today</option>
+            <option value="yesterday">Yesterday</option>
+          </select>
+          <FiChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3 pointer-events-none" />
+        </div>
+      </div>
+
       {/* Applications list */}
       <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between">
-        <div>
-          {/* Filters Row */}
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6">
             <h3 className="text-base font-bold text-gray-900">All jobs</h3>
-            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+            
+            {/* Desktop Filters */}
+            <div className="hidden lg:flex flex-wrap items-center gap-3 w-full lg:w-auto">
               <div className="relative w-full sm:w-auto">
                 <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
@@ -100,10 +136,40 @@ const ApplicationsSubpage = () => {
                 Apply filter
               </button>
             </div>
+
+            {/* Mobile Filters */}
+            <div className="flex lg:hidden items-center justify-between gap-4 w-full max-w-[280px]">
+              {/* Dropdown status text */}
+              <div className="relative flex items-center pr-4">
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="pl-0 pr-6 py-2 bg-transparent text-sm font-bold text-gray-900 outline-none cursor-pointer appearance-none border-none font-sans capitalize"
+                >
+                  <option value="">All status</option>
+                  <option value="Under review">Under review</option>
+                  <option value="Accepted">Accepted</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+                <FiChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-900 w-4 h-4 pointer-events-none" />
+              </div>
+
+              {/* Search input */}
+              <div className="relative max-w-[130px] sm:max-w-xs">
+                <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3" />
+                <input
+                  type="text"
+                  placeholder="Search Jobs"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-7 pr-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] outline-none focus:border-[#016EA6] focus:bg-white transition-all font-medium text-gray-800"
+                />
+              </div>
+            </div>
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="overflow-x-auto hidden md:block">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-gray-50 text-gray-400 font-semibold">
@@ -148,8 +214,29 @@ const ApplicationsSubpage = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden space-y-4">
+            {filteredApps.length > 0 ? (
+              filteredApps.map((app) => (
+                <MobileJobCard
+                  key={app.id}
+                  job={{
+                    ...app,
+                    datePosted: app.appliedOn,
+                    status: app.status === "Under review" ? "Pending" : app.status === "Accepted" ? "Active" : "Cancelled"
+                  }}
+                  onViewDetails={() => {}}
+                />
+              ))
+            ) : (
+              <div className="py-8 text-center text-gray-400 font-semibold text-xs bg-gray-50 rounded-2xl">
+                No applications found matching the filter criteria.
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      {/* </div> */}
 
       {/* Pagination */}
       <div className="flex items-center justify-between border-t border-gray-100 pt-6">

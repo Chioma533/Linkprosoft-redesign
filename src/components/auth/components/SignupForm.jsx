@@ -51,84 +51,86 @@ const SignupForm = ({ onSubmit, onGoogleSignup, isLoading }) => {
   return (
     <AuthLayout>
       {/* Right Column: Signup form */}
-        {/* Header Icon */}
-        <div className="flex flex-col items-center justify-center">
+      {/* Header Icon */}
+      <div className="flex flex-col items-center justify-center">
         <h2 className="text-md md:text-2xl font-semibold text-gray-900 mb-6 font-sans">
           Sign up to Linkprosoft
         </h2>
-        </div>
+      </div>
 
-        <form onSubmit={handleSignUp} className="flex flex-col gap-4 w-full">
-          <Input
-            label="Full Name"
-            name="fullName"
-            type="text"
-            placeholder="Enter name"
-            value={formData.fullName}
-            onChange={handleChange}
-            error={errors.fullName}
-            disabled={isLoading}
-            leftIcon={FiUser}
-            required
-          />
-
-          <Input
-            label="Email"
-            name="email"
-            type="email"
-            placeholder="Enter mail"
-            value={formData.email}
-            onChange={handleChange}
-            error={errors.email}
-            disabled={isLoading}
-            leftIcon={FiMail}
-            required
-          />
-
-          <Input
-            label="Password"
-            name="password"
-            type="password"
-            placeholder="Enter Password"
-            value={formData.password}
-            onChange={handleChange}
-            error={errors.password}
-            disabled={isLoading}
-            leftIcon={FiLock}
-            required
-          />
-          {/* password strength checker */}
-          <PasswordStrengthMeter password={formData.password} />
-
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide mt-2 cursor-pointer"
-          >
-            {isLoading ? "Creating account..." : "Create account"}
-          </Button>
-        </form>
-
-        <div className="flex items-center justify-center my-3">
-          <span className="text-gray-500 text-sm font-medium">OR</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={onGoogleSignup}
+      <form onSubmit={handleSignUp} className="flex flex-col gap-4 w-full">
+        <Input
+          label="Full Name"
+          name="fullName"
+          type="text"
+          placeholder="Enter name"
+          value={formData.fullName}
+          onChange={handleChange}
+          error={errors.fullName}
           disabled={isLoading}
-          className="w-full rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 py-3.5 text-base font-medium shadow-xs flex items-center justify-center gap-3 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <FcGoogle className="w-5 h-5" />
-          <span>Continue with Google</span>
-        </button>
+          leftIcon={FiUser}
+          required
+        />
 
-        <p className="text-center md:text-left text-gray-500 text-sm mt-6">
-          Already have an Account?{" "}
-          <a href="/login" className="text-[#016EA6] font-medium hover:underline">
-            Log in
-          </a>
-        </p>
+        <Input
+          label="Email"
+          name="email"
+          type="email"
+          placeholder="Enter mail"
+          value={formData.email}
+          onChange={handleChange}
+          error={errors.email}
+          disabled={isLoading}
+          leftIcon={FiMail}
+          required
+        />
+
+        <Input
+          label="Password"
+          name="password"
+          type="password"
+          placeholder="Enter Password"
+          value={formData.password}
+          onChange={handleChange}
+          error={errors.password}
+          disabled={isLoading}
+          leftIcon={FiLock}
+          required
+        />
+        {/* password strength checker */}
+        {formData.password.length > 0 && (
+          <PasswordStrengthMeter password={formData.password} />
+        )}
+
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide mt-2 cursor-pointer"
+        >
+          {isLoading ? "Creating account..." : "Create account"}
+        </Button>
+      </form>
+
+      <div className="flex items-center justify-center my-3">
+        <span className="text-gray-500 text-sm font-medium">OR</span>
+      </div>
+
+      <button
+        type="button"
+        onClick={onGoogleSignup}
+        disabled={isLoading}
+        className="w-full rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 py-3.5 text-base font-medium shadow-xs flex items-center justify-center gap-3 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <FcGoogle className="w-5 h-5" />
+        <span>Continue with Google</span>
+      </button>
+
+      <p className="text-center md:text-left text-gray-500 text-sm mt-6">
+        Already have an Account?{" "}
+        <a href="/login" className="text-[#016EA6] font-medium hover:underline">
+          Log in
+        </a>
+      </p>
     </AuthLayout>
   );
 };

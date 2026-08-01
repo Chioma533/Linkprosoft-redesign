@@ -27,7 +27,7 @@ const Footer = () => {
               {/* Search capsule form */}
               <form
                 onSubmit={handleSearchSubmit}
-                className="bg-white backdrop-blur-md border border-white/20 p-2 rounded-full flex items-center w-full max-w-md shadow-inner mt-2"
+                className="bg-white shrink-0 backdrop-blur-md border border-white/20 p-2 rounded-full flex items-center w-full max-w-md shadow-inner mt-2"
               >
                 <input
                   type="text"

@@ -82,7 +82,7 @@ const EmployerMessagesSubpage = () => {
   const archiveCount = threads.filter((t) => t.unread === 0 && !t.online).length;
 
   return (
-    <div className="-m-4 sm:-m-6 md:-m-8 flex" style={{ height: "calc(100vh - 5rem)" }}>
+    <div className="-m-4 sm:-m-6 py-5 md:-m-8 flex" style={{ height: "calc(100vh - 5rem)" }}>
       {/* Sidebar Panel */}
       <MessageSidebar
         showConversation={showConversation}

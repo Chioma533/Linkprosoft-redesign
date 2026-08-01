@@ -20,7 +20,7 @@ const MessageSidebar = ({
         ${showConversation ? "hidden" : "flex"}
         md:flex flex-col
         w-full md:w-[34%] lg:w-[31%]
-        bg-white border-r border-gray-100
+        bg-white rounded-l-2xl border-r border-gray-100
         shrink-0
       `}
     >

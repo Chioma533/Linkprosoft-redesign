@@ -9,7 +9,7 @@ const MessageInput = ({
   inputRef,
 }) => {
   return (
-    <div className="shrink-0 px-5 py-4 bg-white border-t border-gray-100">
+    <div className="shrink-0 px-5 py-4 rounded-br-2xl bg-white border-t border-gray-100">
       <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2.5 focus-within:border-[#016EA6] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#016EA6]/10 transition-all duration-200">
         <button
           type="button"

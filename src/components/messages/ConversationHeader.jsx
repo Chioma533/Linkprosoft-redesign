@@ -6,7 +6,7 @@ const ConversationHeader = ({ thread, onBackMobile }) => {
   if (!thread) return null;
 
   return (
-    <header className="flex items-center justify-between px-5 py-4 bg-white border-b border-gray-100 shrink-0">
+    <header className="flex items-center justify-between px-5 py-4 rounded-tr-2xl bg-white border-b border-gray-100 shrink-0">
       <div className="flex items-center gap-3">
         <button
           onClick={onBackMobile}

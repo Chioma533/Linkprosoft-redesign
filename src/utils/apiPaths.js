@@ -1,5 +1,5 @@
 export const API_BASE_URL = "https://linprosoft-backend.onrender.com"
-//export const API_BASE_URL = "http://localhost:5020"
+// export const API_BASE_URL = "http://localhost:5020"
 export const API_PATHS = {
   AUTH: {
     SIGNUP: "/api/auth/signup",

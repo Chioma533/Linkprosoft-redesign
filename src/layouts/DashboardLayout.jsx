@@ -3,15 +3,28 @@ import DashboardSidebar from "../components/layout/DashboardSidebar";
 import DashboardNavbar from "../components/layout/DashboardNavbar";
 import { useDashboardStore } from "../store/dashboardStore";
 import { Home, Search, Briefcase, FileText, Wallet } from "lucide-react";
+import { debugLog } from "../utils/debugLogger";
 
 const DashboardLayout = ({ children }) => {
   const { activeTab, setActiveTab, fetchDashboardData } = useDashboardStore();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+    // Persist token debug info so it survives redirects / page reloads
+    try {
+      const token = localStorage.getItem("token");
+      debugLog("token_before_fetchDashboardData", token);
+    } catch (e) {
+      debugLog("token_before_fetchDashboardData_error", String(e));
+    }
 
+    // Also log fetch start/finish for more context
+    debugLog("fetchDashboardData_start", { timestamp: new Date().toISOString() });
+    fetchDashboardData()
+      .then(() => debugLog("fetchDashboardData_success", { timestamp: new Date().toISOString() }))
+      .catch((err) => debugLog("fetchDashboardData_failure", { timestamp: new Date().toISOString(), error: (err && err.message) || String(err) }));
+  }, [fetchDashboardData]);
+  
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     // Automatically collapse sidebar after selecting a tab

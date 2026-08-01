@@ -1,14 +1,45 @@
 import { create } from "zustand";
 import { authService } from "../api/services/authService";
-import {toast} from "react-hot-toast"
+import { toast } from "react-hot-toast"
 
+
+const storedUser = JSON.parse(localStorage.getItem("user")) || null;
+const storedToken = localStorage.getItem("token") || null;
 
 export const useAuthStore = create((set) => ({
-  user: JSON.parse(localStorage.getItem("user")) || null,
-  token: localStorage.getItem("token") || null,
-  isAuthenticated: !!localStorage.getItem("token"),
+  user: storedUser,
+  token: storedToken,
+  isAuthenticated: !!storedToken || !!storedUser,
   error: null,
   isLoading: false,
+
+  setAuth: ({ user, token }) => {
+    if (token !== undefined) {
+      if (token) {
+        localStorage.setItem("token", token);
+      } else {
+        localStorage.removeItem("token");
+      }
+    }
+
+    if (user !== undefined) {
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      } else {
+        localStorage.removeItem("user");
+      }
+    }
+
+    const currentUser = user !== undefined ? user : storedUser;
+    const currentToken = token !== undefined ? token : storedToken;
+
+    set({
+      user: currentUser || null,
+      token: currentToken || null,
+      isAuthenticated: !!currentToken || !!currentUser,
+      error: null,
+    });
+  },
 
   signup: async (userData) => {
     set({ isLoading: true, error: null });
@@ -23,22 +54,27 @@ export const useAuthStore = create((set) => ({
     }
   },
 
+  googleSignin: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await authService.googleSignin();
+      set({ isLoading: false });
+      return data;
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || "Google login failed";
+      set({ error: errorMsg, isLoading: false });
+      throw errorMsg;
+    }
+  },
+
   verifyOtp: async (email, code) => {
     set({ isLoading: true, error: null });
     try {
       const data = await authService.verifyEmail({ email, code });
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-      }
-      if (data?.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-      }
-      set({
-        user: data.user || null,
-        token: data.token || null,
-        isAuthenticated: !!data.token,
-        isLoading: false,
-      });
+      const token = data?.token || data?.accessToken;
+      const user = data?.user || null;
+      set({ isLoading: false });
+      useAuthStore.getState().setAuth({ user, token });
       return data;
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || "OTP verification failed";
@@ -50,22 +86,16 @@ export const useAuthStore = create((set) => ({
   login: async (credentials) => {
     set({ isLoading: true, error: null });
     try {
-    const response = await authService.login(credentials);
-      
+      const response = await authService.login(credentials);
+
       // console.log("LOGIN RESPONSE:", response);
-     
+
       const authData = response.data;
+      const token = authData.accessToken || authData.token;
+      const user = authData.user || null;
 
-      localStorage.setItem("token", authData.accessToken);
-      localStorage.setItem("user", JSON.stringify(authData.user));
-
-      set({
-        user: authData.user,
-        token: authData.accessToken,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      // console.log("STORE:", useAuthStore.getState());
+      set({ isLoading: false });
+      useAuthStore.getState().setAuth({ user, token });
 
       return response;
     } catch (error) {

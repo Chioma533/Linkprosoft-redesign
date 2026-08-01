@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-hot-toast";
-import { useAuth } from "../../context/AuthContext";
 import RoleSelection from "../../components/auth/components/RoleSelection";
 import SignupForm from "../../components/auth/components/SignupForm";
 import OtpVerification from "../../components/auth/components/OtpVerification";
@@ -18,7 +17,7 @@ const SignupPage = () => {
   const [professionalType, setProfessionalType] = useState(null); // digital or none-digital
   const [email, setEmail] = useState("");
   const [apiError, setApiError] = useState("");
-  const {signup, verifyOtp, isLoading, error} = useAuthStore();
+  const { googleSignin, signup, verifyOtp, isLoading, error } = useAuthStore();
 
   const handleNextStep = () => {
     if (step === "role-selection") {
@@ -66,7 +65,7 @@ const SignupPage = () => {
       await signup(payload);
 
       setEmail(formData.email);
-      
+
       toast.success("Account created successfully! Verification code sent.");
       setStep("otp-verification");
     } catch (err) {
@@ -91,6 +90,15 @@ const SignupPage = () => {
   const handleResendCode = async () => {
     toast.success("A new verification code has been sent to " + email);
     // Add resend logic if backend supports it. For now, we simulate resend and alert.
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      await googleSignin();
+    } catch (error) {
+      const errMsg = typeof error === "string" ? error : "Google signup failed. Please try again.";
+      toast.error(errMsg);
+    }
   };
 
   const handleDashboardRedirect = () => {
@@ -154,6 +162,7 @@ const SignupPage = () => {
               <SignupForm
                 role={role}
                 onSubmit={handleSignupSubmit}
+                onGoogleSignup={handleGoogleSignup}
                 onBack={handleBackToRole}
                 isLoading={isLoading}
               />

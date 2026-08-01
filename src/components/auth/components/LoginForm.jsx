@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { FiMail, FiLock, FiUser } from "react-icons/fi";
+import { FcGoogle } from "react-icons/fc";
 import Input from "../../../components/common/Input";
 import Button from "../../../components/common/Button";
 import AuthLayout from "../../../layouts/AuthLayout";
 
-const LoginForm = ({ onSubmit, onForgotPassword, isLoading, error }) => {
+const LoginForm = ({ onSubmit, onForgotPassword, onGoogleLogin, isLoading, error }) => {
   const [credentials, setCredentials] = useState({
     email: "",
     password: "",
@@ -88,11 +89,25 @@ const LoginForm = ({ onSubmit, onForgotPassword, isLoading, error }) => {
         <Button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide mt-4"
+          className="w-full rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide mt-4 cursor-pointer"
         >
           {isLoading ? "Signing in..." : "Sign in"}
         </Button>
       </form>
+
+      <div className="flex items-center justify-center my-3">
+        <span className="text-gray-500 text-sm font-medium">OR</span>
+      </div>
+
+      <button
+        type="button"
+        onClick={onGoogleLogin}
+        disabled={isLoading}
+        className="w-full rounded-full border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 py-3.5 text-base font-medium shadow-xs flex items-center justify-center gap-3 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <FcGoogle className="w-5 h-5" />
+        <span>Continue with Google</span>
+      </button>
 
       <p className="text-center md:text-left text-gray-500 text-sm mt-6">
         Don&apos;t have an Account?{" "}

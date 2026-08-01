@@ -8,6 +8,7 @@ import { AuthProvider } from './context/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import EmployerDashboardPage from './pages/employer/EmployerDashboardPage';
 import AdminDahboardPage from './pages/admin/AdminDahboardPage';
+import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
             <Route path="/" element={<LandingPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
 
             <Route element={<PrivateRoutes allowedRoles={['professional']} />}>
               <Route path="/professional/dashboard" element={<ProfessionalDashboardPage />} />

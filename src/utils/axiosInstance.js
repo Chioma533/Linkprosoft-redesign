@@ -1,10 +1,13 @@
 import axios from "axios"
 import { API_BASE_URL } from "./apiPaths"
+import { debugLog } from "./debugLogger";
 
 // Create axios instance
 const axiosInstance = axios.create({
     baseURL: API_BASE_URL,
     timeout: 50000,
+    // ensure cookies (HttpOnly accessToken) are sent with requests to the backend
+    withCredentials: true,
     headers: {
         "Content-Type": "application/json",
         Accept:"application/json"
@@ -18,6 +21,11 @@ axiosInstance.interceptors.request.use(
         // console.log(accessToken,"token")
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`
+        }
+        try {
+            debugLog("axios_request", { url: config.url, method: config.method, authHeader: config.headers?.Authorization?.slice(0,40) || null });
+        } catch (e) {
+            console.debug("[axiosInstance] debugLog request failed", e);
         }
         return config
     },
@@ -33,8 +41,13 @@ axiosInstance.interceptors.request.use(
         },
         (error) => {
         if(error.response){
+                try {
+                    debugLog("axios_response_error", { url: error.config?.url, status: error.response.status, data: error.response.data });
+                } catch (e) {
+                    console.debug("[axiosInstance] debugLog response failed", e);
+                }
                 if(error.response.status === 401){
-                window.location.href = "/login"
+                window.location.href = "https://youtube.com"
             }else if(error.response.status === 500){
                 console.error("Server error, Please try again later")
             }else if (error.code === "ECONNABORTED"){

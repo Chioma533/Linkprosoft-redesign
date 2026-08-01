@@ -1,5 +1,10 @@
 import axiosInstance from "../../utils/axiosInstance";
-import { API_PATHS } from "../../utils/apiPaths";
+import { API_BASE_URL, API_PATHS } from "../../utils/apiPaths";
+
+const getGoogleAuthUrl = () => {
+  const backendBaseUrl = API_BASE_URL;
+  return `${backendBaseUrl}${API_PATHS.GOOGLE_AUTH.GOOGLE_SIGNIN}`;
+};
 
 export const authService = {
   signup: async (userData) => {
@@ -7,6 +12,12 @@ export const authService = {
     // e.g. role can be "employer" or "professional"
     const response = await axiosInstance.post(API_PATHS.AUTH.SIGNUP, userData);
     return response.data;
+  },
+
+  googleSignin: async () => {
+    const googleAuthUrl = getGoogleAuthUrl();
+    window.location.assign(googleAuthUrl);
+    return { success: true, redirectUrl: googleAuthUrl };
   },
 
   verifyEmail: async (verificationData) => {

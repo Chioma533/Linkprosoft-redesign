@@ -17,19 +17,27 @@ const LoginPage = () => {
   const [code, setCode] = useState("");
   const [apiError, setApiError] = useState("");
 
-  const { login, forgotPassword, verifyResetCode, resetPassword, isLoading, error } = useAuthStore();
+  const { login, googleSignin, forgotPassword, verifyResetCode, resetPassword, isLoading, error } = useAuthStore();
 
   const handleLoginSubmit = async (credentials) => {
-   try{
-  const response = await login(credentials);
-    toast.success("Welcome back!");
-    navigate(getDashboardRoute(response.data.user.role));
-   }catch(err){
-    toast.error(
-      err.response?.data?.message || err || "Login failed. Please verify your credentials."
-    );  
-   }
+    try {
+      const response = await login(credentials);
+      toast.success("Welcome back!");
+      navigate(getDashboardRoute(response.data.user.role));
+    } catch (err) {
+      toast.error(
+        err.response?.data?.message || err || "Login failed. Please verify your credentials."
+      );
+    }
+  };
 
+  const handleGoogleLogin = async () => {
+    try {
+      const response = await googleSignin();
+      navigate(getDashboardRoute(response.data.user.role), { replace: true });
+    } catch (err) {
+      toast.error(err || "Google sign-in failed. Please try again.");
+    }
   };
 
   const handleForgotPasswordSubmit = async (targetEmail) => {
@@ -117,6 +125,7 @@ const LoginPage = () => {
               <LoginForm
                 onSubmit={handleLoginSubmit}
                 onForgotPassword={() => setStep("forgot-password")}
+                onGoogleLogin={handleGoogleLogin}
                 isLoading={isLoading}
                 error={error}
               />

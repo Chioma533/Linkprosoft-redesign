@@ -47,7 +47,7 @@ axiosInstance.interceptors.request.use(
                     console.debug("[axiosInstance] debugLog response failed", e);
                 }
                 if(error.response.status === 401){
-                window.location.href = "https://youtube.com"
+                window.location.href = "/login"
             }else if(error.response.status === 500){
                 console.error("Server error, Please try again later")
             }else if (error.code === "ECONNABORTED"){

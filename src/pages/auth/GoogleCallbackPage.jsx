@@ -35,7 +35,7 @@ const GoogleCallbackPage = () => {
         console.error('Google sign-in verification failed:', error);
         toast.error('We could not complete Google sign-in. Please try again.');
         debugLog('Failed to verify Google sign-in');
-        navigate('https://youtube.com', { replace: true });
+        navigate('/login', { replace: true });
       }
     };
 

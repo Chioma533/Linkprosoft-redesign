@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FiSearch, FiBriefcase, FiClock, FiCheckCircle, FiXCircle, FiPlus } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
 import StatsCard from "../../components/ui/StatsCard";
 import PostJobWizard from "./PostJobWizard";
+import { jobService } from "../../api/services/jobService";
 
 const EmployerManageJobsSubpage = ({ onViewProject }) => {
   const { user } = useAuthStore();
@@ -12,6 +13,60 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeSubTab, setActiveSubTab] = useState("All");
   const [showWizard, setShowWizard] = useState(false);
+
+  const [jobs, setJobs] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchEmployerJobs = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await jobService.getMyEmployerJobs();
+      if (response && response.success && response.data) {
+        // Handle array response or paginated DTO response ({ items: [...] })
+        const rawItems = Array.isArray(response.data)
+          ? response.data
+          : response.data.items || [];
+
+        // Normalize backend fields to UI props
+        const formatted = rawItems.map((item) => ({
+          id: String(item.id || item._id || "ORD-000"),
+          title: item.title || "Untitled Job",
+          category: item.category || (item.skill && item.skill.name) || "General",
+          location: item.location || "Remote",
+          budget: item.budget || 0,
+          currency: item.currency || "NGN",
+          professional: item.professional || (item.assignedProfessional && item.assignedProfessional.name) || "Johnathan David",
+          status: normalizeStatus(item.status),
+        }));
+
+        setJobs(formatted);
+      } else {
+        setJobs([]);
+      }
+    } catch (err) {
+      console.error("Error fetching employer jobs:", err);
+      setError("Failed to load jobs");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchEmployerJobs();
+  }, [fetchEmployerJobs]);
+
+  const normalizeStatus = (rawStatus) => {
+    if (!rawStatus) return "Awaiting Offers";
+    const s = String(rawStatus).toLowerCase();
+    if (s === "draft" || s === "posted" || s.includes("offer")) return "Awaiting Offers";
+    if (s.includes("escrow")) return "Awaiting Escrow";
+    if (s.includes("progress") || s === "active") return "In Progress";
+    if (s.includes("complete")) return "Completed";
+    if (s.includes("cancel")) return "Canceled";
+    return rawStatus;
+  };
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -29,21 +84,22 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
     }).format(amount).replace("NGN", "₦");
   };
 
-  const subTabs = [
-    { label: "All", count: 18 },
-    { label: "Awaiting Offers", count: 18 },
-    { label: "Awaiting Escrow", count: 18 },
-    { label: "In progress", count: 8 },
-    { label: "Canceled", count: 87 },
-    { label: "Completed", count: 8 }
-  ];
+  // Dynamic Metrics Calculations
+  const totalAllJobs = jobs.length;
+  const upcomingJobsCount = jobs.filter((j) =>
+    ["In Progress", "Awaiting Escrow", "Awaiting Offers"].includes(j.status)
+  ).length;
+  const completedJobsCount = jobs.filter((j) => j.status === "Completed").length;
+  const cancelledJobsCount = jobs.filter((j) => j.status === "Canceled").length;
 
-  const jobsData = [
-    { id: "ORD657783", title: "Wardrobe Installation", category: "Carpentry", location: "Lekki Lagos", budget: 500000, professional: "Johnathan David", status: "In Progress" },
-    { id: "ORD657784", title: "Kitchen Cabinet Repair", category: "Carpentry", location: "Ikeja Lagos", budget: 350000, professional: "Johnathan David", status: "Awaiting Escrow" },
-    { id: "ORD657785", title: "Plumbing Refurbishment", category: "Plumbing", location: "Lekki Lagos", budget: 120000, professional: "David Jonathan", status: "Awaiting Offers" },
-    { id: "ORD657786", title: "Modern Bedroom Closet", category: "Carpentry", location: "Ikoyi Lagos", budget: 600000, professional: "Marvelous Samuel", status: "Completed" },
-    { id: "ORD657787", title: "Living Room Cabinet", category: "Carpentry", location: "Surulere Lagos", budget: 200000, professional: "Johnathan David", status: "Canceled" }
+  // Dynamic Sub-Tabs calculation
+  const subTabs = [
+    { label: "All", count: jobs.length },
+    { label: "Awaiting Offers", count: jobs.filter((j) => j.status === "Awaiting Offers").length },
+    { label: "Awaiting Escrow", count: jobs.filter((j) => j.status === "Awaiting Escrow").length },
+    { label: "In progress", count: jobs.filter((j) => j.status === "In Progress").length },
+    { label: "Canceled", count: jobs.filter((j) => j.status === "Canceled").length },
+    { label: "Completed", count: jobs.filter((j) => j.status === "Completed").length },
   ];
 
   const getStatusStyle = (status) => {
@@ -54,13 +110,13 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
     return "bg-red-50 text-red-500";
   };
 
-  // Simple filtering
-  const filteredJobs = jobsData.filter((job) => {
-    const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          job.id.toLowerCase().includes(searchTerm.toLowerCase());
+  // Filter logic
+  const filteredJobs = jobs.filter((job) => {
+    const matchesSearch =
+      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      job.id.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory ? job.category === selectedCategory : true;
-    
-    // Tab filters
+
     if (activeSubTab === "All") return matchesSearch && matchesCategory;
     if (activeSubTab === "Awaiting Offers") return job.status === "Awaiting Offers" && matchesSearch && matchesCategory;
     if (activeSubTab === "Awaiting Escrow") return job.status === "Awaiting Escrow" && matchesSearch && matchesCategory;
@@ -82,7 +138,8 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
         </div>
         <button
           onClick={() => setShowWizard(true)}
-          className="flex items-center justify-center gap-2 bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 px-6 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all self-start sm:self-center cursor-pointer">
+          className="flex items-center justify-center gap-2 bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 px-6 rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all self-start sm:self-center cursor-pointer"
+        >
           <FiPlus className="w-4 h-4" />
           <span>Post a Job</span>
         </button>
@@ -90,10 +147,10 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard title="All Jobs" value="189" icon={FiBriefcase} iconColor="text-blue-500" iconBg="bg-blue-50" />
-        <StatsCard title="Upcoming jobs" value="172" icon={FiClock} iconColor="text-orange-500" iconBg="bg-orange-50" />
-        <StatsCard title="Completed jobs" value="288" icon={FiCheckCircle} iconColor="text-green-500" iconBg="bg-green-50" />
-        <StatsCard title="Cancelled jobs" value="56" icon={FiXCircle} iconColor="text-red-500" iconBg="bg-red-50" />
+        <StatsCard title="All Jobs" value={totalAllJobs} icon={FiBriefcase} iconColor="text-blue-500" iconBg="bg-blue-50" />
+        <StatsCard title="Upcoming jobs" value={upcomingJobsCount} icon={FiClock} iconColor="text-orange-500" iconBg="bg-orange-50" />
+        <StatsCard title="Completed jobs" value={completedJobsCount} icon={FiCheckCircle} iconColor="text-green-500" iconBg="bg-green-50" />
+        <StatsCard title="Cancelled jobs" value={cancelledJobsCount} icon={FiXCircle} iconColor="text-red-500" iconBg="bg-red-50" />
       </div>
 
       {/* Filter Options */}
@@ -118,6 +175,8 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
             <option value="">All Categories</option>
             <option value="Carpentry">Carpentry</option>
             <option value="Plumbing">Plumbing</option>
+            <option value="Electrical">Electrical</option>
+            <option value="General">General</option>
           </select>
 
           <select
@@ -127,8 +186,11 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
             <option>Sort by: Oldest</option>
           </select>
 
-          <button className="bg-[#016EA6] hover:bg-[#061EA6] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer text-center">
-            Apply
+          <button
+            onClick={fetchEmployerJobs}
+            className="bg-[#016EA6] hover:bg-[#061EA6] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 cursor-pointer text-center"
+          >
+            Refresh
           </button>
         </div>
       </div>
@@ -156,13 +218,28 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
 
       {/* Jobs Cards List */}
       <div className="space-y-4">
-        {filteredJobs.length > 0 ? (
+        {isLoading ? (
+          <div className="bg-white p-12 text-center border border-gray-100 rounded-3xl space-y-3">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#016EA6] border-t-transparent"></div>
+            <p className="text-sm font-semibold text-gray-500">Loading your posted jobs...</p>
+          </div>
+        ) : error ? (
+          <div className="bg-rose-50 p-6 text-center border border-rose-100 rounded-3xl text-rose-600 text-sm font-medium">
+            {error}
+            <button
+              onClick={fetchEmployerJobs}
+              className="ml-3 underline font-bold hover:text-rose-800"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : filteredJobs.length > 0 ? (
           filteredJobs.map((job) => (
             <div key={job.id} className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:shadow-md transition-shadow duration-300">
               {/* Left Details */}
               <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center w-full md:w-auto">
                 <div className="w-20 h-20 bg-gradient-to-tr from-rose-500 to-rose-600 rounded-2xl shrink-0 flex items-center justify-center text-white text-xl font-bold shadow-inner">
-                  W
+                  {job.title ? job.title.charAt(0).toUpperCase() : "J"}
                 </div>
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -178,7 +255,9 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
                     📍 {job.location} • <span className="text-gray-900 font-extrabold">{formatCurrency(job.budget)}</span>
                   </p>
                   <div className="flex items-center gap-1.5 mt-2 bg-slate-50 px-2 py-1 rounded-lg w-max">
-                    <div className="w-4 h-4 bg-sky-100 rounded-full flex items-center justify-center text-[#016EA6] font-bold text-[8px]">JD</div>
+                    <div className="w-4 h-4 bg-sky-100 rounded-full flex items-center justify-center text-[#016EA6] font-bold text-[8px]">
+                      {job.professional ? job.professional.substring(0, 2).toUpperCase() : "JD"}
+                    </div>
                     <span className="text-[10px] text-gray-500 font-bold">{job.professional}</span>
                   </div>
                 </div>
@@ -204,7 +283,10 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
       {showWizard && (
         <PostJobWizard
           onClose={() => setShowWizard(false)}
-          onSuccess={() => setShowWizard(false)}
+          onSuccess={() => {
+            setShowWizard(false);
+            fetchEmployerJobs();
+          }}
         />
       )}
     </div>
@@ -212,3 +294,4 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
 };
 
 export default EmployerManageJobsSubpage;
+

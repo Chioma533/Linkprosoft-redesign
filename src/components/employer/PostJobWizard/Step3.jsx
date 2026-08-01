@@ -3,7 +3,7 @@ import StepBar from "../../common/StepBar";
 import ReviewRow from "../../common/ReviewRow";
 import NavButtons from "../../common/NavButtons";
 
-const Step3 = ({ data, onBack, onSubmit, onGoToStep }) => {
+const Step3 = ({ data, onBack, onSubmit, onGoToStep, isSubmitting = false }) => {
   const formatBudget = () => {
     if (!data.budgetMin && !data.budgetMax) return "—";
     const fmt = (v) => `₦${Number(v).toLocaleString("en-NG")}`;
@@ -39,9 +39,10 @@ const Step3 = ({ data, onBack, onSubmit, onGoToStep }) => {
         <ReviewRow label="Location" value={data.location || "—"} onEdit={() => onGoToStep(2)} noBorder />
       </div>
 
-      <NavButtons onBack={onBack} onContinue={onSubmit} continueLabel="Post Job" />
+      <NavButtons onBack={onBack} onContinue={onSubmit} continueLabel="Post Job" isSubmitting={isSubmitting} />
     </div>
   );
 };
 
 export default Step3;
+

@@ -23,7 +23,7 @@ const StatsCard = ({
     : "";
 
   return (
-    <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100/50 flex flex-col justify-between hover:shadow-md transition-shadow duration-300">
+    <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#E9E8E7] flex flex-col justify-between transition-shadow duration-300">
       <div className="flex items-start justify-between gap-1">
         <div>
           <span className="text-xs sm:text-sm font-medium text-gray-400">{title}</span>

@@ -1,16 +1,16 @@
 import {
-  Home,
   Search,
-  Briefcase,
   FileText,
   Calendar,
-  Wallet,
   CheckSquare,
   X,
-  Users,
   Bell,
-  MessageCircle,
 } from "lucide-react";
+import HomeIcon from "../icons/HomeIcon";
+import CaseIcon from "../icons/CaseIcon";
+import Message02Icon from "../icons/Message02Icon";
+import WalletIcon from "../icons/WalletIcon";
+import TieIcon from "../icons/TieIcon";
 import Logo from "../../assets/images/logo2.jpg";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
@@ -24,20 +24,20 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
   const getMenuItems = () => {
     if (role === "employer") {
       return [
-        { id: "overview", name: "Overview", icon: Home },
-        { id: "manage-jobs", name: "Manage jobs", icon: Briefcase },
-        { id: "browse-professionals", name: "Browse Professionals", icon: Users },
-        { id: "messages", name: "Messages", icon: MessageCircle },
-        { id: "wallet", name: "Wallet", icon: Wallet },
+        { id: "overview", name: "Overview", icon: HomeIcon },
+        { id: "manage-jobs", name: "Manage jobs", icon: CaseIcon },
+        { id: "browse-professionals", name: "Browse Professionals", icon: TieIcon },
+        { id: "messages", name: "Messages", icon: Message02Icon },
+        { id: "wallet", name: "Wallet", icon: WalletIcon },
       ];
     }
     return [
-      { id: "overview", name: "Overview", icon: Home },
+      { id: "overview", name: "Overview", icon: HomeIcon },
       { id: "browse-jobs", name: "Browse jobs", icon: Search },
-      { id: "my-jobs", name: "My jobs", icon: Briefcase },
+      { id: "my-jobs", name: "My jobs", icon: CaseIcon },
       { id: "applications", name: "Applications", icon: FileText },
       { id: "schedule", name: "Schedule", icon: Calendar },
-      { id: "wallet", name: "Wallet", icon: Wallet },
+      { id: "wallet", name: "Wallet", icon: WalletIcon },
     ];
   };
 

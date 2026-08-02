@@ -1,7 +1,11 @@
 import React from "react";
-import { FiFilter, FiDownload, FiPlus, FiBriefcase, FiClock, FiCheckCircle, FiDollarSign } from "react-icons/fi";
+import { FiFilter, FiDownload, FiPlus } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
 import StatsCard from "../../components/ui/StatsCard";
+import ToggleOffIcon from "../../components/icons/ToggleOffIcon";
+import InformationCircleIcon from "../../components/icons/InformationCircleIcon";
+import DatabaseLockedIcon from "../../components/icons/DatabaseLockedIcon";
+import BorderFullIcon from "../../components/icons/BorderFullIcon";
 
 const EmployerOverviewSubpage = ({ onViewProject }) => {
   const { user } = useAuthStore();
@@ -55,16 +59,16 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
     <div className="space-y-8 animate-fade-in pb-8">
       {/* Welcome Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">{getGreeting()} {userName}</h2>
-        <p className="text-sm text-gray-400 mt-1 font-semibold">Manage your jobs and payments effortlessly.</p>
+        <h2 className="text-2xl font-normal text-gray-900">{getGreeting()} {userName}</h2>
+        <p className="text-sm text-gray-400 mt-1 font-light">Manage your jobs and payments effortlessly.</p>
       </div>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard title="Active jobs" value="18" icon={FiBriefcase} iconColor="text-blue-500" iconBg="bg-blue-50" />
-        <StatsCard title="Awaiting action" value="8" icon={FiClock} iconColor="text-orange-500" iconBg="bg-orange-50" />
-        <StatsCard title="Funds in Escrow" value={formatCurrency(540000)} icon={FiDollarSign} iconColor="text-green-500" iconBg="bg-green-50" />
-        <StatsCard title="Completed jobs" value="98" icon={FiCheckCircle} iconColor="text-emerald-500" iconBg="bg-emerald-50" />
+        <StatsCard title="Active jobs" value="18" icon={ToggleOffIcon} iconColor="text-blue-500"/>
+        <StatsCard title="Awaiting action" value="8" icon={InformationCircleIcon} iconColor="text-orange-500"  BgColor="bg-[#fff4ea]" />
+        <StatsCard title="Funds in Escrow" value={formatCurrency(540000)} icon={DatabaseLockedIcon} iconColor="text-green-500"/>
+        <StatsCard title="Completed jobs" value="98" icon={BorderFullIcon} iconColor="text-emerald-500" />
       </div>
 
       {/* Middle Grid */}

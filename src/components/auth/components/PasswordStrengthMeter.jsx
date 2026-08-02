@@ -1,9 +1,10 @@
 import { Check, X } from "lucide-react";
 import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
 const PassWordCriteria = ({ password }) => {
   const creteria = [
     { label: "At least 8 characters", met: password.length >= 8 },
-    { label: "Containsuppercase letter", met: /[A-Z]/.test(password) },
+    { label: "Contains uppercase letter", met: /[A-Z]/.test(password) },
     { label: "Contains lowercase letter", met: /[a-z]/.test(password) },
     { label: "Contains a number", met: /\d/.test(password) },
     { label: "Contains special character", met: /[^A-Za-z0-9]/.test(password) },
@@ -45,31 +46,49 @@ const PasswordStrengthMeter = ({ password }) => {
     return "bg-green-500";
   };
   const getStrengthText = () => {
-    if (strength === 0) return "Very Weak";
-    if (strength === 1) return "Weak";
-    if (strength === 2) return "Fair";
-    if (strength === 4) return "Good";
-    return "Strong";
+   switch (strength) {
+     case 0:
+       return "Very Weak";
+     case 1:
+       return "Weak";
+     case 2:
+       return "Fair";
+     case 3:
+       return "Good";
+     case 4:
+       return "Strong";
+     default:
+       return "";
+   }
+
   };
   return (
-    <div className="mt-2 ">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-xs text-gray-400">Password Strength</span>
-        <span className="text-xs text-gray-400">
-          {getStrengthText(strength)}
-        </span>
-      </div>
-      <div className="flex space-x-1">
-        {[...Array(4)].map((_, index) => (
-          <div
-            key={index}
-            className={`h-1 w-1/4 rounded-full transition-colors duration-300
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: "auto" }}
+        exit={{ opacity: 0, height: 0 }}
+        transition={{ duration: 0.25 }}
+        className="mt-2 overflow-hidden "
+      >
+        <div className="flex justify-between items-center mb-1">
+          <span className="text-xs text-gray-400">Password Strength</span>
+          <span className="text-xs text-gray-400">
+            {getStrengthText(strength)}
+          </span>
+        </div>
+        <div className="flex space-x-1">
+          {[...Array(4)].map((_, index) => (
+            <div
+              key={index}
+              className={`h-1 w-1/4 rounded-full transition-colors duration-300
                      ${index < strength ? getColor(strength) : "bg-gray-600"}`}
-          ></div>
-        ))}
-      </div>
-      <PassWordCriteria password={password} />
-    </div>
+            ></div>
+          ))}
+        </div>
+        <PassWordCriteria password={password} />
+      </motion.div>
+    </AnimatePresence>
   );
 };
 

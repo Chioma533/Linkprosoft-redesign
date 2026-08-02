@@ -9,6 +9,7 @@ import { Toaster } from 'react-hot-toast';
 import EmployerDashboardPage from './pages/employer/EmployerDashboardPage';
 import AdminDahboardPage from './pages/admin/AdminDahboardPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
+import Preloader from './components/common/preloader/PreLoader';
 
 const App = () => {
   return (
@@ -31,9 +32,9 @@ const App = () => {
 
             <Route element={<PrivateRoutes allowedRoles={['admin']} />}>
               <Route path="/admin/dashboard" element={<AdminDahboardPage />} />
-            </Route>  
+            </Route> 
           </Routes>
-          <Toaster position="top-right" reverseOrder={false} />
+          <Toaster position="top-center" reverseOrder={false} />
         </div>
       </Router>
     </AuthProvider>

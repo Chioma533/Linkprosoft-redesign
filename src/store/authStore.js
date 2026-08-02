@@ -48,7 +48,18 @@ export const useAuthStore = create((set) => ({
       set({ isLoading: false });
       return data;
     } catch (error) {
-      const errorMsg = error.response?.data?.message || error.message || "Signup failed";
+      let errorMsg = error.response?.data?.message || error.message || "Signup failed";
+
+      // Translate common DB/constraint errors into user-friendly messages
+      const serverMsg = String(error.response?.data?.message || "").toLowerCase();
+      if (error.response?.status === 500 && serverMsg.includes("duplicate key")) {
+        if (serverMsg.includes("users_email_key") || serverMsg.includes("email")) {
+          errorMsg = "An account with that email already exists.";
+        } else {
+          errorMsg = "A resource conflict occurred. Please check your input.";
+        }
+      }
+
       set({ error: errorMsg, isLoading: false });
       throw errorMsg;
     }

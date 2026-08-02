@@ -9,7 +9,8 @@ import CreateNewPassword from "../../components/auth/components/CreateNewPasswor
 import ResetSuccess from "../../components/auth/components/ResetSuccess";
 import { useAuthStore } from "../../store/authStore";
 import { getDashboardRoute } from "../../utils/getDashboardRoute";
-
+import { redirectWithPreloader } from "../../utils/helper";
+import { usePreloader } from "../../context/PreLoaderContext";
 const LoginPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState("login"); // login, forgot-password, enter-code, create-password, reset-success
@@ -17,17 +18,35 @@ const LoginPage = () => {
   const [code, setCode] = useState("");
   const [apiError, setApiError] = useState("");
 
-  const { login, googleSignin, forgotPassword, verifyResetCode, resetPassword, isLoading, error } = useAuthStore();
+  const {
+    login,
+    googleSignin,
+    forgotPassword,
+    verifyResetCode,
+    resetPassword,
+    isLoading,
+    error,
+  } = useAuthStore();
+  const { showPreloader } = usePreloader();
 
   const handleLoginSubmit = async (credentials) => {
     try {
       const response = await login(credentials);
+
       toast.success("Welcome back!");
-      navigate(getDashboardRoute(response.data.user.role));
+    showPreloader(() => {
+      navigate(getDashboardRoute(response.data.user.role), {
+        replace: true,
+      });
+    });
+
     } catch (err) {
-      toast.error(
-        err.response?.data?.message || err || "Login failed. Please verify your credentials."
-      );
+       const message =
+    err?.response?.data?.message ||
+    err?.message ||
+    (typeof err === "string" ? err : "Login failed. Please verify your credentials.");
+
+  toast.error(message);
     }
   };
 
@@ -48,7 +67,10 @@ const LoginPage = () => {
       toast.success("Reset code sent successfully!");
       setStep("enter-code");
     } catch (err) {
-      const errMsg = typeof err === "string" ? err : "Failed to send reset code. Please try again.";
+      const errMsg =
+        typeof err === "string"
+          ? err
+          : "Failed to send reset code. Please try again.";
       setApiError(errMsg);
       toast.error(errMsg);
     }
@@ -62,7 +84,8 @@ const LoginPage = () => {
       toast.success("Code verified successfully!");
       setStep("create-password");
     } catch (err) {
-      const errMsg = typeof err === "string" ? err : "Invalid code. Please try again.";
+      const errMsg =
+        typeof err === "string" ? err : "Invalid code. Please try again.";
       setApiError(errMsg);
       toast.error(errMsg);
     }
@@ -75,7 +98,10 @@ const LoginPage = () => {
       toast.success("Password reset successfully!");
       setStep("reset-success");
     } catch (err) {
-      const errMsg = typeof err === "string" ? err : "Failed to reset password. Please try again.";
+      const errMsg =
+        typeof err === "string"
+          ? err
+          : "Failed to reset password. Please try again.";
       setApiError(errMsg);
       toast.error(errMsg);
     }

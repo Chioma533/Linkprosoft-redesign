@@ -6,6 +6,14 @@ import { toast } from "react-hot-toast"
 const storedUser = JSON.parse(localStorage.getItem("user")) || null;
 const storedToken = localStorage.getItem("token") || null;
 
+const extractUser = (response) => {
+  if (response?.user) return response.user;
+  if (response?.data?.user) return response.data.user;
+  if (response?.role) return response;
+  if (response?.data?.role) return response.data;
+  return null;
+};
+
 export const useAuthStore = create((set) => ({
   user: storedUser,
   token: storedToken,
@@ -82,8 +90,17 @@ export const useAuthStore = create((set) => ({
     set({ isLoading: true, error: null });
     try {
       const data = await authService.verifyEmail({ email, otp_code: otpCode });
-      const token = data?.token || data?.accessToken;
-      const user = data?.user || null;
+      const token = data?.token || data?.accessToken || data?.data?.token || data?.data?.accessToken;
+      let user = extractUser(data);
+
+      if (!user) {
+        user = extractUser(await authService.getCurrentUser());
+      }
+
+      if (!user?.role) {
+        throw new Error("Unable to load the verified user's role");
+      }
+
       set({ isLoading: false });
       useAuthStore.getState().setAuth({ user, token });
       return data;

@@ -74,60 +74,62 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
       {/* Middle Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Active Jobs Table */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h3 className="text-base font-bold text-gray-900">Active jobs</h3>
-              <div className="flex flex-wrap items-center gap-2">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
-                  <FiFilter className="w-3.5 h-3.5" />
-                  <span>Filter</span>
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
-                  <FiDownload className="w-3.5 h-3.5" />
-                  <span>Export data</span>
-                </button>
-                <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer">
-                  <FiPlus className="w-3.5 h-3.5" />
-                  <span>Post a project</span>
-                </button>
+        <div className="lg:col-span-2">
+          <div className="bg-white border border-gray-100 rounded-3xl p-[50px]">
+            <div className="flex flex-col justify-between h-full p-[20px] border border-gray-100 rounded-3xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 className="text-base font-bold text-gray-900">Active jobs</h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+                    <FiFilter className="w-3.5 h-3.5" />
+                    <span>Filter</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+                    <FiDownload className="w-3.5 h-3.5" />
+                    <span>Export data</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer">
+                    <FiPlus className="w-3.5 h-3.5" />
+                    <span>Post a project</span>
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-50 text-gray-400 font-semibold">
-                    <th className="pb-3 font-semibold">OrderID</th>
-                    <th className="pb-3 font-semibold">Job title</th>
-                    <th className="pb-3 font-semibold">Professional</th>
-                    <th className="pb-3 font-semibold">Status</th>
-                    <th className="pb-3 font-semibold">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {activeJobs.map((job, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
-                      <td className="py-3.5 font-semibold text-gray-500">{job.id}</td>
-                      <td className="py-3.5 font-bold text-gray-800">{job.title}</td>
-                      <td className="py-3.5 font-semibold text-gray-800">{job.professional}</td>
-                      <td className="py-3.5">
-                        <span className={`px-2.5 py-1 rounded-lg font-bold text-[10px] ${getStatusBadgeStyle(job.status)}`}>
-                          {job.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5">
-                        <button
-                          onClick={() => onViewProject("job-1")}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${getActionButtonStyle(job.actionText)}`}
-                        >
-                          {job.actionText}
-                        </button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-50 text-gray-400 font-semibold">
+                      <th className="pb-3 font-semibold">OrderID</th>
+                      <th className="pb-3 font-semibold">Job title</th>
+                      <th className="pb-3 font-semibold">Professional</th>
+                      <th className="pb-3 font-semibold">Status</th>
+                      <th className="pb-3 font-semibold">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {activeJobs.map((job, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
+                        <td className="py-3.5 font-semibold text-gray-500">{job.id}</td>
+                        <td className="py-3.5 font-bold text-gray-800">{job.title}</td>
+                        <td className="py-3.5 font-semibold text-gray-800">{job.professional}</td>
+                        <td className="py-3.5">
+                          <span className={`px-2.5 py-1 rounded-lg font-bold text-[10px] ${getStatusBadgeStyle(job.status)}`}>
+                            {job.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5">
+                          <button
+                            onClick={() => onViewProject("job-1")}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${getActionButtonStyle(job.actionText)}`}
+                          >
+                            {job.actionText}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -135,12 +137,12 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
         {/* Right column: Escrow Overview & Performance */}
         <div className="space-y-8">
           {/* Escrow Overview */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
+          <div className="bg-white p-6 rounded-3xl border border-gray-100/50">
             <h3 className="text-base font-bold text-gray-900 mb-4">Escrow Overview</h3>
-            <div className="bg-[#016EA6] py-0.2 px-6 rounded-[22.68px] text-white relative overflow-hidden shadow-md">
+            <div className="bg-[#016EA6] -py-12 px-6 rounded-[22.68px] text-white relative overflow-hidden shadow-md">
               <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-              <div className="relative z-10 flex h-44 items-center justify-between gap-4">
-                <div className="flex-1">
+              <div className="relative z-10 flex h-44 items-center">
+                <div className="flex-1 max-w-[55%]">
                   <span className="text-[12.47px] text-sky-200 font-regular tracking-wide block">Money held</span>
                   <h1 className="text-2xl font-extrabold tracking-tight mt-1">{formatCurrency(540000)}</h1>
                   <p className="text-[10px] text-sky-100 font-medium mt-1">4 active escrows</p>
@@ -148,19 +150,19 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
                     View Details
                   </button>
                 </div>
-                <div className="hidden md:flex items-end justify-end flex-1">
-                  <img
-                    src="/secure_wallet_illustration.png"
-                    alt="Secure wallet illustration"
-                    className=" max-h-36 w-[1040px] object-contain"
-                  />
-                </div>
+              </div>
+              <div className="absolute right-0 bottom-0 top-0 w-[45%] flex items-end justify-end pr-4 pb-4 pointer-events-none">
+                <img
+                  src="/secure_wallet_illustration.png"
+                  alt="Secure wallet illustration"
+                  className="max-h-[170px] w-auto -mx-5 mt-9 object-contain"
+                />
               </div>
             </div>
           </div>
 
           {/* Your Performance */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm space-y-4">
+          <div className="bg-white p-6 rounded-3xl border border-gray-100/50 space-y-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-bold text-gray-900">Your performance</h3>
               <span className="text-[10px] text-gray-400 font-bold border border-gray-100 rounded-lg px-2 py-0.5">This week</span>
@@ -186,7 +188,7 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
       </div>
 
       {/* Bottom Grid: Schedule */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm max-w-5xl">
+      <div className="bg-white p-6 rounded-3xl border border-gray-100/50 max-w-5xl">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h3 className="text-base font-bold text-gray-900">Upcoming Schedule</h3>
           <div className="flex gap-2">

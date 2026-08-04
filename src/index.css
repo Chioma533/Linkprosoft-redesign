@@ -159,3 +159,47 @@ figcaption {
   --font-heading: "Manrope", system-ui, sans-serif;
   --font-body: "Manrope", system-ui, sans-serif;
 }
+
+/* =========================================================
+   GLOBAL SCROLLBAR STYLING
+   Thin sky blue thumb, hidden when idle
+   ========================================================= */
+
+:root,
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(2, 132, 199, 0) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(2, 132, 199, 0);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  opacity: 0;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:active,
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(2, 132, 199, 0.85);
+  opacity: 1;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+*:hover {
+  scrollbar-color: rgba(2, 132, 199, 0.85) transparent;
+}

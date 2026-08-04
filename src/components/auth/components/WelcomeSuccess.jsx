@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "framer-motion";
 import Button from "../../../components/common/Button";
-
+import { getDashboardRoute } from "../../../utils/getDashboardRoute";
 // Simple custom confetti particles with framer-motion
 const confettiColors = ["#016EA6", "#FBBF24", "#EF4444", "#10B981", "#8B5CF6", "#EC4899"];
 
@@ -38,7 +38,6 @@ const ConfettiParticle = ({ idx }) => {
     />
   );
 };
-
 const WelcomeSuccess = ({ onDashboardRedirect }) => {
   useEffect(() => {
     // Optionally trigger any welcome success actions

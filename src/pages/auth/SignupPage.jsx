@@ -8,7 +8,7 @@ import OtpVerification from "../../components/auth/components/OtpVerification";
 import WelcomeSuccess from "../../components/auth/components/WelcomeSuccess";
 import ProfessionalTypeSelection from "../../components/auth/components/ProfessionalTypeSelection";
 import { useAuthStore } from "../../store/authStore";
-import { getDashboardRoute } from "../../utils/getDashboardRoute";
+import { redirectToDashboard } from "../../utils/getDashboardRoute";
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ const SignupPage = () => {
   const [professionalType, setProfessionalType] = useState(null); // digital or none-digital
   const [email, setEmail] = useState("");
   const [apiError, setApiError] = useState("");
-  const { googleSignin, signup, verifyOtp, isLoading, error } = useAuthStore();
+  const { googleSignin, signup, verifyOtp, user, isLoading, error } = useAuthStore();
 
   const handleNextStep = () => {
     if (step === "role-selection") {
@@ -103,8 +103,7 @@ const SignupPage = () => {
   };
 
   const handleDashboardRedirect = () => {
-    const route = getDashboardRoute(role);
-    navigate(route);
+    redirectToDashboard(user?.role, navigate, { replace: true });
   };
 
   // Select transition variants based on step flow direction

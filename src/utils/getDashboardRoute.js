@@ -13,3 +13,8 @@ export const getDashboardRoute = (role) => {
       return "/";
   }
 };
+
+export const redirectToDashboard = (role, navigate, options = {}) => {
+  const dashboardRoute = getDashboardRoute(role);
+  navigate(dashboardRoute, options);
+};

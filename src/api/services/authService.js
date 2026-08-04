@@ -30,6 +30,11 @@ export const authService = {
     return response.data;
   },
 
+  getCurrentUser: async () => {
+    const response = await axiosInstance.get(API_PATHS.PROFILE.GET_PROFILE);
+    return response.data;
+  },
+
   login: async (credentials) => {
     // payload: { email, password }
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, credentials);

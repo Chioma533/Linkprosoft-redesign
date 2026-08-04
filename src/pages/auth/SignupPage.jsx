@@ -8,6 +8,7 @@ import OtpVerification from "../../components/auth/components/OtpVerification";
 import WelcomeSuccess from "../../components/auth/components/WelcomeSuccess";
 import ProfessionalTypeSelection from "../../components/auth/components/ProfessionalTypeSelection";
 import { useAuthStore } from "../../store/authStore";
+import { getDashboardRoute } from "../../utils/getDashboardRoute";
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -102,7 +103,8 @@ const SignupPage = () => {
   };
 
   const handleDashboardRedirect = () => {
-    navigate("/dashboard");
+    const route = getDashboardRoute(role);
+    navigate(route);
   };
 
   // Select transition variants based on step flow direction

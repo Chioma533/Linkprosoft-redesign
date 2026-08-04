@@ -137,16 +137,25 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
           {/* Escrow Overview */}
           <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
             <h3 className="text-base font-bold text-gray-900 mb-4">Escrow Overview</h3>
-            <div className="bg-gradient-to-r from-[#013554] via-[#01507B] to-[#016EA6] p-6 rounded-2xl text-white relative overflow-hidden flex flex-col justify-between h-44 shadow-md">
-              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200 via-transparent to-transparent" />
-              <div className="relative z-10">
-                <span className="text-[10px] text-sky-200 font-semibold tracking-wide block">Money held</span>
-                <h1 className="text-2xl font-extrabold tracking-tight mt-1">{formatCurrency(540000)}</h1>
-                <p className="text-[10px] text-sky-100 font-medium mt-1">4 active escrows</p>
+            <div className="bg-[#016EA6] py-0.2 px-6 rounded-[22.68px] text-white relative overflow-hidden shadow-md">
+              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
+              <div className="relative z-10 flex h-44 items-center justify-between gap-4">
+                <div className="flex-1">
+                  <span className="text-[12.47px] text-sky-200 font-regular tracking-wide block">Money held</span>
+                  <h1 className="text-2xl font-extrabold tracking-tight mt-1">{formatCurrency(540000)}</h1>
+                  <p className="text-[10px] text-sky-100 font-medium mt-1">4 active escrows</p>
+                  <button className="mt-4 text-white text-xs font-semibold underline underline-offset-4 hover:text-sky-100 transition-colors">
+                    View Details
+                  </button>
+                </div>
+                <div className="hidden md:flex items-end justify-end flex-1">
+                  <img
+                    src="/secure_wallet_illustration.png"
+                    alt="Secure wallet illustration"
+                    className=" max-h-36 w-[1040px] object-contain"
+                  />
+                </div>
               </div>
-              <button className="bg-white text-[#013554] hover:bg-sky-50 px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-all self-start cursor-pointer">
-                View Details
-              </button>
             </div>
           </div>
 

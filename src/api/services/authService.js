@@ -21,8 +21,12 @@ export const authService = {
   },
 
   verifyEmail: async (verificationData) => {
-    // payload: { email, code }
-    const response = await axiosInstance.post(API_PATHS.AUTH.VERIFY, verificationData);
+    // payload required by backend: { email, otp_code }
+    const payload = {
+      email: verificationData?.email,
+      otp_code: verificationData?.otp_code || verificationData?.code,
+    };
+    const response = await axiosInstance.post(API_PATHS.AUTH.VERIFY, payload);
     return response.data;
   },
 

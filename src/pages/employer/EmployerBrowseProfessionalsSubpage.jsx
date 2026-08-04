@@ -45,29 +45,36 @@ const EmployerBrowseProfessionalsSubpage = () => {
 
   return (
     <div className="space-y-6 animate-fade-in pb-8">
-      {/* Title */}
+      {/* Welcome Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 font-sans">Browse Professionals</h2>
-        <p className="text-sm text-gray-400 mt-1 font-semibold">Discover and collaborate with the top-vetted professionals in Lagos.</p>
+        <h2 className="text-2xl font-normal text-gray-900">Browse Professionals</h2>
+        <p className="text-sm text-gray-400 mt-1 font-light">Manage your jobs and payments effortlessly.</p>
       </div>
 
-      {/* Search Filter Row */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-100/50 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:max-w-xs">
+      {/* Search Filter Row (updated to match Manage Jobs styling) */}
+      <div className="rounded-full flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:flex-1">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
           <input
             type="text"
             placeholder="Search by skill, name or trade..."
-            className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all"
+            className="w-full pl-11 pr-4 py-3 bg-white border border-[#e9e8e7] rounded-full text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all duration-200"
           />
         </div>
-        <div className="flex gap-3 w-full md:w-auto">
-          <select className="w-full md:w-44 pl-4 pr-8 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold">
+
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <select className="w-full sm:w-44 pl-4 pr-8 py-2.5 bg-gray-50 border border-[#e9e8e7] rounded-full text-xs outline-none cursor-pointer text-gray-500 font-semibold">
             <option>All Locations</option>
             <option>Lekki</option>
             <option>Ikeja</option>
           </select>
-          <button className="bg-[#016EA6] hover:bg-[#061EA6] text-white px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer">
+
+          <select className="w-full sm:w-44 pl-4 pr-8 py-2.5 bg-gray-50 border border-[#e9e8e7] rounded-full text-xs outline-none cursor-pointer text-gray-500 font-semibold">
+            <option>Sort by: Newest</option>
+            <option>Sort by: Oldest</option>
+          </select>
+
+          <button className="bg-[#016EA6] hover:bg-[#061EA6] text-white px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer text-center">
             Filter
           </button>
         </div>

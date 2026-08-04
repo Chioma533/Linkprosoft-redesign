@@ -78,10 +78,10 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  verifyOtp: async (email, code) => {
+  verifyOtp: async (email, otpCode) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await authService.verifyEmail({ email, code });
+      const data = await authService.verifyEmail({ email, otp_code: otpCode });
       const token = data?.token || data?.accessToken;
       const user = data?.user || null;
       set({ isLoading: false });

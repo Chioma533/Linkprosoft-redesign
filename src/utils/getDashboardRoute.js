@@ -1,16 +1,15 @@
-
 export const getDashboardRoute = (role) => {
-    switch (role) {
-        case "professional":
-            return "/professional/dashboard";
+  switch (role) {
+    case "professional":
+      return "/professional/home";
 
-        case "employer":
-            return "/employer/dashboard";
+    case "employer":
+      return "/home";
 
-        case "admin":
-            return "/admin/dashboard";
+    case "admin":
+      return "/admin/dashboard";
 
-        default:
-            return "/";
-    }
+    default:
+      return "/";
+  }
 };

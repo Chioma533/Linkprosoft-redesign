@@ -47,7 +47,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
     <>
       {/* Sidebar Container */}
       <div 
-        className={`bg-white border-r border-gray-100 flex flex-col h-screen transition-all duration-300 ease-in-out z-50
+        className={`bg-[#f9f9f9] border-r border-[#E6F1F6] flex flex-col h-screen transition-all duration-300 ease-in-out z-50
           ${isOpen 
             ? "fixed inset-y-0 left-0 w-64 shadow-2xl md:shadow-none md:sticky md:top-0 flex" 
             : "hidden md:flex sticky top-0 w-16"
@@ -55,7 +55,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         `}
       >
         {/* Top Logo */}
-        <div className={`py-6 flex items-center border-b border-gray-50 transition-all duration-300
+        <div className={`py-6 flex items-center transition-all duration-300
           ${isOpen ? "px-6 justify-between" : "px-3 justify-center"}
         `}>
           <div className="flex items-center gap-3">
@@ -128,8 +128,8 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`w-full flex items-center rounded-xl text-sm font-medium transition-all duration-200 group relative cursor-pointer
-                  ${isOpen ? "px-4 py-3.5 justify-between" : "p-3 justify-center"}
+                className={`w-full flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-200 group relative cursor-pointer
+                  px-4 py-3.5
                   ${
                     isActive
                       ? "bg-[#016EA6] text-white shadow-md shadow-[#016EA6]/10"
@@ -137,7 +137,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
                   }`}
                 title={!isOpen ? item.name : undefined}
               >
-                <div className="flex items-center gap-3">
+                <div className={`flex items-center ${isOpen ? "gap-3 justify-start w-full" : "justify-center"}`}>
                   <Icon
                     className={`w-5 h-5 shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}
                   />

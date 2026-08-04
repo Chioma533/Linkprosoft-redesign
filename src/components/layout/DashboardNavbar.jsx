@@ -29,7 +29,7 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="h-20 bg-[#f9f9f9] border-b-2 border-[#016EA6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
+    <header className="h-20 bg-[#f9f9f9] border-b-2 border-[#E6F1F6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
       {/* Title */}
       <div className="flex items-center gap-2 sm:gap-4">
         {title === "profile" ? (

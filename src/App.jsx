@@ -1,6 +1,8 @@
 import LandingPage from './pages/LandingPage';
+import DefaultBuyerScreen from './pages/buyer/DefaultBuyerScreen';
+import DefaultProfessionalScreen from './pages/professional/DefaultProfessionalScreen';
 import SignupPage from './pages/auth/SignupPage';
-import LoginPage from "./pages/auth/LoginPage"
+import LoginPage from "./pages/auth/LoginPage";
 import ProfessionalDashboardPage from './pages/professionals/ProfessionalDashboardPage';
 import PrivateRoutes from './routes/PrivateRoutes';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
@@ -9,7 +11,6 @@ import { Toaster } from 'react-hot-toast';
 import EmployerDashboardPage from './pages/employer/EmployerDashboardPage';
 import AdminDahboardPage from './pages/admin/AdminDahboardPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
-import Preloader from './components/common/preloader/PreLoader';
 
 const App = () => {
   return (
@@ -22,12 +23,14 @@ const App = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
 
-            <Route element={<PrivateRoutes allowedRoles={['professional']} />}>
-              <Route path="/professional/dashboard" element={<ProfessionalDashboardPage />} />
+            <Route element={<PrivateRoutes allowedRoles={['employer']} />}>
+              <Route path="/home" element={<DefaultBuyerScreen />} />
+              <Route path="/employer/dashboard" element={<EmployerDashboardPage />} />
             </Route>
 
-            <Route element={<PrivateRoutes allowedRoles={['employer']} />}>
-              <Route path="/employer/dashboard" element={<EmployerDashboardPage />} />
+            <Route element={<PrivateRoutes allowedRoles={['professional']} />}>
+              <Route path="/professional/home" element={<DefaultProfessionalScreen />} />
+              <Route path="/professional/dashboard" element={<ProfessionalDashboardPage />} />
             </Route>
 
             <Route element={<PrivateRoutes allowedRoles={['admin']} />}>

@@ -95,7 +95,7 @@ const SignupPage = () => {
 
   const handleGoogleSignup = async () => {
     try {
-      await googleSignin();
+      await googleSignin(role);
     } catch (error) {
       const errMsg = typeof error === "string" ? error : "Google signup failed. Please try again.";
       toast.error(errMsg);

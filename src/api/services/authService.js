@@ -14,8 +14,8 @@ export const authService = {
     return response.data;
   },
 
-  googleSignin: async () => {
-    const googleAuthUrl = getGoogleAuthUrl();
+  googleSignin: async (role) => {
+    const googleAuthUrl = getGoogleAuthUrl() + (role ? `?role=${encodeURIComponent(role)}` : '');
     window.location.assign(googleAuthUrl);
     return { success: true, redirectUrl: googleAuthUrl };
   },

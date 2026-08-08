@@ -267,11 +267,10 @@ const DefaultProfessionalScreen = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
           >
             {paginatedJobs.length > 0 ? (
-              paginatedJobs.map((job, idx) => (
+              paginatedJobs.map((job) => (
                 <JobCard
                   key={job.id}
                   {...job}
-                  isSelected={idx === 0 && safeCurrentPage === 1}
                   onApply={() => console.log(`Applying to job: ${job.title}`)}
                   onSave={(val) =>
                     console.log(`Saved job ${job.title}: ${val}`)

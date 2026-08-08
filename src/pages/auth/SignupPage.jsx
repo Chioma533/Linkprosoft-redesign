@@ -95,7 +95,8 @@ const SignupPage = () => {
 
   const handleGoogleSignup = async () => {
     try {
-      await googleSignin(role);
+      console.log('Google signup params:', { role, professionalType: role === 'professional' ? professionalType : undefined });
+      await googleSignin(role, role === 'professional' ? professionalType : undefined);
     } catch (error) {
       const errMsg = typeof error === "string" ? error : "Google signup failed. Please try again.";
       toast.error(errMsg);

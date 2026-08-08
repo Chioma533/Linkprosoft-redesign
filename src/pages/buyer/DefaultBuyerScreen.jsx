@@ -1,27 +1,13 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { FiAlertCircle, FiChevronRight, FiChevronLeft, FiX } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 import BuyerNavbar from "../../layouts/buyer/BuyerNavbar";
 import ProfessionalSearchBar from "../../components/buyer/ProfessionalSearchBar";
 import ProfessionalCard from "../../components/buyer/ProfessionalCard";
+import { searchService } from "../../api/services/searchService";
 
 /* ─────────────────────────────────────────────────────────────
-   Mock data — 9 professionals per page to match the Figma 3x3 grid
-   ───────────────────────────────────────────────────────────── */
-const ALL_PROFESSIONALS = Array.from({ length: 108 }, (_, i) => ({
-  id: i + 1,
-  name: "Jonathan David",
-  role: "Carpenter",
-  avatarUrl: "/professional_avatar.png",
-  rating: 2.5,
-  reviewCount: 32,
-  bio: "Skilled carpenter specializing in custom wardrobes, sliding doors, and bespoke storage solutions. Available for on-site consultation this week.",
-  pricePerDay: 10000,
-}));
-
-const ITEMS_PER_PAGE = 9;
-
-/* ─────────────────────────────────────────────────────────────
-   Pagination sub-component
+   Pagination sub-component (unchanged)
    ───────────────────────────────────────────────────────────── */
 const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPages = () => {
@@ -96,41 +82,99 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
 const DefaultBuyerScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [verificationDismissed, setVerificationDismissed] = useState(false);
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({
+    searchQuery: "",
+    location: "",
+    rating: "",
+    budget: "",
+  });
 
+  // Data from API
+  const [apiProfessionals, setApiProfessionals] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [totalPagesAPI, setTotalPagesAPI] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Apply filters client-side on the fetched data
   const filteredProfessionals = useMemo(() => {
-    return ALL_PROFESSIONALS.filter((pro) => {
-      const search = filters.searchQuery?.toLowerCase() || "";
+    const { searchQuery, location, rating, budget } = filters;
+    const list = Array.isArray(apiProfessionals) ? apiProfessionals : [];
+    return list.filter((pro) => {
+      if (!pro) return false;
+      const search = searchQuery?.toLowerCase() || "";
+      const name = pro.name || `${pro.user?.firstName || ''} ${pro.user?.lastName || ''}`.trim();
+      const proLocation = pro.location || pro.user?.location || "";
+      const proRating = pro.rating ?? pro.avgRating ?? 0;
+      const proPrice = pro.pricePerDay ?? pro.hourlyRate ?? 0;
+      const proRole = pro.profession || pro.role || (pro.skills && pro.skills.length > 0 ? (typeof pro.skills[0] === 'string' ? pro.skills[0] : pro.skills[0].name || "") : "") || "Professional";
+
       const matchesSearch =
         !search ||
-        pro.name.toLowerCase().includes(search) ||
-        pro.role.toLowerCase().includes(search) ||
-        pro.bio.toLowerCase().includes(search);
+        name.toLowerCase().includes(search) ||
+        proRole.toLowerCase().includes(search) ||
+        (pro.bio || "").toLowerCase().includes(search);
 
-      const matchesRating = !filters.rating || filters.rating === "Any Rating" || (() => {
-        const minStars = Number(filters.rating?.match(/\d+/)?.[0] || 0);
-        return pro.rating >= minStars;
+      const matchesLocation =
+        !location ||
+        proLocation.toLowerCase().includes(location.toLowerCase());
+
+      const matchesRating = !rating || rating === "Any Rating" || (() => {
+        const minStars = Number(rating?.match(/\d+/)?.[0] || 0);
+        return proRating >= minStars;
       })();
 
-      const normalizedBudget = filters.budget?.replace(/–/g, "-") || "";
+      const normalizedBudget = budget?.replace(/–/g, "-") || "";
       const matchesBudget = !normalizedBudget || normalizedBudget === "Any Budget" || (() => {
-        if (normalizedBudget === "Under ₦5,000") return pro.pricePerDay < 5000;
-        if (normalizedBudget === "₦5,000 - ₦20,000") return pro.pricePerDay >= 5000 && pro.pricePerDay <= 20000;
-        if (normalizedBudget === "₦20,000 - ₦50,000") return pro.pricePerDay >= 20000 && pro.pricePerDay <= 50000;
-        if (normalizedBudget === "₦50,000+") return pro.pricePerDay > 50000;
+        if (normalizedBudget === "Under ₦5,000") return proPrice < 5000;
+        if (normalizedBudget === "₦5,000 - ₦20,000")
+          return proPrice >= 5000 && proPrice <= 20000;
+        if (normalizedBudget === "₦20,000 - ₦50,000")
+          return proPrice >= 20000 && proPrice <= 50000;
+        if (normalizedBudget === "₦50,000+") return proPrice > 50000;
         return true;
       })();
 
-      return matchesSearch && matchesRating && matchesBudget;
+      return matchesSearch && matchesLocation && matchesRating && matchesBudget;
     });
-  }, [filters]);
+  }, [apiProfessionals, filters]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredProfessionals.length / ITEMS_PER_PAGE));
+  const ITEMS_PER_PAGE = 9;
+  const totalPages = Math.max(1, Math.ceil((filteredProfessionals?.length || 0) / ITEMS_PER_PAGE));
+
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  const paginatedProfessionals = filteredProfessionals.slice(
+  const paginatedProfessionals = (filteredProfessionals || []).slice(
     (safeCurrentPage - 1) * ITEMS_PER_PAGE,
     safeCurrentPage * ITEMS_PER_PAGE
   );
+
+  const fetchProfessionals = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch all professionals from database without filters initially
+      const response = await searchService.searchProfessionals({ page: 1, limit: 100 });
+      if (response && response.success && response.data) {
+        const items = Array.isArray(response.data.professionals)
+          ? response.data.professionals
+          : Array.isArray(response.data.items)
+          ? response.data.items
+          : Array.isArray(response.data)
+          ? response.data
+          : [];
+        setApiProfessionals(items);
+        setTotal(response.data.meta?.total || response.data.total || items.length);
+        setTotalPagesAPI(response.data.meta?.pages || response.data.totalPages || 1);
+      } else {
+        throw new Error(response?.message || "Failed to fetch professionals");
+      }
+    } catch (err) {
+      setError(err.message || "Something went wrong");
+      toast.error(err.message || "Failed to load professionals");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -145,6 +189,34 @@ const DefaultBuyerScreen = () => {
   const handleDismissVerification = () => {
     setVerificationDismissed(true);
   };
+
+  useEffect(() => {
+    fetchProfessionals();
+  }, []); // fetch on mount
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Error loading professionals</h2>
+        <p className="text-gray-500 text-center">{error}</p>
+        <button
+          onClick={() => fetchProfessionals()}
+          className="mt-6 bg-[#016EA6] hover:bg-[#061EA6] text-white px-6 py-3 rounded-full text-font-medium"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans">
       {/* ── Navbar ───────────────────────────────────────────── */}
@@ -228,17 +300,24 @@ const DefaultBuyerScreen = () => {
         id="professionals-results-section"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
       >
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
-            {/* Section header */}
-            <div className="mb-6">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Related to{" "}
-                <span className="text-gray-700">&ldquo;Carpentry&rdquo;</span>
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {filteredProfessionals.length} professionals available
-              </p>
-            </div>
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
+          {/* Section header */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">
+              {filters.searchQuery ? (
+                <>
+                  Related to <span className="text-gray-700">&ldquo;{filters.searchQuery}&rdquo;</span>
+                </>
+              ) : filters.location || filters.rating || filters.budget ? (
+                "Filtered Professionals"
+              ) : (
+                "All Professionals"
+              )}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {filteredProfessionals.length} professionals available
+            </p>
+          </div>
 
           {/* 3-column professional grid */}
           <div
@@ -246,15 +325,29 @@ const DefaultBuyerScreen = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
           >
             {paginatedProfessionals.length > 0 ? (
-              paginatedProfessionals.map((pro, idx) => (
-                <ProfessionalCard
-                  key={pro.id}
-                  {...pro}
-                  isSelected={idx === 0 && safeCurrentPage === 1}
-                  onContact={() => console.log(`Contacting ${pro.name}`)}
-                  onBookmark={(val) => console.log(`Bookmarked ${pro.name}: ${val}`)}
-                />
-              ))
+              paginatedProfessionals.map((pro, idx) => {
+                const fullName = pro.name || `${pro.user?.firstName || ''} ${pro.user?.lastName || ''}`.trim() || "Unknown";
+                const roleName = pro.profession || pro.role || (pro.skills && pro.skills.length > 0 ? (typeof pro.skills[0] === 'string' ? pro.skills[0] : pro.skills[0].name || "Professional") : "Professional");
+                const locationName = pro.location || pro.user?.location || "";
+                return (
+                  <ProfessionalCard
+                    key={pro.id}
+                    id={pro.id}
+                    name={fullName}
+                    role={roleName}
+                    location={locationName}
+                    avatarUrl={pro.avatarUrl || pro.user?.avatar || "/professional_avatar.png"}
+                    rating={pro.rating ?? pro.avgRating ?? 0}
+                    reviewCount={pro.reviewCount ?? pro.totalReviews ?? 0}
+                    bio={pro.bio || "No bio available"}
+                    pricePerDay={pro.pricePerDay ?? pro.hourlyRate ?? 0}
+                    isBookmarked={false}
+                    isSelected={idx === 0 && safeCurrentPage === 1}
+                    onContact={() => console.log(`Contacting ${fullName}`)}
+                    onBookmark={(val) => console.log(`Bookmarked ${fullName}: ${val}`)}
+                  />
+                );
+              })
             ) : (
               <div className="col-span-full py-20 text-center">
                 <p className="text-sm text-gray-500">No professionals match your current filters. Try expanding your search or adjusting the filters.</p>

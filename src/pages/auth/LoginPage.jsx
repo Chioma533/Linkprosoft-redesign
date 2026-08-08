@@ -52,7 +52,8 @@ const LoginPage = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      const response = await googleSignin();
+      console.log('Google login params:', { role: 'professional', professionalType: undefined });
+      const response = await googleSignin('professional', undefined);
       navigate(getDashboardRoute(response.data.user.role), { replace: true });
     } catch (err) {
       toast.error(err || "Google sign-in failed. Please try again.");

@@ -73,10 +73,10 @@ export const useAuthStore = create((set) => ({
     }
   },
 
-  googleSignin: async (role) => {
+  googleSignin: async (role, professionalType) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await authService.googleSignin(role);
+      const data = await authService.googleSignin(role, professionalType);
       set({ isLoading: false });
       return data;
     } catch (error) {

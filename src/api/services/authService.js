@@ -14,10 +14,35 @@ export const authService = {
     return response.data;
   },
 
-  googleSignin: async (role) => {
-    const googleAuthUrl = getGoogleAuthUrl() + (role ? `?role=${encodeURIComponent(role)}` : '');
-    window.location.assign(googleAuthUrl);
-    return { success: true, redirectUrl: googleAuthUrl };
+  googleSignin: async (role, professionalType) => {
+    let url = getGoogleAuthUrl();
+    // Generate a nonce for CSRF protection and store it in sessionStorage
+    const nonceArray = new Uint8Array(16);
+    crypto.getRandomValues(nonceArray);
+    // Convert to base64url string
+    const nonce = btoa(String.fromCharCode(...nonceArray))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    sessionStorage.setItem('google_oauth_nonce', nonce);
+
+    // Build state payload
+    const statePayload = {
+      nonce,
+      role,
+      professionalType: role === 'professional' ? professionalType : undefined,
+    };
+    // Encode as base64url-safe JSON
+    const state = btoa(JSON.stringify(statePayload))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const params = [`state=${encodeURIComponent(state)}`];
+    url += '?' + params.join('&');
+    console.log('Google OAuth redirect URL with state:', url);
+    window.location.assign(url);
+    return { success: true, redirectUrl: url };
   },
 
   verifyEmail: async (verificationData) => {

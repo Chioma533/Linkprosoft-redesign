@@ -5,7 +5,7 @@ import Button from "../../../components/common/Button";
 const RoleSelection = ({ role, onChangeRole, onNext }) => {
   const options = [
     {
-      id: "client",
+      id: "employer",
       title: "I'm looking to hire",
       description: "Find a trusted professional near you",
       icon: FiSearch,

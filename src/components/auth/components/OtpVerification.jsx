@@ -187,11 +187,10 @@ const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
           <button
             onClick={handleResendClick}
             disabled={isResendDisabled || isLoading}
-            className={`font-semibold cursor-pointer outline-none ${
-              isResendDisabled
+            className={`font-semibold cursor-pointer outline-none ${isResendDisabled
                 ? "text-gray-300 cursor-not-allowed"
                 : "text-[#016EA6] hover:underline"
-            }`}
+              }`}
           >
             {isResendDisabled ? `Resend in ${countdown}s` : "Resend"}
           </button>

@@ -1,0 +1,304 @@
+import React, { useMemo, useState } from "react";
+import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
+import ProfessionalNavbar from "../../layouts/professional/ProfessionalNavbar";
+import JobSearchBar from "../../components/professional/JobSearchBar";
+import JobCard from "../../components/professional/JobCard";
+
+/* ─────────────────────────────────────────────────────────────
+   Mock data — 108 jobs, 9 per page (3×3 grid), 5 pages total display
+   ───────────────────────────────────────────────────────────── */
+const ALL_JOBS = Array.from({ length: 108 }, (_, i) => ({
+  id: i + 1,
+  title: "Wardrobe Installation",
+  employerName: "Jonathan David",
+  employerAvatarUrl: "/professional_avatar.png",
+  postedAgo: "Posted 2 min ago",
+  description:
+    "Hi, I'm looking for an experienced carpenter to build and install a custom wardrobe for my master bedroom. The wardrobe should have sliding doors, multiple shelves, hanging sections, and drawers.",
+  budget: 10000,
+  location: "Lagos",
+  category: "Carpentry",
+  datePostedDays: 0, // 0 = today
+}));
+
+const ITEMS_PER_PAGE = 9;
+
+/* ─────────────────────────────────────────────────────────────
+   Pagination sub-component (identical pattern to DefaultBuyerScreen)
+   ───────────────────────────────────────────────────────────── */
+const ProfessionalPagination = ({ currentPage, totalPages, onPageChange }) => {
+  const getPages = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push("...");
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      for (let i = start; i <= end; i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push("...");
+      pages.push(totalPages);
+    }
+    return pages;
+  };
+
+  return (
+    <div className="flex items-center justify-between pt-6 border-t border-gray-100">
+      <span className="text-xs text-gray-500 font-medium">
+        Showing page {currentPage} of {totalPages} pages
+      </span>
+
+      <div className="flex items-center gap-1.5">
+        <button
+          id="job-pagination-prev-btn"
+          onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="w-8 h-8 rounded-full border border-gray-100 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer"
+        >
+          <FiChevronLeft className="w-3.5 h-3.5" />
+        </button>
+
+        {getPages().map((page, index) =>
+          page === "..." ? (
+            <span key={`ellipsis-${index}`} className="px-1 text-xs text-gray-400">
+              ...
+            </span>
+          ) : (
+            <button
+              key={page}
+              id={`job-pagination-page-${page}-btn`}
+              onClick={() => onPageChange(page)}
+              className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === page
+                ? "bg-[#016EA6] text-white shadow-sm"
+                : "border border-gray-100 text-gray-500 hover:bg-gray-50"
+                }`}
+            >
+              {page}
+            </button>
+          )
+        )}
+
+        <button
+          id="job-pagination-next-btn"
+          onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className="w-8 h-8 rounded-full border border-gray-100 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer"
+        >
+          <FiChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────
+   Main Page
+   ───────────────────────────────────────────────────────────── */
+const DefaultProfessionalScreen = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [verificationDismissed, setVerificationDismissed] = useState(false);
+  const [filters, setFilters] = useState({});
+
+  /* ── Filtering ─────────────────────────────────────────────── */
+  const filteredJobs = useMemo(() => {
+    return ALL_JOBS.filter((job) => {
+      const search = filters.searchQuery?.toLowerCase() || "";
+      const matchesSearch =
+        !search ||
+        job.title.toLowerCase().includes(search) ||
+        job.description.toLowerCase().includes(search) ||
+        job.category.toLowerCase().includes(search);
+
+      const matchesLocation =
+        !filters.location ||
+        filters.location === "All Locations" ||
+        job.location === filters.location;
+
+      const normalizedBudget = filters.budget?.replace(/–/g, "-") || "";
+      const matchesBudget =
+        !normalizedBudget ||
+        normalizedBudget === "Any Budget" ||
+        (() => {
+          if (normalizedBudget === "Under ₦5,000") return job.budget < 5000;
+          if (normalizedBudget === "₦5,000 - ₦20,000")
+            return job.budget >= 5000 && job.budget <= 20000;
+          if (normalizedBudget === "₦20,000 - ₦50,000")
+            return job.budget >= 20000 && job.budget <= 50000;
+          if (normalizedBudget === "₦50,000+") return job.budget > 50000;
+          return true;
+        })();
+
+      const matchesDate =
+        !filters.datePosted ||
+        filters.datePosted === "Any time" ||
+        (() => {
+          if (filters.datePosted === "Today") return job.datePostedDays === 0;
+          if (filters.datePosted === "This week") return job.datePostedDays <= 7;
+          if (filters.datePosted === "This month") return job.datePostedDays <= 30;
+          if (filters.datePosted === "Last 3 months") return job.datePostedDays <= 90;
+          return true;
+        })();
+
+      return matchesSearch && matchesLocation && matchesBudget && matchesDate;
+    });
+  }, [filters]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / ITEMS_PER_PAGE));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const paginatedJobs = filteredJobs.slice(
+    (safeCurrentPage - 1) * ITEMS_PER_PAGE,
+    safeCurrentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(1);
+  };
+
+  const handleDismissVerification = () => {
+    setVerificationDismissed(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 font-sans">
+      {/* ── Navbar ─────────────────────────────────────────────── */}
+      <ProfessionalNavbar activePage="browse-jobs" />
+
+      {/* ── Hero Section ───────────────────────────────────────── */}
+      <section id="professional-hero-section" className="bg-[#EEF5F9] relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
+          <div className="flex items-center justify-between gap-8">
+            {/* Left: headline + verification banner */}
+            <div className="flex-1 max-w-xl">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
+                Find Your Next Opportunity
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-3 font-normal">
+                Looking for jobs? Browse our latest job openings to view
+              </p>
+
+              {/* Verification Required Banner */}
+              {!verificationDismissed && (
+                <div
+                  id="verification-banner"
+                  className="mt-6 flex items-center gap-3 bg-[#fff4ea] border border-[#ff8d28]/30 rounded-xl px-5 py-4 max-w-md"
+                >
+                  <FiAlertCircle className="w-5 h-5 text-orange-500 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-[#59310e]">
+                      Verification Required
+                    </p>
+                    <p className="text-[11px] text-[#ff8d28] mt-0.5 leading-relaxed max-w-[26rem]">
+                      Complete your verification to apply for jobs and receive
+                      payments securely.
+                    </p>
+                  </div>
+                  <button
+                    id="complete-verification-btn"
+                    className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-bold px-3.5 py-2 rounded-full transition-all duration-200 cursor-pointer whitespace-nowrap"
+                  >
+                    Complete Verification
+                  </button>
+                  <button
+                    id="dismiss-verification-btn"
+                    onClick={handleDismissVerification}
+                    className="p-1 rounded-full text-gray-400 hover:text-gray-700 transition-colors"
+                    aria-label="Dismiss verification banner"
+                  >
+                    <FiX className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Right: Tools bucket illustration */}
+            <div
+              className="hidden sm:flex items-end justify-center flex-1 max-w-xs"
+              style={{ mixBlendMode: "multiply" }}
+            >
+              <img
+                src="/tools_bucket_illustration.png"
+                alt="Construction Tools"
+                className="w-56 sm:w-64 lg:w-72 object-contain"
+                style={{ transform: "translateY(78px)" }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Subtle bottom gradient line */}
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#016EA6]/20 to-transparent" />
+      </section>
+
+      {/* ── Search & Filter Bar ─────────────────────────────────── */}
+      <section
+        id="job-search-filter-section"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"
+      >
+        <JobSearchBar onApply={handleApplyFilters} />
+      </section>
+
+      {/* ── Job Results Grid ─────────────────────────────────────── */}
+      <section
+        id="jobs-results-section"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+      >
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
+          {/* Section header */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Related to{" "}
+              <span className="text-gray-700">&ldquo;Carpentry&rdquo;</span>
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {filteredJobs.length} jobs available
+            </p>
+          </div>
+
+          {/* 3-column job grid */}
+          <div
+            id="jobs-grid"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+          >
+            {paginatedJobs.length > 0 ? (
+              paginatedJobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  {...job}
+                  onApply={() => console.log(`Applying to job: ${job.title}`)}
+                  onSave={(val) =>
+                    console.log(`Saved job ${job.title}: ${val}`)
+                  }
+                />
+              ))
+            ) : (
+              <div className="col-span-full py-20 text-center">
+                <p className="text-sm text-gray-500">
+                  No jobs match your current filters. Try expanding your search
+                  or adjusting the filters.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          <div className="mt-8">
+            <ProfessionalPagination
+              currentPage={safeCurrentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default DefaultProfessionalScreen;

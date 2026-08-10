@@ -8,9 +8,7 @@ import OtpVerification from "../../components/auth/components/OtpVerification";
 import WelcomeSuccess from "../../components/auth/components/WelcomeSuccess";
 import ProfessionalTypeSelection from "../../components/auth/components/ProfessionalTypeSelection";
 import { useAuthStore } from "../../store/authStore";
-import { usePreloader } from "../../context/PreLoaderContext";
-import { getDashboardRoute } from "../../utils/getDashboardRoute";
-
+import { redirectToDashboard } from "../../utils/getDashboardRoute";
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -20,8 +18,7 @@ const SignupPage = () => {
   const [professionalType, setProfessionalType] = useState(null); // digital or none-digital
   const [email, setEmail] = useState("");
   const [apiError, setApiError] = useState("");
-  const { googleSignin, signup, verifyOtp, isLoading, error } = useAuthStore();
-  const { showPreloader } = usePreloader();
+  const { googleSignin, signup, verifyOtp, user, isLoading, error } = useAuthStore();
 
   const handleNextStep = () => {
     if (step === "role-selection") {
@@ -103,8 +100,8 @@ const SignupPage = () => {
 
   const handleGoogleSignup = async () => {
     try {
-      await googleSignin();
-   
+      console.log('Google signup params:', { role, professionalType: role === 'professional' ? professionalType : undefined });
+      await googleSignin(role, role === 'professional' ? professionalType : undefined);
     } catch (error) {
       const errMsg = typeof error === "string" ? error : "Google signup failed. Please try again.";
       toast.error(errMsg);
@@ -112,7 +109,7 @@ const SignupPage = () => {
   };
 
   const handleDashboardRedirect = () => {
-    navigate("/dashboard");
+    redirectToDashboard(user?.role, navigate, { replace: true });
   };
 
   // Select transition variants based on step flow direction

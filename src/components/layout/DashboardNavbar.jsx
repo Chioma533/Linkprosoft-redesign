@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiSearch, FiMessageSquare, FiBell, FiChevronDown, FiLogOut, FiUser, FiMenu, FiChevronLeft } from "react-icons/fi";
+import MessageIcon from "../icons/Message02Icon";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 
@@ -28,7 +29,7 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
   const unreadNotificationsCount = notifications.filter(n => n.unread).length;
 
   return (
-    <header className="h-20 bg-white border-b-2 border-[#016EA6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
+    <header className="h-20 bg-[#f9f9f9] border-b-2 border-[#E6F1F6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
       {/* Title */}
       <div className="flex items-center gap-2 sm:gap-4">
         {title === "profile" ? (
@@ -44,10 +45,10 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
             {/* Desktop Menu Button */}
             <button
               onClick={onMenuClick}
-              className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer hidden md:flex items-center justify-center"
+              className="p-2 text-gray-600 bg-[#e6f1f6] hover:bg-[#d8e6f1] rounded-xl transition-all cursor-pointer hidden md:flex items-center justify-center"
               title="Toggle Sidebar"
             >
-              <FiMenu className="w-5 h-5" />
+              <FiChevronLeft className="w-5 h-5" />
             </button>
           </>
         ) : title === "project-details" ? (
@@ -61,13 +62,13 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
         ) : (
           <button
             onClick={onMenuClick}
-            className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer flex items-center justify-center"
+            className="p-2 text-gray-600 bg-[#e6f1f6] hover:bg-[#d8e6f1] rounded-xl transition-all cursor-pointer flex items-center justify-center"
             title="Toggle Sidebar"
           >
-            <FiMenu className="w-5 h-5" />
+            <FiChevronLeft className="w-5 h-5" />
           </button>
         )}
-        <h1 className="text-lg md:text-xl font-bold text-gray-900 capitalize truncate">
+        <h1 className="text-lg md:text-xl font-normal text-gray-900 capitalize truncate">
           {title === "project-details" ? (selectedJob?.title || "Wardrobe Installation") : title.replace("-", " ")}
         </h1>
       </div>
@@ -78,7 +79,7 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
         <input
           type="text"
           placeholder="Search anything"
-          className="w-full pl-11 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm outline-none focus:border-[#016EA6] focus:bg-white transition-all duration-200"
+          className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-100 rounded-full text-sm outline-none focus:border-[#016EA6] focus:bg-white transition-all duration-200"
         />
       </div>
 
@@ -89,7 +90,7 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
           onClick={() => setActiveTab("chat")}
           className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer"
         >
-          <FiMessageSquare className="w-5 h-5" />
+          <MessageIcon className="w-5 h-5" />
           {unreadMessagesCount > 0 && (
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#016EA6] rounded-full ring-2 ring-white animate-pulse" />
           )}
@@ -107,10 +108,10 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
         <div className="w-px h-6 bg-gray-100 hidden sm:block" />
 
         {/* Profile Avatar Dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative bg-white rounded-full p-0.6" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-3 p-1 rounded-xl hover:bg-gray-50 transition-all cursor-pointer"
+            className="flex items-center gap-3 p-1 rounded-full hover:bg-white-500 transition-all cursor-pointer"
           >
             <div className="w-9 h-9 rounded-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] overflow-hidden">
               {user?.avatar ? (

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Eye, EyeOff, Download, Filter, Plus, ArrowUpRight, DollarSign, Wallet, ArrowDownLeft, Clock, X, Check } from "lucide-react";
+import TopUpIcon from "../../components/icons/TopUpIcon";
 import StatsCard from "../../components/ui/StatsCard";
 import { useDashboardStore } from "../../store/dashboardStore";
 
@@ -12,20 +13,28 @@ const WalletSubpage = () => {
   
   const { setActiveTab } = useDashboardStore();
 
-  const transactions = [
-    { id: "TRX-87W7", type: "Withdrawal", client: "------", date: "Jul 07, 2026", amount: 32000, status: "Successful" },
-    { id: "TRX-87W7", type: "Job Payment", client: "John miguel", date: "Jul 07, 2026", amount: 32000, status: "Pending" },
-    { id: "TRX-87W7", type: "Withdrawal", client: "------", date: "Jul 07, 2026", amount: 32000, status: "Successful" },
-    { id: "TRX-87W7", type: "Job Payment", client: "John miguel", date: "Jul 07, 2026", amount: 32000, status: "Pending" }
+  const activeEscrows = [
+    { jobTitle: "Wardrobe Installation", professional: "Jonathan D", amount: 22500, status: "Awaiting Funding" },
+    { jobTitle: "Wardrobe Installation", professional: "Jonathan D", amount: 22500, status: "Awaiting Funding" },
+    { jobTitle: "Wardrobe Installation", professional: "Jonathan D", amount: 22500, status: "In progress" },
+    { jobTitle: "Wardrobe Installation", professional: "Jonathan D", amount: 22500, status: "In progress" }
   ];
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-NG", {
+  const recentTransactions = [
+    { title: "Wallet Top-Up", date: "12th July 2026", amount: 50000, status: "Successful" },
+    { title: "Wallet Top-Up", date: "12th July 2026", amount: 50000, status: "Successful" },
+    { title: "Wallet Top-Up", date: "12th July 2026", amount: 50000, status: "Successful" }
+  ];
+
+  const formatCurrency = (amount, showSign = false) => {
+    const value = new Intl.NumberFormat("en-NG", {
       style: "currency",
       currency: "NGN",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(amount).replace("NGN", "₦");
+
+    return showSign ? `+${value}` : value;
   };
 
   return (
@@ -36,13 +45,23 @@ const WalletSubpage = () => {
         <p className="text-sm text-gray-400 mt-1">Manage your earnings, withdrawals, and transaction history.</p>
       </div>
 
-      {/* Blue Header Wallet Banner */}
-      <div className="bg-gradient-to-r from-[#013554] via-[#01507B] to-[#016EA6] p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden flex flex-col gap-6 md:flex-row md:items-center justify-between">
-        {/* Background Grid Accent */}
-        <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200 via-transparent to-transparent" />
-        
-        {/* Flex container wrapping layout */}
-        <div className="flex flex-col gap-6 w-full md:flex-row md:items-center md:justify-between">
+      {/* Outer pale-blue wrapper matching design */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-[#E6F1F6]">
+
+      {/* Blue Header Wallet Banner (inner) */}
+      <div
+        className="p-6 bg-[#00273A] sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden flex flex-col gap-6 md:flex-row md:items-center justify-between"
+      >
+        {/* Right-side decorative white flow image */}
+        <img
+          src="/white-flow-bgdesign.png"
+          alt=""
+          aria-hidden
+          className="pointer-events-none absolute right-0 top-0 h-full w-1/2 object-contain"
+        />
+
+        {/* Flex container wrapping layout (content above bg images) */}
+        <div className="flex flex-col gap-6 w-full md:flex-row md:items-center md:justify-between relative z-10">
           <div className="flex flex-col gap-4 w-full">
             {/* Top row for mobile or standard logo row */}
             <div className="flex items-center justify-between w-full md:w-auto">
@@ -51,13 +70,15 @@ const WalletSubpage = () => {
                 <span>NGN</span>
               </div>
               
-              {/* Mobile-only Withdraw Button */}
+              {/* Mobile-only Top Up Button */}
               <button 
                 onClick={() => setIsWithdrawOpen(true)}
-                className="md:hidden bg-white text-[#013554] hover:bg-sky-50 px-4 py-2 rounded-full text-xs font-bold shadow-md flex items-center gap-1.5 cursor-pointer"
+                className="md:hidden bg-[#E8F3FF] text-[#104F84] hover:bg-[#D7E9FF] px-3.5 py-2 rounded-full text-[11px] font-semibold shadow-sm flex items-center gap-2.5 cursor-pointer"
               >
-                <span>Withdraw funds</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <span>Top Up Wallet</span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-white border border-[#D7E9FF]">
+                  <TopUpIcon className="w-4 h-4 text-[#104F84]" />
+                </span>
               </button>
             </div>
 
@@ -77,15 +98,18 @@ const WalletSubpage = () => {
             </div>
           </div>
 
-          {/* Desktop-only Withdraw Button */}
+          {/* Desktop-only Top Up Button */}
           <button 
             onClick={() => setIsWithdrawOpen(true)}
-            className="hidden whitespace-nowrap md:flex bg-white text-[#013554] hover:bg-sky-50 px-6 py-3.5 rounded-full text-sm font-bold shadow-md hover:shadow-lg transition-all duration-300 items-center justify-center gap-2 relative z-10 cursor-pointer active:scale-95"
+            className="hidden whitespace-nowrap md:flex bg-[#E8F3FF] text-[#104F84] hover:bg-[#D7E9FF] px-5 py-3 rounded-full text-sm font-semibold shadow-sm hover:shadow-md transition-all duration-300 items-center justify-center gap-3 relative z-10 cursor-pointer active:scale-95"
           >
-            <span>Withdraw funds</span>
-            <ArrowUpRight className="w-4 h-4" />
+            <span>Top Up Wallet</span>
+            <span className="flex h-6 w-10 items-center justify-center rounded-2xl bg-white border border-[#D7E9FF]">
+              <TopUpIcon className="w-4 h-4 text-[#104F84]" />
+            </span>
           </button>
         </div>
+      </div>
       </div>
 
       {/* Row of Metrics */}
@@ -96,62 +120,35 @@ const WalletSubpage = () => {
         <StatsCard title="Total Withdrawn" value="₦1.8M" icon={ArrowUpRight} iconColor="text-[#016EA6]" iconBg="bg-sky-50" />
       </div>
 
-      {/* Table & Chart Section */}
+      {/* Table Section Redesigned from Figma */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Recent Transactions */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between">
+        {/* Active Escrow Payments */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-[#E5E7EB] flex flex-col justify-between">
           <div>
-            <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
-              <h3 className="text-base font-bold text-gray-900">Recent Transaction</h3>
-              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-                <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors">
-                  <Filter className="w-3.5 h-3.5" />
-                  <span>Filter</span>
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-2 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors">
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Export data</span>
-                </button>
-                <button className="flex items-center gap-1.5 px-4 py-2 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-semibold transition-colors">
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>List a service</span>
-                </button>
-              </div>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-base font-bold text-gray-900">Active Escrow Payments</h3>
             </div>
-
-              {/* Desktop Table View */}
-            <div className="overflow-x-auto hidden md:block">
-              <table className="w-full text-left text-xs border-collapse">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-50 text-gray-400 font-semibold">
-                    <th className="pb-3 font-semibold">Transaction ID</th>
-                    <th className="pb-3 font-semibold">Type</th>
-                    <th className="pb-3 font-semibold">Client</th>
-                    <th className="pb-3 font-semibold">Date</th>
-                    <th className="pb-3 font-semibold">Amount</th>
-                    <th className="pb-3 font-semibold">Status</th>
+                  <tr className="bg-gray-50 text-gray-500 text-xs uppercase tracking-[0.15em]">
+                    <th className="px-4 py-3 font-semibold">Job Title</th>
+                    <th className="px-4 py-3 font-semibold">Professional</th>
+                    <th className="px-4 py-3 font-semibold">Amount</th>
+                    <th className="px-4 py-3 font-semibold">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {transactions.map((tx, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
-                      <td className="py-3.5 font-semibold text-gray-500">{tx.id}</td>
-                      <td className="py-3.5 font-bold text-gray-800 flex items-center gap-2">
-                        {tx.type === "Withdrawal" ? (
-                          <ArrowUpRight className="w-3.5 h-3.5 text-red-500" />
-                        ) : (
-                          <ArrowDownLeft className="w-3.5 h-3.5 text-green-500" />
-                        )}
-                        <span>{tx.type}</span>
-                      </td>
-                      <td className="py-3.5 font-semibold text-gray-800">{tx.client}</td>
-                      <td className="py-3.5 font-medium text-gray-400">{tx.date}</td>
-                      <td className="py-3.5 font-bold text-gray-800">{formatCurrency(tx.amount)}</td>
-                      <td className="py-3.5">
-                        <span className={`px-2.5 py-1 rounded-lg font-bold text-[10px] ${
-                          tx.status === "Successful" ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-500"
+                <tbody className="divide-y divide-gray-100">
+                  {activeEscrows.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-gray-50/80 transition-colors">
+                      <td className="px-4 py-4 text-sm font-medium text-gray-800">{item.jobTitle}</td>
+                      <td className="px-4 py-4 text-sm text-gray-500">{item.professional}</td>
+                      <td className="px-4 py-4 text-sm font-bold text-gray-800">{formatCurrency(item.amount)}</td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
+                          item.status === "In progress" ? "bg-orange-50 text-orange-600" : "bg-orange-50 text-orange-600"
                         }`}>
-                          {tx.status}
+                          {item.status}
                         </span>
                       </td>
                     </tr>
@@ -159,114 +156,42 @@ const WalletSubpage = () => {
                 </tbody>
               </table>
             </div>
-
-              
-
-              {/* Mobile Card List View */}
-            <div className="md:hidden space-y-4">
-              {transactions.map((tx, idx) => (
-                <div key={idx} className="bg-white p-5 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col gap-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      {/* Icon Container */}
-                      <div className="w-12 h-12 bg-[#EBF3FA] text-[#016EA6] rounded-2xl flex items-center justify-center shrink-0">
-                        <Wallet className="w-5 h-5" />
-                      </div>
-                      
-                      {/* Transaction Info */}
-                      <div className="space-y-0.5">
-                        <h4 className="font-bold text-gray-900 text-sm leading-snug">
-                          {tx.type === "Withdrawal" ? "Funds Withdrawal" : "Job Payment"}
-                        </h4>
-                        <div className="text-[11px] text-gray-400 font-medium">
-                          <span>{tx.client}</span>
-                          <span className="mx-1.5">•</span>
-                          <span>Carpentry</span>
-                        </div>
-                        <div className="text-[10px] text-gray-400 flex items-center gap-1 font-medium">
-                          <span>{tx.date}</span>
-                          <span>•</span>
-                          <span>9:00 am</span>
-                        </div>
-                        <div className="text-xs font-bold text-gray-800 pt-1">
-                          {formatCurrency(tx.amount)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Status Badge */}
-                    <div className="shrink-0">
-                      <span className={`px-2.5 py-1 rounded-lg font-bold text-[10px] ${
-                        tx.status === "Successful" ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-500"
-                      }`}>
-                        {tx.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
 
-          <div className="flex items-center justify-between border-t border-gray-50 pt-4 mt-6">
-            <span className="text-[10px] text-gray-400 font-medium">Showing page 1 of 5 pages</span>
-            <div className="flex gap-1">
-              <button className="w-6 h-6 bg-[#016EA6] text-white rounded-md text-[10px] font-bold">1</button>
-              <button className="w-6 h-6 border border-gray-100 hover:bg-gray-50 text-gray-500 rounded-md text-[10px] font-bold">2</button>
-              <button className="w-6 h-6 border border-gray-100 hover:bg-gray-50 text-gray-500 rounded-md text-[10px] font-bold">3</button>
+          <div className="flex items-center justify-between border-t border-gray-100 pt-4 mt-6">
+            <span className="text-xs text-gray-400">Showing page 1 of 5 pages</span>
+            <div className="flex items-center gap-2">
+              <button className="w-8 h-8 rounded-full bg-[#2E1C73] text-white text-xs font-bold">1</button>
+              <button className="w-8 h-8 rounded-full border border-gray-200 text-gray-500 text-xs font-bold hover:bg-gray-50">2</button>
+              <button className="w-8 h-8 rounded-full border border-gray-200 text-gray-500 text-xs font-bold hover:bg-gray-50">3</button>
+              <span className="text-gray-300">...</span>
+              <button className="w-8 h-8 rounded-full border border-gray-200 text-gray-500 text-xs font-bold hover:bg-gray-50">5</button>
             </div>
           </div>
         </div>
 
-        {/* Earning Chart Panel */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-base font-bold text-gray-900">Earning chat</h3>
-              <select className="text-xs font-semibold text-gray-400 outline-none border-none bg-transparent cursor-pointer">
-                <option>This year</option>
-                <option>This month</option>
-              </select>
-            </div>
+        {/* Recent Transaction Cards */}
+        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
+          <h3 className="text-base font-bold text-gray-900 mb-6">Recent Transaction</h3>
+          <div className="space-y-4">
+            {recentTransactions.map((tx, idx) => (
+              <div key={idx} className="flex items-center justify-between gap-4 rounded-3xl border border-gray-100 bg-gray-50/80 p-4 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#016EA6] text-white">
+                    <Wallet className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{tx.title}</p>
+                    <p className="text-xs text-gray-400 mt-1">{tx.date}</p>
+                  </div>
+                </div>
 
-            {/* SVG Custom Premium Wave Chart */}
-            <div className="relative h-44 w-full mt-4 flex items-end">
-              <svg className="w-full h-full overflow-visible" viewBox="0 0 100 50" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#016EA6" stopOpacity="0.25" />
-                    <stop offset="100%" stopColor="#016EA6" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-                {/* Wave Path */}
-                <path
-                  d="M0 25 C15 35, 30 15, 45 30 C60 45, 75 10, 100 20"
-                  fill="none"
-                  stroke="#016EA6"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                />
-                {/* Area under wave */}
-                <path
-                  d="M0 25 C15 35, 30 15, 45 30 C60 45, 75 10, 100 20 L100 50 L0 50 Z"
-                  fill="url(#chartGradient)"
-                />
-                {/* Active selection dot */}
-                <circle cx="75" cy="10" r="3" fill="#016EA6" stroke="#fff" strokeWidth="1.5" className="animate-pulse" />
-                <line x1="75" y1="10" x2="75" y2="50" stroke="#016EA6" strokeWidth="1" strokeDasharray="2 2" opacity="0.4" />
-              </svg>
-            </div>
-
-            {/* X-Axis labels */}
-            <div className="flex justify-between text-[8px] font-bold text-gray-400 mt-4 px-1 uppercase">
-              <span>Jan</span>
-              <span>Feb</span>
-              <span>Mar</span>
-              <span>Apr</span>
-              <span className="text-[#016EA6]">May</span>
-              <span>Jun</span>
-              <span>Jul</span>
-            </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-[#016EA6]">{formatCurrency(tx.amount, true)}</p>
+                  <p className="text-sm font-semibold text-emerald-600 mt-1">{tx.status}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>

@@ -1,1 +1,205 @@
 @import "tailwindcss";
+
+/* =========================================================
+   SATOSHI – Local @font-face declarations
+   ========================================================= */
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-LightItalic.otf") format("opentype");
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-Regular.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-Italic.otf") format("opentype");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-Medium.otf") format("opentype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-MediumItalic.otf") format("opentype");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-Bold.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-BoldItalic.otf") format("opentype");
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Satoshi";
+  src: url("/fonts/Satoshi/Satoshi-BlackItalic.otf") format("opentype");
+  font-weight: 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* =========================================================
+   CSS CUSTOM PROPERTIES – Typography tokens
+   ========================================================= */
+
+:root {
+  --font-heading: "Manrope", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+}
+
+/* =========================================================
+   GLOBAL TYPOGRAPHY – Apply fonts project-wide
+   ========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-body);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Headings: Manrope (regular) */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+/* Body / smaller text: Manrope */
+p,
+span,
+label,
+input,
+textarea,
+select,
+button,
+a,
+li,
+td,
+th,
+caption,
+small,
+sub,
+sup,
+blockquote,
+figcaption {
+  font-family: var(--font-body);
+}
+
+/* =========================================================
+   TAILWIND v4 THEME EXTENSION
+   Registers font-heading and font-body as Tailwind utilities
+   ========================================================= */
+
+@theme {
+  --font-heading: "Manrope", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+}
+
+/* =========================================================
+   GLOBAL SCROLLBAR STYLING
+   Thin sky blue thumb, hidden when idle
+   ========================================================= */
+
+:root,
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(2, 132, 199, 0) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(2, 132, 199, 0);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  opacity: 0;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+*::-webkit-scrollbar-thumb:hover,
+*::-webkit-scrollbar-thumb:active,
+*:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(2, 132, 199, 0.85);
+  opacity: 1;
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+*:hover {
+  scrollbar-color: rgba(2, 132, 199, 0.85) transparent;
+}

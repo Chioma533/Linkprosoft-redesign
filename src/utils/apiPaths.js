@@ -1,5 +1,5 @@
 export const API_BASE_URL = "https://linprosoft-backend.onrender.com"
-// export const API_BASE_URL = "http://localhost:5020"
+//export const API_BASE_URL = "http://localhost:5020"
 export const API_PATHS = {
   AUTH: {
     SIGNUP: "/api/auth/signup",
@@ -49,5 +49,10 @@ export const API_PATHS = {
   GOOGLE_AUTH: {
     GOOGLE_SIGNIN: "/api/auth/google",
     GOOGLE_CALLBACK: "/auth/google/callback",
+  },
+  SEARCH: {
+    PROFESSIONALS: "/api/search/professionals",
+    FILTERS: "/api/search/filters",
+    SKILLS_AUTOCOMPLETE: "/api/search/skills",
   }
 };

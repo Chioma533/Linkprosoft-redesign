@@ -1,7 +1,11 @@
 import React from "react";
-import { FiFilter, FiDownload, FiPlus, FiBriefcase, FiClock, FiCheckCircle, FiDollarSign } from "react-icons/fi";
+import { FiFilter, FiDownload, FiPlus } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
 import StatsCard from "../../components/ui/StatsCard";
+import ToggleOffIcon from "../../components/icons/ToggleOffIcon";
+import InformationCircleIcon from "../../components/icons/InformationCircleIcon";
+import DatabaseLockedIcon from "../../components/icons/DatabaseLockedIcon";
+import BorderFullIcon from "../../components/icons/BorderFullIcon";
 
 const EmployerOverviewSubpage = ({ onViewProject }) => {
   const { user } = useAuthStore();
@@ -55,75 +59,77 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
     <div className="space-y-8 animate-fade-in pb-8">
       {/* Welcome Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">{getGreeting()} {userName}</h2>
-        <p className="text-sm text-gray-400 mt-1 font-semibold">Manage your jobs and payments effortlessly.</p>
+        <h2 className="text-2xl font-normal text-gray-900">{getGreeting()} {userName}</h2>
+        <p className="text-sm text-gray-400 mt-1 font-light">Manage your jobs and payments effortlessly.</p>
       </div>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard title="Active jobs" value="18" icon={FiBriefcase} iconColor="text-blue-500" iconBg="bg-blue-50" />
-        <StatsCard title="Awaiting action" value="8" icon={FiClock} iconColor="text-orange-500" iconBg="bg-orange-50" />
-        <StatsCard title="Funds in Escrow" value={formatCurrency(540000)} icon={FiDollarSign} iconColor="text-green-500" iconBg="bg-green-50" />
-        <StatsCard title="Completed jobs" value="98" icon={FiCheckCircle} iconColor="text-emerald-500" iconBg="bg-emerald-50" />
+        <StatsCard title="Active jobs" value="18" icon={ToggleOffIcon} iconColor="text-blue-500"/>
+        <StatsCard title="Awaiting action" value="8" icon={InformationCircleIcon} iconColor="text-orange-500"  BgColor="bg-[#fff4ea]" />
+        <StatsCard title="Funds in Escrow" value={formatCurrency(540000)} icon={DatabaseLockedIcon} iconColor="text-green-500"/>
+        <StatsCard title="Completed jobs" value="98" icon={BorderFullIcon} iconColor="text-emerald-500" />
       </div>
 
       {/* Middle Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Active Jobs Table */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between">
-          <div>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h3 className="text-base font-bold text-gray-900">Active jobs</h3>
-              <div className="flex flex-wrap items-center gap-2">
-                <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
-                  <FiFilter className="w-3.5 h-3.5" />
-                  <span>Filter</span>
-                </button>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
-                  <FiDownload className="w-3.5 h-3.5" />
-                  <span>Export data</span>
-                </button>
-                <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer">
-                  <FiPlus className="w-3.5 h-3.5" />
-                  <span>Post a project</span>
-                </button>
+        <div className="lg:col-span-2">
+          <div className="bg-white border border-gray-100 rounded-3xl p-[50px]">
+            <div className="flex flex-col justify-between h-full p-[20px] border border-gray-100 rounded-3xl">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <h3 className="text-base font-bold text-gray-900">Active jobs</h3>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+                    <FiFilter className="w-3.5 h-3.5" />
+                    <span>Filter</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+                    <FiDownload className="w-3.5 h-3.5" />
+                    <span>Export data</span>
+                  </button>
+                  <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer">
+                    <FiPlus className="w-3.5 h-3.5" />
+                    <span>Post a project</span>
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-50 text-gray-400 font-semibold">
-                    <th className="pb-3 font-semibold">OrderID</th>
-                    <th className="pb-3 font-semibold">Job title</th>
-                    <th className="pb-3 font-semibold">Professional</th>
-                    <th className="pb-3 font-semibold">Status</th>
-                    <th className="pb-3 font-semibold">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {activeJobs.map((job, idx) => (
-                    <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
-                      <td className="py-3.5 font-semibold text-gray-500">{job.id}</td>
-                      <td className="py-3.5 font-bold text-gray-800">{job.title}</td>
-                      <td className="py-3.5 font-semibold text-gray-800">{job.professional}</td>
-                      <td className="py-3.5">
-                        <span className={`px-2.5 py-1 rounded-lg font-bold text-[10px] ${getStatusBadgeStyle(job.status)}`}>
-                          {job.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5">
-                        <button
-                          onClick={() => onViewProject("job-1")}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${getActionButtonStyle(job.actionText)}`}
-                        >
-                          {job.actionText}
-                        </button>
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="border-b border-gray-50 text-gray-400 font-semibold">
+                      <th className="pb-3 font-semibold">OrderID</th>
+                      <th className="pb-3 font-semibold">Job title</th>
+                      <th className="pb-3 font-semibold">Professional</th>
+                      <th className="pb-3 font-semibold">Status</th>
+                      <th className="pb-3 font-semibold">Action</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {activeJobs.map((job, idx) => (
+                      <tr key={idx} className="hover:bg-gray-50/30 transition-colors">
+                        <td className="py-3.5 font-semibold text-gray-500">{job.id}</td>
+                        <td className="py-3.5 font-bold text-gray-800">{job.title}</td>
+                        <td className="py-3.5 font-semibold text-gray-800">{job.professional}</td>
+                        <td className="py-3.5">
+                          <span className={`px-2.5 py-1 rounded-lg font-bold text-[10px] ${getStatusBadgeStyle(job.status)}`}>
+                            {job.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5">
+                          <button
+                            onClick={() => onViewProject("job-1")}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${getActionButtonStyle(job.actionText)}`}
+                          >
+                            {job.actionText}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
@@ -131,23 +137,32 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
         {/* Right column: Escrow Overview & Performance */}
         <div className="space-y-8">
           {/* Escrow Overview */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
+          <div className="bg-white p-6 rounded-3xl border border-gray-100/50">
             <h3 className="text-base font-bold text-gray-900 mb-4">Escrow Overview</h3>
-            <div className="bg-gradient-to-r from-[#013554] via-[#01507B] to-[#016EA6] p-6 rounded-2xl text-white relative overflow-hidden flex flex-col justify-between h-44 shadow-md">
-              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200 via-transparent to-transparent" />
-              <div className="relative z-10">
-                <span className="text-[10px] text-sky-200 font-semibold tracking-wide block">Money held</span>
-                <h1 className="text-2xl font-extrabold tracking-tight mt-1">{formatCurrency(540000)}</h1>
-                <p className="text-[10px] text-sky-100 font-medium mt-1">4 active escrows</p>
+            <div className="bg-[#016EA6] -py-12 px-6 rounded-[22.68px] text-white relative overflow-hidden shadow-md">
+              <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
+              <div className="relative z-10 flex h-44 items-center">
+                <div className="flex-1 max-w-[55%]">
+                  <span className="text-[12.47px] text-sky-200 font-regular tracking-wide block">Money held</span>
+                  <h1 className="text-2xl font-extrabold tracking-tight mt-1">{formatCurrency(540000)}</h1>
+                  <p className="text-[10px] text-sky-100 font-medium mt-1">4 active escrows</p>
+                  <button className="mt-4 text-white text-xs font-semibold underline underline-offset-4 hover:text-sky-100 transition-colors">
+                    View Details
+                  </button>
+                </div>
               </div>
-              <button className="bg-white text-[#013554] hover:bg-sky-50 px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-all self-start cursor-pointer">
-                View Details
-              </button>
+              <div className="absolute right-0 bottom-0 top-0 w-[45%] flex items-end justify-end pr-4 pb-4 pointer-events-none">
+                <img
+                  src="/secure_wallet_illustration.png"
+                  alt="Secure wallet illustration"
+                  className="max-h-[170px] w-auto -mx-5 mt-9 object-contain"
+                />
+              </div>
             </div>
           </div>
 
           {/* Your Performance */}
-          <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm space-y-4">
+          <div className="bg-white p-6 rounded-3xl border border-gray-100/50 space-y-4">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-base font-bold text-gray-900">Your performance</h3>
               <span className="text-[10px] text-gray-400 font-bold border border-gray-100 rounded-lg px-2 py-0.5">This week</span>
@@ -173,7 +188,7 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
       </div>
 
       {/* Bottom Grid: Schedule */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm max-w-5xl">
+      <div className="bg-white p-6 rounded-3xl border border-gray-100/50 max-w-5xl">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h3 className="text-base font-bold text-gray-900">Upcoming Schedule</h3>
           <div className="flex gap-2">

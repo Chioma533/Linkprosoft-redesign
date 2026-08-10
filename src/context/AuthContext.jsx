@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
   const verifyOtp = async (email, code) => {
     try {
-      const data = await authService.verifyEmail({ email, code });
+      const data = await authService.verifyEmail({ email, otp_code: code });
       // If server returns a token and user details, save them
       if (data?.token) {
         localStorage.setItem("token", data.token);

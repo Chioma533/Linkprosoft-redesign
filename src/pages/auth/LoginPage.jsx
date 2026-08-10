@@ -34,26 +34,31 @@ const LoginPage = () => {
       const response = await login(credentials);
 
       toast.success("Welcome back!");
-    showPreloader(() => {
-      navigate(getDashboardRoute(response.data.user.role), {
-        replace: true,
+      showPreloader(() => {
+        navigate(getDashboardRoute(response.data.user.role), {
+          replace: true,
+        });
       });
-    });
-
     } catch (err) {
-       const message =
-    err?.response?.data?.message ||
-    err?.message ||
-    (typeof err === "string" ? err : "Login failed. Please verify your credentials.");
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        (typeof err === "string"
+          ? err
+          : "Login failed. Please verify your credentials.");
 
-  toast.error(message);
+      toast.error(message);
     }
   };
 
   const handleGoogleLogin = async () => {
     try {
       const response = await googleSignin();
-      navigate(getDashboardRoute(response.data.user.role), { replace: true });
+      showPreloader(() => {
+        navigate(getDashboardRoute(response.data.user.role), {
+          replace: true,
+        });
+      });
     } catch (err) {
       toast.error(err || "Google sign-in failed. Please try again.");
     }

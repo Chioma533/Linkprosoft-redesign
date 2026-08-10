@@ -8,6 +8,9 @@ import OtpVerification from "../../components/auth/components/OtpVerification";
 import WelcomeSuccess from "../../components/auth/components/WelcomeSuccess";
 import ProfessionalTypeSelection from "../../components/auth/components/ProfessionalTypeSelection";
 import { useAuthStore } from "../../store/authStore";
+import { usePreloader } from "../../context/PreLoaderContext";
+import { getDashboardRoute } from "../../utils/getDashboardRoute";
+
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -18,6 +21,7 @@ const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [apiError, setApiError] = useState("");
   const { googleSignin, signup, verifyOtp, isLoading, error } = useAuthStore();
+  const { showPreloader } = usePreloader();
 
   const handleNextStep = () => {
     if (step === "role-selection") {
@@ -60,7 +64,6 @@ const SignupPage = () => {
         professional_type: role === "professional" ? professionalType : undefined,
       };
 
-      console.log("Signup Payload:", payload);
 
       await signup(payload);
 
@@ -79,7 +82,13 @@ const SignupPage = () => {
     try {
       await verifyOtp(email, code);
       toast.success("Email verified successfully! Welcome onboard.");
+      
       setStep("success");
+        showPreloader(() => {
+          navigate(getDashboardRoute(response.data.user.role), {
+            replace: true,
+          });
+        });
     } catch (err) {
       const errMsg = typeof err === "string" ? err : "Verification failed. Invalid code.";
       setApiError(errMsg);
@@ -95,6 +104,7 @@ const SignupPage = () => {
   const handleGoogleSignup = async () => {
     try {
       await googleSignin();
+   
     } catch (error) {
       const errMsg = typeof error === "string" ? error : "Google signup failed. Please try again.";
       toast.error(errMsg);

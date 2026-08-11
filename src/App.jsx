@@ -1,4 +1,5 @@
 import LandingPage from './pages/LandingPage';
+import Waitlist from './pages/Waitlist';
 import DefaultBuyerScreen from './pages/buyer/DefaultBuyerScreen';
 import DefaultProfessionalScreen from './pages/professional/DefaultProfessionalScreen';
 import SignupPage from './pages/auth/SignupPage';
@@ -19,6 +20,7 @@ const App = () => {
         <div className="min-h-screen bg-white text-gray-900 font-sans">
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />

@@ -98,7 +98,9 @@ const MyJobsSubpage = () => {
         <div>
           {/* Header and Filter Row */}
           <div className="flex items-center justify-between mb-6">
-            <h3 className="md:text-base text-sm whitespace-nowrap font-bold text-gray-900">All jobs</h3>
+            <h3 className="md:text-base text-sm whitespace-nowrap font-bold text-gray-900">
+              All jobs
+            </h3>
 
             {/* Desktop Filters */}
             <div className="hidden lg:flex flex-wrap items-center gap-3 w-full lg:w-auto">
@@ -107,7 +109,7 @@ const MyJobsSubpage = () => {
                 value={search}
                 onChange={setSearch}
                 debounce={500}
-                className="w-37.5 sm:w-56 pr-4 py-2.5 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all duration-200"
+                className="w-37.5 sm:w-80 pr-4 py-2.5 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all duration-200"
               />
 
               <FilterSelect
@@ -115,7 +117,7 @@ const MyJobsSubpage = () => {
                 icon={FiChevronDown}
                 onChange={setCategoryFilter}
                 options={categoryOptions}
-                className="w-full sm:w-auto pr-8 py-2.5 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
+                className="w-full sm:w-auto pr-4 py-2.5 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
               />
 
               <FilterSelect
@@ -123,17 +125,16 @@ const MyJobsSubpage = () => {
                 icon={FiChevronDown}
                 onChange={setStatusFilter}
                 options={statusOptions}
-                className="w-full sm:w-auto pr-8 py-2.5 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
+                className="w-full sm:w-auto pr-4 py-2.5 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
               />
             </div>
 
             {/* Mobile Filters */}
             <div className="flex lg:hidden items-center justify-between gap-4 w-full max-w-70">
               {/* Dropdown status text */}
-              <div className="relative flex items-center pr-4">
-           
+              {/* <div className="relative flex items-center pr-4">
                 <FiChevronDown className="absolute right-0 top-1/2 -translate-y-1/2 text-gray-900 w-4 h-4 pointer-events-none" />
-              </div>
+              </div> */}
 
               {/* Search input */}
               <div className="relative max-w-32.5 sm:max-w-xs">

@@ -51,7 +51,7 @@ const ProfessionalTypeSelection = ({ professionalType, onChangeType, onNext, onB
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -15 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
-      className="w-full max-w-[900px] mx-auto px-4 md:px-0 flex flex-col items-center text-center py-6"
+      className="w-full max-w-225 mx-auto px-4 md:px-0 flex flex-col items-center text-center py-6"
     >
       <h2 className="text-2xl md:text-4xl font-semibold text-gray-900 tracking-tight mb-2 font-sans">
         What kind of a professional are you?
@@ -85,7 +85,7 @@ const ProfessionalTypeSelection = ({ professionalType, onChangeType, onNext, onB
                 </p>
               </div>
 
-              <div className="w-full flex items-center justify-center min-h-[140px]">
+              <div className="w-full flex items-center justify-center min-h-35">
                 {option.illustration}
               </div>
             </motion.div>
@@ -97,7 +97,7 @@ const ProfessionalTypeSelection = ({ professionalType, onChangeType, onNext, onB
         <Button
           onClick={onNext}
           disabled={!professionalType}
-          className="w-full md:max-w-[380px] !rounded-full !bg-[#016EA6] hover:!bg-[#016EA6]/95 py-3.5 text-base shadow-sm font-medium tracking-wide"
+          className="w-full md:max-w-95 rounded-full! bg-[#016EA6]! hover:bg-[#016EA6]/95! py-3.5 text-base shadow-sm font-medium tracking-wide"
         >
           Continue
         </Button>

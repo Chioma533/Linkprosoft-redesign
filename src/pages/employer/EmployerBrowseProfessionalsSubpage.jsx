@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiStar, FiCheckCircle, FiSearch, FiMapPin, FiMail } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { searchService } from "../../api/services/searchService";
+import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 
 const EmployerBrowseProfessionalsSubpage = () => {
   const [professionals, setProfessionals] = useState([]);
@@ -9,7 +10,8 @@ const EmployerBrowseProfessionalsSubpage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);  // true from the start — skeleton first
+  const [minTimePassed, setMinTimePassed] = useState(false);
   const [error, setError] = useState(null);
 
   // Filters
@@ -39,6 +41,8 @@ const EmployerBrowseProfessionalsSubpage = () => {
   const fetchProfessionals = async () => {
     setLoading(true);
     setError(null);
+    /* 2.5 s minimum skeleton display time */
+    const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
     try {
       const params = {
         skills: selectedSkills.length > 0 ? selectedSkills.join(",") : undefined,
@@ -73,6 +77,7 @@ const EmployerBrowseProfessionalsSubpage = () => {
       toast.error(err.message || "Failed to load professionals");
     } finally {
       setLoading(false);
+      return () => clearTimeout(minTimer);
     }
   };
 
@@ -131,12 +136,8 @@ const EmployerBrowseProfessionalsSubpage = () => {
     return selectedLocation === "All Locations" || loc.includes(selectedLocation.toLowerCase());
   });
 
-  if (loading) {
-    return (
-      <div className="flex h-[600px] items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (loading || !minTimePassed) {
+    return <LoadingScreen />;
   }
 
   if (error) {

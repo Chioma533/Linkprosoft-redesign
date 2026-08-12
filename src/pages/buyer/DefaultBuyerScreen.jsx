@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import BuyerNavbar from "../../layouts/buyer/BuyerNavbar";
 import ProfessionalSearchBar from "../../components/buyer/ProfessionalSearchBar";
 import ProfessionalCard from "../../components/buyer/ProfessionalCard";
+import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import { searchService } from "../../api/services/searchService";
 
 /* ─────────────────────────────────────────────────────────────
@@ -93,7 +94,8 @@ const DefaultBuyerScreen = () => {
   const [apiProfessionals, setApiProfessionals] = useState([]);
   const [total, setTotal] = useState(0);
   const [totalPagesAPI, setTotalPagesAPI] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);  // true from the start — skeleton first
+  const [minTimePassed, setMinTimePassed] = useState(false);
   const [error, setError] = useState(null);
 
   // Apply filters client-side on the fetched data
@@ -151,6 +153,8 @@ const DefaultBuyerScreen = () => {
   const fetchProfessionals = async () => {
     setLoading(true);
     setError(null);
+    /* Enforce 2.5 s minimum skeleton display time */
+    const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
     try {
       // Fetch all professionals from database without filters initially
       const response = await searchService.searchProfessionals({ page: 1, limit: 100 });
@@ -173,6 +177,8 @@ const DefaultBuyerScreen = () => {
       toast.error(err.message || "Failed to load professionals");
     } finally {
       setLoading(false);
+      /* minTimer clears itself; setMinTimePassed fires after 2.5 s */
+      return () => clearTimeout(minTimer);
     }
   };
 
@@ -194,12 +200,8 @@ const DefaultBuyerScreen = () => {
     fetchProfessionals();
   }, []); // fetch on mount
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  if (loading || !minTimePassed) {
+    return <LoadingScreen />;
   }
 
   if (error) {

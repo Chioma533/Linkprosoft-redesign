@@ -13,7 +13,7 @@ export const useDashboardStore = create((set, get) => ({
   activeTab: "overview", // overview, browse-jobs, my-jobs, applications, schedule, wallet
   selectedJob: null,
   previousTab: "overview",
-  isLoading: false,
+  isLoading: true,
   error: null,
 
   setActiveTab: (tab) => set({ activeTab: tab }),

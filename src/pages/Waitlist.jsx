@@ -334,27 +334,29 @@ const Waitlist = () => {
             Good things come to
             <br />
             those who{" "}
-            <em style={{ fontStyle: "italic", fontWeight: 700 }}>wait</em>.
+            <em
+              style={{
+                fontStyle: "italic",
+                fontWeight: 700,
+                fontFamily: "'Instrument Serif', serif",
+              }}
+            >
+              wait
+            </em>
+            .
+            <span
+              style={{
+                display: "block",
+                fontSize: "0.95rem",
+                fontWeight: 500,
+                marginTop: 12,
+                fontFamily: "var(--font-body)",
+                color: "rgba(255,255,255,0.85)",
+              }}
+            >
+              Be the first to see what&apos;s coming.
+            </span>
           </motion.h1>
-
-          {/* ── Sub-text ────────────────────────────────────────── */}
-          <motion.p
-            {...fadeUp(0.16)}
-            style={{
-              color: "rgba(255,255,255,0.88)",
-              fontSize: "clamp(0.95rem, 1.8vw, 1.05rem)",
-              lineHeight: 1.6,
-              textAlign: "center",
-              margin: 0,
-              marginBottom: 40,
-              fontFamily: "var(--font-body)",
-              textShadow: "0 1px 6px rgba(0,0,0,0.18)",
-            }}
-          >
-            Stay close to the launch and be among
-            <br />
-            the first to see what&apos;s coming.
-          </motion.p>
 
           {/* ── Email form pill ─────────────────────────────────── */}
           <motion.form
@@ -410,7 +412,7 @@ const Waitlist = () => {
                 padding: "12px 28px",
                 fontWeight: 700,
                 fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                fontFamily: "var(--font-body)",
+                fontFamily: "Manrope",
                 cursor: "pointer",
                 whiteSpace: "nowrap",
                 letterSpacing: "0.01em",

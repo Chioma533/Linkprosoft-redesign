@@ -8,7 +8,7 @@ import { API_PATHS } from "../utils/apiPaths";
 /* ─── Design Tokens ────────────────────────────────────────── */
 const BG_IMAGE = "/temp_figma_mockups/Waitlsit-bg.jpg";
 
-/* Worker avatar stack – three small circular images in the badge */
+/* Worker avatar stack – three x circular images in the badge */
 const WORKER_AVATARS = [
   "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=64&h=64&fit=crop&crop=face",
   "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=64&h=64&fit=crop&crop=face",

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FiMessageSquare, FiBell, FiUser, FiChevronDown, FiLogOut, FiMenu, FiX, FiGrid } from "react-icons/fi";
-import Logo from "../../assets/images/logo2.jpg";
+import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
+
 import { useAuthStore } from "../../store/authStore";
 import PostJobWizard from "../../pages/employer/PostJobWizard";
 
@@ -9,7 +10,7 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [showPostJobModal, setShowPostJobModal] = useState(false);
-  
+
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const { user, logout } = useAuthStore();
@@ -57,11 +58,10 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
                   key={link.id}
                   to={link.path}
                   id={`nav-${link.id}`}
-                  className={`text-sm font-semibold tracking-wide transition-colors whitespace-nowrap pb-1 ${
-                    activePage === link.id
+                  className={`text-sm font-semibold tracking-wide transition-colors whitespace-nowrap pb-1 ${activePage === link.id
                       ? "text-[#016EA6] border-b-2 border-[#016EA6]"
                       : "text-gray-600 hover:text-[#016EA6]"
-                  }`}
+                    }`}
                 >
                   {link.label}
                 </Link>
@@ -169,9 +169,8 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
                 key={link.id}
                 to={link.path}
                 onClick={() => setMobileMenuOpen(false)}
-                className={`text-base font-medium hover:text-[#016EA6] transition-colors ${
-                  activePage === link.id ? "text-[#016EA6]" : "text-gray-700"
-                }`}
+                className={`text-base font-medium hover:text-[#016EA6] transition-colors ${activePage === link.id ? "text-[#016EA6]" : "text-gray-700"
+                  }`}
               >
                 {link.label}
               </Link>

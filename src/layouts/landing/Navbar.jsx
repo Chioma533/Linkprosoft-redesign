@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { FiMenu, FiX } from "react-icons/fi";
-import Logo from "../../assets/images/logo2.jpg";
+import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
+
 import Button from "../../components/common/Button";
 
 const Navbar = () => {

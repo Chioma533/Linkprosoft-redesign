@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaMicrophone, FaArrowUp } from "react-icons/fa";
 
@@ -11,7 +11,17 @@ const HERO_IMAGES = [
   "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=1600&q=80"
 ];
 
-const Hero = ({ searchVal, onSearchChange }) => {
+/**
+ * Landing page Hero with AI search input.
+ * Submit pathway: docs/integrations/AI-SEARCH-NLP-INTEGRATION.md
+ *
+ * @param {object}   props
+ * @param {string}   props.searchVal       - controlled textarea value
+ * @param {function} props.onSearchChange  - setter for the textarea value
+ * @param {function} props.onSearchSubmit  - callback receiving the trimmed query string
+ * @param {boolean}  [props.isSearching]   - disables submit while a request is in-flight
+ */
+const Hero = ({ searchVal, onSearchChange, onSearchSubmit, isSearching = false }) => {
   const [bgIndex, setBgIndex] = useState(0);
 
   useEffect(() => {
@@ -21,6 +31,26 @@ const Hero = ({ searchVal, onSearchChange }) => {
     }, 20000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleSubmit = useCallback(() => {
+    const trimmed = searchVal?.trim();
+    if (!trimmed || isSearching) return;
+    onSearchSubmit?.(trimmed);
+  }, [searchVal, isSearching, onSearchSubmit]);
+
+  /**
+   * Ctrl+Enter submits the search (standard multi-line textarea convention).
+   * Plain Enter inserts a newline as usual.
+   */
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    },
+    [handleSubmit]
+  );
 
   return (
     <section className="relative w-full min-h-[450px] md:h-[85vh] flex items-center justify-center overflow-hidden px-4 md:px-12 py-12 rounded-[2rem] md:rounded-[2rem] max-w-[95%] mx-auto mt-4">
@@ -75,12 +105,13 @@ const Hero = ({ searchVal, onSearchChange }) => {
           <textarea
             value={searchVal}
             onChange={(e) => onSearchChange(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="I am looking for a plumber.."
-            className="w-full bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 text-base md:text-lg focus:ring-0 focus:outline-none resize-none font-normal leading-normal h-20"
+            className="flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 text-base md:text-lg focus:ring-0 focus:outline-none resize-none font-normal leading-normal h-20"
           />
 
           {/* Bottom right action button panel */}
-          <div className="flex justify-end items-center gap-3 w-full mt-auto">
+          <div className="flex justify-end items-center gap-3 shrink-0 mt-auto">
             <button
               type="button"
               className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
@@ -89,8 +120,11 @@ const Hero = ({ searchVal, onSearchChange }) => {
               <FaMicrophone className="text-base md:text-lg" />
             </button>
             <button
-              type="submit"
-              className="p-2.5 bg-[#0070BA] hover:bg-[#0070BA]/90 text-white rounded-full hover:scale-105 transition-all shadow-md shrink-0 flex items-center justify-center w-10 h-10"
+              id="hero-search-submit-btn"
+              type="button"
+              disabled={isSearching || !searchVal?.trim()}
+              onClick={handleSubmit}
+              className="p-2.5 bg-[#0070BA] hover:bg-[#0070BA]/90 text-white rounded-full hover:scale-105 transition-all shadow-md shrink-0 flex items-center justify-center w-10 h-10 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               <FaArrowUp className="text-sm" />
             </button>

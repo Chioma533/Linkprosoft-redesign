@@ -11,7 +11,7 @@ import CaseIcon from "../icons/CaseIcon";
 import Message02Icon from "../icons/Message02Icon";
 import WalletIcon from "../icons/WalletIcon";
 import TieIcon from "../icons/TieIcon";
-import Logo from "../../assets/images/logo2.jpg";
+import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 

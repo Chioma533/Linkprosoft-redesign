@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronDown } from "react-icons/fi";
 import toast from "react-hot-toast";
+import axiosInstance from "../utils/axiosInstance";
+import { API_PATHS } from "../utils/apiPaths";
 
 /* ─── Design Tokens ────────────────────────────────────────── */
 const BG_IMAGE = "/temp_figma_mockups/Waitlsit-bg.jpg";
@@ -173,11 +175,24 @@ const Waitlist = () => {
     }
 
     setSubmitting(true);
-    /* Replace with real API call */
-    await new Promise((r) => setTimeout(r, 1200));
-    toast.success("You're on the list! We'll notify you at launch 🎉");
-    setEmail("");
-    setSubmitting(false);
+    try {
+      const response = await axiosInstance.post(
+        API_PATHS.WAITLIST || "/api/waitlist",
+        { email: email.trim() }
+      );
+      toast.success(
+        response?.data?.message || "You're on the list! We'll notify you at launch 🎉"
+      );
+      setEmail("");
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Something went wrong. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   /* Shared staggered entrance animation factory */

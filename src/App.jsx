@@ -12,6 +12,7 @@ import { Toaster } from 'react-hot-toast';
 import EmployerDashboardPage from './pages/employer/EmployerDashboardPage';
 import AdminDahboardPage from './pages/admin/AdminDahboardPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
+import TestPreloaderPage from './pages/TestPreloaderPage';
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+            <Route path="/test-preloader" element={<TestPreloaderPage />} />
 
             <Route element={<PrivateRoutes allowedRoles={['employer']} />}>
               <Route path="/home" element={<DefaultBuyerScreen />} />

@@ -1,97 +1,134 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
-import Logo from "../../../assets/images/logo2.jpg"; // Change to your logo
+import { motion } from "framer-motion";
+import { useEffect } from "react";
+
+const LOGO_SRC = "/temp_figma_mockups/linkprosoft-logo.png";
+
+/* ─────────────────────────────────────────────
+   Inline styles — keeps the animation
+   self-contained and zero-dependency on CSS files
+───────────────────────────────────────────── */
+const styles = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    zIndex: 9999,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "#ffffff",
+  },
+  inner: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "0px",
+  },
+  logo: {
+    width: "110px",
+    height: "110px",
+    objectFit: "contain",
+  },
+  brand: {
+    marginTop: "10px",
+    fontSize: "22px",
+    fontWeight: "700",
+    letterSpacing: "0.12em",
+    color: "#016EA6",
+    fontFamily: "'Inter', 'Segoe UI', sans-serif",
+    textTransform: "uppercase",
+  },
+  pillsWrapper: {
+    marginTop: "24px",
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "8px",
+  },
+  pillTrack: {
+    position: "relative",
+    width: "24.21px",
+    height: "6.72px",
+    borderRadius: "999px",
+    background: "#E6F1F6",
+    overflow: "hidden",
+  },
+  pillShimmer: {
+    position: "absolute",
+    inset: 0,
+    borderRadius: "999px",
+    background: "#016EA6",
+    animation: "pill-pulse 1.4s ease-in-out infinite",
+  },
+};
+
+/* Keyframes injected once into <head> */
+const KEYFRAMES = `
+@keyframes pill-pulse {
+  0%, 100% { opacity: 0.15; transform: scaleX(0.9); }
+  35%, 65% { opacity: 1; transform: scaleX(1); }
+}
+`;
+
+function injectKeyframes() {
+  if (document.getElementById("preloader-kf")) return;
+  const tag = document.createElement("style");
+  tag.id = "preloader-kf";
+  tag.textContent = KEYFRAMES;
+  document.head.appendChild(tag);
+}
+
+/* Each pill gets a staggered delay for a continuous left-to-right flow */
+const PILL_DELAYS = ["0s", "0.35s", "0.7s"];
 
 const Preloader = ({ onFinish }) => {
-  const [showText, setShowText] = useState(false);
-
   useEffect(() => {
-    const textTimer = setTimeout(() => {
-      setShowText(true);
-    }, 1100);
+    injectKeyframes();
 
-    const finishTimer = setTimeout(() => {
+    const timer = setTimeout(() => {
       onFinish?.();
-    }, 2600);
+    }, 3000);
 
-    return () => {
-      clearTimeout(textTimer);
-      clearTimeout(finishTimer);
-    };
+    return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
     <motion.div
-      className="fixed inset-0 z-9999 flex items-center justify-center overflow-hidden bg-gray-50"
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
+      style={styles.overlay}
+      exit={{ opacity: 0, transition: { duration: 0.5, ease: "easeInOut" } }}
     >
-      {/* Blue Expansion */}
-      <motion.div
-        initial={{
-          clipPath: "inset(50% 50% 50% 50%)",
-          transformOrigin: "center",
-        }}
-        animate={{
-          clipPath: "inset(0% 0% 0% 0%)",
-        }}
-        transition={{
-          delay: 0.45,
-          duration: 0.9,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-        className="absolute inset-0 bg-[#016EA6]"
-      />
-
-      {/* Content */}
-      <div className="relative z-20 flex flex-col items-center">
+      <div style={styles.inner}>
         {/* Logo */}
         <motion.img
-          src={Logo}
+          src={LOGO_SRC}
           alt="Linkprosoft"
-          initial={{
-            opacity: 0,
-            scale: 0.8,
-          }}
-          animate={{
-            opacity: 1,
-            scale: 1,
-          }}
-          transition={{
-            duration: 0.5,
-          }}
-          className="w-24 h-24 object-contain"
+          style={styles.logo}
+          initial={{ opacity: 0, scale: 0.75 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         />
 
-        <AnimatePresence>
-          {showText && (
-            <motion.div className="mt-6 flex text-white text-3xl font-bold tracking-wider">
-              {"LINKPROSOFT".split("").map((letter, index) => (
-                <motion.span
-                  key={index}
-                  initial={{
-                    opacity: 0,
-                    y: 20,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  transition={{
-                    delay: index * 0.05,
-                  }}
-                >
-                  {letter}
-                </motion.span>
-              ))}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Three pill loaders */}
+        <motion.div
+          style={styles.pillsWrapper}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.6, ease: "easeOut" }}
+        >
+          {PILL_DELAYS.map((delay, i) => (
+            <div key={i} style={styles.pillTrack}>
+              <div
+                style={{
+                  ...styles.pillShimmer,
+                  animationDelay: delay,
+                }}
+              />
+            </div>
+          ))}
+        </motion.div>
       </div>
     </motion.div>
   );
 };
 
 export default Preloader;
-
-

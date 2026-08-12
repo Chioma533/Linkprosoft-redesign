@@ -10,7 +10,7 @@ import {
   FiMenu,
   FiX,
 } from "react-icons/fi";
-import Logo from "../../assets/images/logo2.jpg";
+import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 
 /**
@@ -73,11 +73,10 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
                 key={link.id}
                 to={link.path}
                 id={`nav-${link.id}`}
-                className={`text-sm font-semibold tracking-wide transition-colors whitespace-nowrap pb-1 ${
-                  activePage === link.id
+                className={`text-sm font-semibold tracking-wide transition-colors whitespace-nowrap pb-1 ${activePage === link.id
                     ? "text-[#016EA6] border-b-2 border-[#016EA6]"
                     : "text-gray-600 hover:text-[#016EA6]"
-                }`}
+                  }`}
               >
                 {link.label}
               </Link>
@@ -123,9 +122,8 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
                   )}
                 </div>
                 <FiChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${
-                    profileDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 text-gray-400 transition-transform ${profileDropdownOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -186,9 +184,8 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
               key={link.id}
               to={link.path}
               onClick={() => setMobileMenuOpen(false)}
-              className={`text-base font-medium hover:text-[#016EA6] transition-colors ${
-                activePage === link.id ? "text-[#016EA6]" : "text-gray-700"
-              }`}
+              className={`text-base font-medium hover:text-[#016EA6] transition-colors ${activePage === link.id ? "text-[#016EA6]" : "text-gray-700"
+                }`}
             >
               {link.label}
             </Link>

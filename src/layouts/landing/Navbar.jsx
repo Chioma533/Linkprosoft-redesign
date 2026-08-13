@@ -44,13 +44,15 @@ const Navbar = () => {
           >
             Sign up
           </Link>
-          <Button variant="primary" size="sm" rounded="lg" className="!rounded-full px-6 py-2 !bg-[#016EA6] text-white hover:bg-[#061EA6]/90 transition-colors font-medium">
             <Link
                 to="/login"
               >
+          <Button variant="primary" size="sm" rounded="lg" className="!rounded-full px-6 py-2 !bg-[#016EA6] text-white hover:bg-[#061EA6]/90 transition-colors font-medium">
+
                 Sign In
-            </Link>
           </Button>
+
+            </Link>
         </div>
 
         {/* Mobile menu trigger */}

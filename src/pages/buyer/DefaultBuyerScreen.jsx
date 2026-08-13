@@ -150,25 +150,59 @@ const DefaultBuyerScreen = () => {
     safeCurrentPage * ITEMS_PER_PAGE
   );
 
-  const fetchProfessionals = async () => {
+  const fetchProfessionals = async (activeFilters = filters) => {
     setLoading(true);
     setError(null);
     /* Enforce 2.5 s minimum skeleton display time */
     const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
+
+    // Parse filters into query params
+    let minRating;
+    if (activeFilters.rating && activeFilters.rating !== "Any Rating") {
+      const starsMatch = activeFilters.rating.match(/\d+/);
+      if (starsMatch) minRating = Number(starsMatch[0]);
+    }
+
+    let minRate, maxRate;
+    const normBudget = activeFilters.budget?.replace(/–/g, "-") || "";
+    if (normBudget === "Under ₦5,000") {
+      maxRate = 5000;
+    } else if (normBudget === "₦5,000 - ₦20,000") {
+      minRate = 5000;
+      maxRate = 20000;
+    } else if (normBudget === "₦20,000 - ₦50,000") {
+      minRate = 20000;
+      maxRate = 50000;
+    } else if (normBudget === "₦50,000+" || normBudget === "₦5,000+") {
+      minRate = 50000;
+    }
+
+    const searchParams = {
+      profession: activeFilters.searchQuery?.trim() || undefined,
+      minRating,
+      minRate,
+      maxRate,
+      page: 1,
+      limit: 100,
+    };
+
     try {
-      // Fetch all professionals from database without filters initially
-      const response = await searchService.searchProfessionals({ page: 1, limit: 100 });
-      if (response && response.success && response.data) {
-        const items = Array.isArray(response.data.professionals)
-          ? response.data.professionals
-          : Array.isArray(response.data.items)
-          ? response.data.items
-          : Array.isArray(response.data)
-          ? response.data
+      const response = await searchService.searchProfessionalsByProfession(searchParams);
+
+      const isSuccess = response?.status === "success" || response?.success === true || Boolean(response?.data);
+      const dataObj = response?.data || response;
+
+      if (isSuccess && dataObj) {
+        const items = Array.isArray(dataObj.professionals)
+          ? dataObj.professionals
+          : Array.isArray(dataObj.items)
+          ? dataObj.items
+          : Array.isArray(dataObj)
+          ? dataObj
           : [];
         setApiProfessionals(items);
-        setTotal(response.data.meta?.total || response.data.total || items.length);
-        setTotalPagesAPI(response.data.meta?.pages || response.data.totalPages || 1);
+        setTotal(dataObj.meta?.total || dataObj.total || items.length);
+        setTotalPagesAPI(dataObj.meta?.pages || dataObj.totalPages || 1);
       } else {
         throw new Error(response?.message || "Failed to fetch professionals");
       }
@@ -197,8 +231,9 @@ const DefaultBuyerScreen = () => {
   };
 
   useEffect(() => {
-    fetchProfessionals();
-  }, []); // fetch on mount
+    fetchProfessionals(filters);
+  }, [filters]);
+
 
   if (loading || !minTimePassed) {
     return <LoadingScreen />;

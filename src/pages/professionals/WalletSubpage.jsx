@@ -3,6 +3,8 @@ import { Eye, EyeOff, Download, Filter, Plus, ArrowUpRight, DollarSign, Wallet, 
 import TopUpIcon from "../../components/icons/TopUpIcon";
 import StatsCard from "../../components/ui/StatsCard";
 import { useDashboardStore } from "../../store/dashboardStore";
+import { useAuthStore } from "../../store/authStore";
+import { greeting } from "../../utils/greeting";
 
 const WalletSubpage = () => {
   const [showBalance, setShowBalance] = useState(true);
@@ -37,11 +39,14 @@ const WalletSubpage = () => {
     return showSign ? `+${value}` : value;
   };
 
+  const { user } = useAuthStore();
+  const userName = user?.fullName || user?.full_name || user?.name || "Samuel";
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Welcome Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Good Morning Samuel</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{greeting(new Date())} {userName}</h2>
         <p className="text-sm text-gray-400 mt-1">Manage your earnings, withdrawals, and transaction history.</p>
       </div>
 

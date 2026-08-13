@@ -46,11 +46,6 @@ const floatingStyles = {
   },
   card: {
     display: "flex", flexDirection: "column", alignItems: "center",
-    padding: "28px 32px 24px", borderRadius: 24,
-    background: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
-    boxShadow: "0 8px 40px rgba(1,110,166,0.13), 0 2px 12px rgba(0,0,0,0.07)",
-    border: "1px solid rgba(1,110,166,0.10)",
     pointerEvents: "auto",
   },
   logo:        { width: 64, height: 64, objectFit: "contain" },

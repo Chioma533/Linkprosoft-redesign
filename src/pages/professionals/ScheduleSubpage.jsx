@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FiChevronRight } from "react-icons/fi";
 import { useDashboardStore } from "../../store/dashboardStore";
+import { useAuthStore } from "../../store/authStore";
+import { greeting } from "../../utils/greeting";
 import StatsCard from "../../components/ui/StatsCard";
 import CalendarWidget from "../../components/ui/CalendarWidget";
 
@@ -11,11 +13,14 @@ const ScheduleSubpage = () => {
   // Filter schedules by selected date
   const daySchedules = schedules.filter(sch => sch.date === selectedDate);
 
+  const { user } = useAuthStore();
+  const userName = user?.fullName || user?.full_name || user?.name || "Samuel";
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Welcome Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Good Morning Samuel</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{greeting(new Date())} {userName}</h2>
         <p className="text-sm text-gray-400 mt-1">Manage, jobs, appointment, finance and schedules</p>
       </div>
 

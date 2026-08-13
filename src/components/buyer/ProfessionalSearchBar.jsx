@@ -60,8 +60,14 @@ const ProfessionalSearchBar = ({ onApply }) => {
     </div>
   );
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onApply?.({ searchQuery, location, rating, budget });
+    setOpenDropdown(null);
+  };
+
   return (
-    <div ref={barRef} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2 py-2">
+    <form ref={barRef} onSubmit={handleSubmit} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2 py-2">
       {/* Search input — pill shaped */}
       <div className="relative flex-1 min-w-0">
         <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
@@ -70,7 +76,7 @@ const ProfessionalSearchBar = ({ onApply }) => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search Professionals"
+          placeholder="Search by profession (e.g., Carpenter, Plumber, Electrician)..."
           className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm outline-none focus:border-[#016EA6] transition-all duration-200 text-gray-700 placeholder-gray-400"
         />
       </div>
@@ -110,13 +116,13 @@ const ProfessionalSearchBar = ({ onApply }) => {
         {/* Apply button — pill, light grey matching Figma */}
         <button
           id="filter-apply-btn"
-          onClick={() => { onApply?.({ searchQuery, location, rating, budget }); setOpenDropdown(null); }}
+          type="submit"
           className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-sm rounded-full transition-all duration-200 cursor-pointer whitespace-nowrap"
         >
           Apply
         </button>
       </div>
-    </div>
+    </form>
   );
 };
 

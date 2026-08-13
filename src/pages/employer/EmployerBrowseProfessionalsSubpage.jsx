@@ -70,6 +70,7 @@ const EmployerBrowseProfessionalsSubpage = () => {
     const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
     try {
       const params = {
+        profession: searchQuery.trim() || undefined,
         skills: selectedSkills.length > 0 ? selectedSkills.join(",") : undefined,
         availabilityStatus: undefined,
         sortBy: getSortBy(),
@@ -81,28 +82,32 @@ const EmployerBrowseProfessionalsSubpage = () => {
         Object.entries(params).filter(([, v]) => v !== undefined)
       );
 
-      const response = await searchService.searchProfessionals(filteredParams);
-      if (response && response.success && response.data) {
-        const items = Array.isArray(response.data.professionals)
-          ? response.data.professionals
-          : Array.isArray(response.data.items)
-          ? response.data.items
-          : Array.isArray(response.data)
-          ? response.data
-          : [];
-        setProfessionals(items);
-        setTotal(response.data.meta?.total || response.data.total || items.length);
-        setTotalPages(response.data.meta?.pages || response.data.totalPages || 1);
-        setPage(response.data.meta?.page || response.data.page || 1);
-      } else {
-        throw new Error(response?.message || "Failed to fetch professionals");
-      }
+      const response = await searchService.searchProfessionalsByProfession(filteredParams);
+
+      // Support multiple backend response shapes:
+      // - { success: true, data: { professionals: [...], meta: {...} } }
+      // - { professionals: [...] } or { items: [...] }
+      // - an array of professionals
+      const payload = response?.data ?? response;
+
+      const items = Array.isArray(payload?.professionals)
+        ? payload.professionals
+        : Array.isArray(payload?.items)
+        ? payload.items
+        : Array.isArray(payload)
+        ? payload
+        : [];
+
+      setProfessionals(items);
+      setTotal(payload?.meta?.total || payload?.total || items.length);
+      setTotalPages(payload?.meta?.pages || payload?.totalPages || 1);
+      setPage(payload?.meta?.page || payload?.page || page);
     } catch (err) {
       setError(err.message || "Something went wrong");
       toast.error(err.message || "Failed to load professionals");
     } finally {
       setLoading(false);
-      return () => clearTimeout(minTimer);
+      clearTimeout(minTimer);
     }
   };
 
@@ -122,11 +127,14 @@ const EmployerBrowseProfessionalsSubpage = () => {
     }
   };
 
-  // Effect to fetch professionals when filters change
+  // Effect to fetch professionals when filters or page change.
+  // When filters change we reset to page 1; including `page` in the deps
+  // ensures pagination updates trigger fetches as expected.
   useEffect(() => {
-    resetPage();
+    // If current page is not 1 (user clicked pagination), fetch for that page
     fetchProfessionals();
-  }, [selectedLocation, selectedSort, selectedSkills, limit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedLocation, selectedSort, selectedSkills, limit, page]);
 
   // Effect to fetch skill suggestions when searchQuery changes
   useEffect(() => {

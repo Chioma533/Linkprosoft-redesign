@@ -6,6 +6,45 @@ const getSearchUrl = () => {
   return `${backendBaseUrl}${API_PATHS.SEARCH.PROFESSIONALS}`;
 };
 
+/**
+ * Search professionals by profession name and optional filters.
+ * Contract: docs/integrations/SEARCH_PROFESSION_INTEGRATION_GUIDE.md
+ *
+ * @param {Object} params
+ * @param {string} [params.profession] - Profession name (e.g. "Carpenter")
+ * @param {number[]|string} [params.skills]
+ * @param {number} [params.minRating]
+ * @param {number} [params.maxRating]
+ * @param {number} [params.minRate]
+ * @param {number} [params.maxRate]
+ * @param {string} [params.availabilityStatus]
+ * @param {string} [params.sortBy]
+ * @param {number} [params.page]
+ * @param {number} [params.limit]
+ */
+export const searchProfessionalsByProfession = async (params = {}) => {
+  try {
+    const response = await axiosInstance.get(getSearchUrl(), {
+      params: {
+        profession: params.profession?.trim() || undefined,
+        skills: params.skills || undefined,
+        minRating: params.minRating || undefined,
+        maxRating: params.maxRating || undefined,
+        minRate: params.minRate || undefined,
+        maxRate: params.maxRate || undefined,
+        availabilityStatus: params.availabilityStatus || undefined,
+        sortBy: params.sortBy || 'rating_desc',
+        page: params.page || 1,
+        limit: params.limit || 20,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to search professionals by profession:', error);
+    throw error;
+  }
+};
+
 export const searchService = {
   // Search professionals with filters (legacy GET endpoint)
   searchProfessionals: async (params) => {
@@ -13,6 +52,9 @@ export const searchService = {
     const response = await axiosInstance.get(getSearchUrl(), { params });
     return response.data;
   },
+
+  // Search professionals by profession name (GET endpoint)
+  searchProfessionalsByProfession,
 
   /**
    * Natural-language professional search via POST.

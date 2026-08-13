@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import DashboardSidebar from "../components/layout/DashboardSidebar";
 import DashboardNavbar from "../components/layout/DashboardNavbar";
 import { useDashboardStore } from "../store/dashboardStore";
+import { useAuthStore } from "../store/authStore";
 import { Home, Search, Briefcase, FileText, Wallet } from "lucide-react";
 import { debugLog } from "../utils/debugLogger";
 import DashboardLoadingScreen from "../components/common/preloader/DashboardLoadingScreen";
 
 const DashboardLayout = ({ children }) => {
   const { activeTab, setActiveTab, fetchDashboardData, isLoading } = useDashboardStore();
+  const { user } = useAuthStore();
+  const role = user?.role || "professional";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   /* ── Per-tab skeleton display ────────────────────────────────────────── *
@@ -56,12 +59,12 @@ const DashboardLayout = ({ children }) => {
   return (
     <div className="flex bg-[#EBF3FA]/30 h-screen text-gray-800 font-sans relative overflow-hidden">
       {/* Backdrop overlay for mobile when sidebar is expanded */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/45 backdrop-blur-xs z-40 md:hidden transition-opacity duration-300"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <div 
+        className={`fixed inset-0 bg-black/45 backdrop-blur-xs z-40 md:hidden transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
 
       {/* Sidebar Component */}
       <DashboardSidebar 
@@ -76,6 +79,7 @@ const DashboardLayout = ({ children }) => {
         {/* Navbar Component */}
         <DashboardNavbar 
           title={activeTab} 
+          isOpen={isSidebarOpen}
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
         />
 
@@ -86,13 +90,22 @@ const DashboardLayout = ({ children }) => {
 
         {/* Bottom Navigation for Mobile */}
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-center justify-around py-2 px-1 shadow-lg md:hidden">
-          {[
-            { id: "overview", name: "Overview", icon: Home },
-            { id: "browse-jobs", name: "Browse jobs", icon: Search },
-            { id: "my-jobs", name: "My Jobs", icon: Briefcase },
-            { id: "applications", name: "Applications", icon: FileText },
-            { id: "wallet", name: "Wallet", icon: Wallet },
-          ].map((item) => {
+          {(role === "employer"
+            ? [
+                { id: "overview",              name: "Overview",     icon: Home     },
+                { id: "browse-professionals",  name: "Browse jobs",  icon: Search   },
+                { id: "manage-jobs",            name: "My Jobs",      icon: Briefcase},
+                { id: "messages",              name: "Applications", icon: FileText },
+                { id: "wallet",                name: "Wallet",       icon: Wallet   },
+              ]
+            : [
+                { id: "overview",      name: "Overview",      icon: Home     },
+                { id: "browse-jobs",   name: "Browse jobs",   icon: Search   },
+                { id: "my-jobs",       name: "My Jobs",       icon: Briefcase},
+                { id: "applications",  name: "Applications",  icon: FileText },
+                { id: "wallet",        name: "Wallet",         icon: Wallet   },
+              ]
+          ).map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (

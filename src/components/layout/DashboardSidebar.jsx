@@ -48,9 +48,11 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
       {/* Sidebar Container */}
       <div 
         className={`bg-[#f9f9f9] border-r border-[#E6F1F6] flex flex-col h-screen transition-all duration-300 ease-in-out z-50
+          fixed inset-y-0 left-0 w-64
+          md:sticky md:top-0 md:translate-x-0
           ${isOpen 
-            ? "fixed inset-y-0 left-0 w-64 shadow-2xl md:shadow-none md:sticky md:top-0 flex" 
-            : "hidden md:flex sticky top-0 w-16"
+            ? "translate-x-0 shadow-2xl md:shadow-none md:w-64" 
+            : "-translate-x-full md:w-16"
           }
         `}
       >
@@ -66,56 +68,56 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
               Linkprosoft
             </span>
           </div>
-          {isOpen && (
-            <button 
-              onClick={onClose}
-              className="p-1 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-50 md:hidden cursor-pointer shrink-0"
-              title="Collapse menu"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          )}
+          <button 
+            onClick={onClose}
+            className={`p-1 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-50 md:hidden cursor-pointer shrink-0 transition-opacity duration-300 ${
+              isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            title="Collapse menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Mobile Search & Notification Row */}
-        {isOpen && (
-          <div className="md:hidden px-4 py-3 space-y-3 border-b border-gray-50 pb-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <input
-                type="text"
-                placeholder="Search anything"
-                className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all"
-              />
-            </div>
-            
-            {/* Notifications Link */}
-            <button 
-              onClick={() => {
-                onTabChange("overview");
-                setTimeout(() => {
-                  const notificationsEl = document.getElementById("notifications-section");
-                  if (notificationsEl) {
-                    notificationsEl.scrollIntoView({ behavior: "smooth" });
-                  }
-                }, 100);
-                onClose();
-              }}
-              className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all cursor-pointer"
-            >
-              <div className="flex items-center gap-3">
-                <Bell className="w-4 h-4 shrink-0" />
-                <span>Notifications</span>
-              </div>
-              {unreadNotificationsCount > 0 && (
-                <span className="bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
-                  {unreadNotificationsCount}
-                </span>
-              )}
-            </button>
+        <div className={`md:hidden px-4 py-3 space-y-3 border-b border-gray-50 pb-4 transition-all duration-300 ${
+          isOpen ? "opacity-100 max-h-[200px]" : "opacity-0 max-h-0 py-0 border-none overflow-hidden pointer-events-none"
+        }`}>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search anything"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all"
+            />
           </div>
-        )}
+          
+          {/* Notifications Link */}
+          <button 
+            onClick={() => {
+              onTabChange("overview");
+              setTimeout(() => {
+                const notificationsEl = document.getElementById("notifications-section");
+                if (notificationsEl) {
+                  notificationsEl.scrollIntoView({ behavior: "smooth" });
+                }
+              }, 100);
+              onClose();
+            }}
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all cursor-pointer"
+          >
+            <div className="flex items-center gap-3">
+              <Bell className="w-4 h-4 shrink-0" />
+              <span>Notifications</span>
+            </div>
+            {unreadNotificationsCount > 0 && (
+              <span className="bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
+                {unreadNotificationsCount}
+              </span>
+            )}
+          </button>
+        </div>
 
         {/* Navigation Links */}
         <nav className={`flex-1 py-6 space-y-1.5 overflow-y-auto transition-all duration-300
@@ -128,8 +130,9 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`w-full flex items-center justify-center rounded-xl text-sm font-medium transition-all duration-200 group relative cursor-pointer
-                  px-4 py-3.5
+                className={`w-full flex items-center justify-start rounded-xl text-sm font-medium transition-all duration-300 group relative cursor-pointer
+                  py-3.5 gap-3
+                  ${isOpen ? "px-4" : "px-3.5"}
                   ${
                     isActive
                       ? "bg-[#016EA6] text-white shadow-md shadow-[#016EA6]/10"
@@ -137,31 +140,27 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
                   }`}
                 title={!isOpen ? item.name : undefined}
               >
-                <div className={`flex items-center ${isOpen ? "gap-3 justify-start w-full" : "justify-center"}`}>
-                  <Icon
-                    className={`w-5 h-5 shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}
-                  />
-                  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden
-                    ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}
-                  `}>
-                    {item.name}
-                  </span>
-                </div>
-                {isActive && isOpen && <div className="w-1.5 h-5 bg-white rounded-full shrink-0" />}
+                <Icon
+                  className={`w-5 h-5 shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}
+                />
+                <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden
+                  ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}
+                `}>
+                  {item.name}
+                </span>
+                <div className={`h-5 bg-white rounded-full shrink-0 transition-all duration-300 ml-auto ${isActive && isOpen ? "w-1.5 opacity-100" : "w-0 opacity-0 pointer-events-none"}`} />
               </button>
             );
           })}
         </nav>
 
         {/* Bottom CTA Banner */}
-        <div className={`border-t border-gray-50 transition-all duration-300 flex
-          ${isOpen ? "p-4" : "py-4 px-2 justify-center"}
+        <div className={`border-t border-gray-50 transition-all duration-300 flex w-full
+          ${isOpen ? "p-4" : "py-4 px-2"}
         `}>
           <button
             onClick={() => onTabChange("premium")}
-            className={`bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm transition-all duration-300 hover:shadow-md active:scale-[0.98] cursor-pointer
-              ${isOpen ? "w-full py-3 px-4" : "p-3"}
-            `}
+            className="bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-semibold uppercase tracking-wider flex items-center justify-start gap-2 shadow-sm transition-all duration-300 hover:shadow-md active:scale-[0.98] cursor-pointer w-full px-4 py-3"
             title={!isOpen ? "Linkprosoft Premium" : undefined}
           >
             <CheckSquare className="w-4 h-4 shrink-0" />

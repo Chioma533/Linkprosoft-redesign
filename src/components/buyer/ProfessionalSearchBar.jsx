@@ -30,6 +30,7 @@ const ProfessionalSearchBar = ({ onApply }) => {
   const FilterDropdown = ({ id, icon: Icon, label, value, options, name, onSelect }) => (
     <div className="relative shrink-0">
       <button
+        type="button"
         id={id}
         onClick={() => toggle(name)}
         className="flex items-center gap-1.5 px-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm text-gray-600 hover:border-gray-300 transition-all duration-150 whitespace-nowrap cursor-pointer"
@@ -44,6 +45,7 @@ const ProfessionalSearchBar = ({ onApply }) => {
         <div className="absolute top-full left-0 mt-1.5 min-w-[160px] bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-40">
           {options.map((opt) => (
             <button
+              type="button"
               key={opt}
               onClick={() => { onSelect(opt === options[0] ? "" : opt); setOpenDropdown(null); }}
               className={`w-full px-4 py-2 text-sm text-left transition-colors ${
@@ -61,9 +63,16 @@ const ProfessionalSearchBar = ({ onApply }) => {
   );
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     onApply?.({ searchQuery, location, rating, budget });
     setOpenDropdown(null);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSubmit(e);
+    }
   };
 
   return (
@@ -76,6 +85,7 @@ const ProfessionalSearchBar = ({ onApply }) => {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           placeholder="Search by profession (e.g., Carpenter, Plumber, Electrician)..."
           className="w-full pl-11 pr-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm outline-none focus:border-[#016EA6] transition-all duration-200 text-gray-700 placeholder-gray-400"
         />

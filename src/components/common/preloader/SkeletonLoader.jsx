@@ -1,17 +1,15 @@
 /**
  * SkeletonLoader.jsx
  *
- * Pixel-accurate ghost skeleton for DefaultBuyerScreen / DefaultProfessionalScreen.
- * Every dimension, padding, and gap is taken directly from the real page JSX and
- * component source (BuyerNavbar, ProfessionalCard, JobCard, SearchBars).
+ * Pixel-accurate, responsive ghost skeleton for DefaultBuyerScreen / DefaultProfessionalScreen.
+ * Every dimension, padding, gap, and responsive layout shift matches the real page JSX and
+ * component source (BuyerNavbar, ProfessionalNavbar, ProfessionalCard, JobCard, SearchBars, BottomNav).
  *
- * Layout layers (identical to the real pages):
- *  1. Navbar       – bg-white, border-b, max-w-7xl, px-4→px-8
- *  2. Hero         – bg-[#EEF5F9], py-10→py-14, heading + subtitle
- *  3. Search row   – py-6, flex-1 pill input + 3 filter chips + Apply chip
- *  4. Results card – bg-white rounded-2xl p-6→p-8, section title, 3×3 card grid
- *     Cards        – bg-[#f9f9f9] rounded-2xl, p-5, w-12 avatar, name/role bars,
- *                    stars row, 3-line bio, footer price + CTA button
+ * Responsive behavior:
+ *  - Desktop (>= 768px): 100% pixel-identical to original desktop skeleton (3-col card grid,
+ *    desktop navbar with links, desktop hero section, desktop search filters).
+ *  - Mobile  (< 768px): Mobile navbar header (hamburger + title + avatar), compact hero section,
+ *    single-row horizontal scrollable search bar, 1-col card grid, and fixed bottom navigation bar.
  */
 
 /* ──────────────────────────── Shimmer keyframe ─────────────────────────── */
@@ -39,60 +37,58 @@ const shBgSize = "1600px 100%";
 const shAnim   = "sk-shimmer 1.8s ease-in-out infinite";
 
 /* ──────────────────────────── Primitives ───────────────────────────────── */
-const Bar = ({ w = "100%", h = 12, r = 8, mt = 0, mb = 0, delay = "0s", style: extra = {} }) => (
-  <div style={{
-    width: w, height: h, borderRadius: r,
-    marginTop: mt, marginBottom: mb,
-    background: shBg, backgroundSize: shBgSize,
-    animation: shAnim, animationDelay: delay,
-    flexShrink: 0, ...extra,
-  }} />
+const Bar = ({ w = "100%", h = 12, r = 8, mt = 0, mb = 0, delay = "0s", className = "", style: extra = {} }) => (
+  <div
+    className={className}
+    style={{
+      width: w, height: h, borderRadius: r,
+      marginTop: mt, marginBottom: mb,
+      background: shBg, backgroundSize: shBgSize,
+      animation: shAnim, animationDelay: delay,
+      flexShrink: 0, ...extra,
+    }}
+  />
 );
 
-const Circle = ({ size = 40, delay = "0s" }) => (
-  <div style={{
-    width: size, height: size, borderRadius: "50%",
-    background: shBg, backgroundSize: shBgSize,
-    animation: shAnim, animationDelay: delay,
-    flexShrink: 0,
-  }} />
+const Circle = ({ size = 40, delay = "0s", className = "", style: extra = {} }) => (
+  <div
+    className={className}
+    style={{
+      width: size, height: size, borderRadius: "50%",
+      background: shBg, backgroundSize: shBgSize,
+      animation: shAnim, animationDelay: delay,
+      flexShrink: 0, ...extra,
+    }}
+  />
 );
 
-const Pill = ({ w, h = 38, delay = "0s" }) => (
-  <Bar w={w} h={h} r={999} delay={delay} />
+const Pill = ({ w, h = 38, delay = "0s", className = "", style: extra = {} }) => (
+  <Bar w={w} h={h} r={999} delay={delay} className={className} style={extra} />
 );
 
 /* ══════════════════════════════════════════════════════════════════════════ *
  *  1. NAVBAR SKELETON                                                        *
- *  Mirrors: BuyerNavbar / ProfessionalNavbar                                 *
- *  - bg-white, border-b border-gray-100                                      *
- *  - inner: max-w-7xl mx-auto px-4 (lg:px-8)                                *
- *  - left: logo img ~36px + 4 nav link bars                                  *
- *  - right: message icon, bell icon, avatar circle w-9 h-9                   *
+ *  Desktop: Logo + 4 nav links (left), Message + Bell + Avatar (right)       *
+ *  Mobile:  Hamburger + Title (left), Message + Avatar (right)               *
  * ══════════════════════════════════════════════════════════════════════════ */
-const NavSkeleton = () => (
-  <div style={{
-    background: "#fff",
-    borderBottom: "1px solid #F0F4F6",
-    width: "100%",
-  }}>
-    <div style={{
-      maxWidth: 1280,
-      margin: "0 auto",
-      padding: "0 32px",
-      height: 64,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 32,
-      boxSizing: "border-box",
-    }}>
-      {/* Left: logo + nav links */}
-      <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
-        {/* Logo image is ~36×36 */}
+const NavSkeleton = ({ variant = "buyer" }) => (
+  <div style={{ background: "#fff", borderBottom: "1px solid #F0F4F6", width: "100%" }}>
+    <div
+      style={{
+        maxWidth: 1280,
+        margin: "0 auto",
+        height: 64,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        boxSizing: "border-box",
+      }}
+      className="px-4 md:px-8"
+    >
+      {/* Desktop View: Logo + Nav Links (left), Actions (right) */}
+      <div className="hidden md:flex items-center gap-8">
         <Circle size={36} delay="0s" />
-        {/* 4 nav link bars – approx widths from the real labels */}
-        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+        <div className="flex items-center gap-6">
           <Bar w={150} h={10} r={6} delay="0.05s" />
           <Bar w={100} h={10} r={6} delay="0.10s" />
           <Bar w={88}  h={10} r={6} delay="0.15s" />
@@ -100,12 +96,22 @@ const NavSkeleton = () => (
         </div>
       </div>
 
-      {/* Right: message + bell + avatar */}
-      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+      <div className="hidden md:flex items-center gap-4">
         <Circle size={22} delay="0.10s" />
         <Circle size={22} delay="0.15s" />
-        {/* avatar is w-9 h-9 = 36px */}
         <Circle size={36} delay="0.20s" />
+      </div>
+
+      {/* Mobile View: Hamburger + Page Title (left), Messages + Avatar (right) */}
+      <div className="flex md:hidden items-center justify-between w-full h-full">
+        <div className="flex items-center gap-3">
+          <Circle size={24} delay="0s" />
+          <Bar w={variant === "buyer" ? 140 : 100} h={16} r={6} delay="0.05s" />
+        </div>
+        <div className="flex items-center gap-3">
+          <Circle size={20} delay="0.10s" />
+          <Circle size={32} delay="0.15s" />
+        </div>
       </div>
     </div>
   </div>
@@ -113,95 +119,90 @@ const NavSkeleton = () => (
 
 /* ══════════════════════════════════════════════════════════════════════════ *
  *  2. HERO SKELETON                                                           *
- *  Mirrors: bg-[#EEF5F9] section                                             *
- *  - max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14                  *
- *  - h1: text-3xl sm:text-4xl font-bold  →  28px bar, ~55% width             *
- *  - p:  text-sm mt-3                   →  14px bar, ~38% width              *
- *  - Verification banner bar (mt-6)     →  rounded-xl, full bar              *
+ *  Desktop: py-10 sm:py-14, large H1 & subtext, verification card + banner  *
+ *  Mobile:  py-3, compact H1, subtext, mini mobile verification & illustration*
  * ══════════════════════════════════════════════════════════════════════════ */
-const HeroSkeleton = () => (
-  <div style={{
-    background: "#EEF5F9",
-    width: "100%",
-  }}>
-    <div style={{
-      maxWidth: 1280,
-      margin: "0 auto",
-      padding: "40px 32px 36px",
-      boxSizing: "border-box",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 32,
-    }}>
-      {/* Left: heading + subtitle + banner */}
-      <div style={{ flex: 1, maxWidth: 576 }}>
-        {/* h1 ≈ text-4xl = ~36px tall, word "Find The Right Professional" */}
-        <Bar w="72%" h={32} r={10} delay="0.05s" />
-        {/* p ≈ text-sm = ~14px, mt-3 = 12px */}
-        <Bar w="52%" h={14} r={7} mt={14} delay="0.10s" />
-        {/* Verification banner — mt-6, rounded-xl, px-5 py-4 ≈ height ~56px */}
-        <Bar w="100%" h={56} r={12} mt={24} delay="0.15s"
-          style={{ maxWidth: 448 }} />
-      </div>
+const HeroSkeleton = ({ variant = "buyer" }) => (
+  <div style={{ background: "#EEF5F9", width: "100%" }}>
+    <div
+      style={{ maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" }}
+      className="px-4 sm:px-6 lg:px-8 py-3 sm:py-14"
+    >
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+        {/* Left: Heading + Subtitle + Verification Banner */}
+        <div className="flex-1 max-w-full sm:max-w-xl">
+          <Bar
+            w={variant === "buyer" ? "72%" : "68%"}
+            h={18}
+            r={6}
+            delay="0.05s"
+            style={{ maxWidth: 440 }}
+          />
+          <Bar
+            w="52%"
+            h={10}
+            r={5}
+            mt={4}
+            delay="0.10s"
+            style={{ maxWidth: 320 }}
+          />
 
-      {/* Right: illustration placeholder — hidden on mobile just like the real page */}
-      <div style={{
-        flex: 1, maxWidth: 288, display: "flex",
-        alignItems: "flex-end", justifyContent: "center",
-      }}>
-        <Bar w={230} h={180} r={16} delay="0.20s" style={{ opacity: 0.55 }} />
+          {/* Mobile Verification Banner + Illustration */}
+          <div className="mt-3 flex items-end justify-between gap-2 sm:hidden">
+            <div className="w-[248px] shrink-0 rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-2">
+              <div className="flex items-center gap-1.5">
+                <Circle size={10} delay="0.12s" />
+                <Bar w={96} h={7} r={4} delay="0.14s" />
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-1.5">
+                <Bar w={110} h={5} r={3} delay="0.16s" />
+                <Bar w={54} h={12} r={999} delay="0.18s" />
+              </div>
+            </div>
+            <div className="w-[35%] opacity-60">
+              <Bar w="100%" h={48} r={8} delay="0.20s" />
+            </div>
+          </div>
+
+          {/* Desktop Verification Banner */}
+          <div className="hidden sm:block">
+            <Bar w="100%" h={56} r={12} mt={24} delay="0.15s" style={{ maxWidth: 448 }} />
+          </div>
+        </div>
+
+        {/* Desktop Right Illustration Placeholder */}
+        <div className="hidden sm:flex flex-1 max-w-xs items-end justify-center">
+          <Bar w={230} h={180} r={16} delay="0.20s" style={{ opacity: 0.55 }} />
+        </div>
       </div>
     </div>
-    {/* Subtle bottom gradient line — real page has `h-px` gradient */}
     <div style={{ height: 1, background: "rgba(1,110,166,0.10)" }} />
   </div>
 );
 
 /* ══════════════════════════════════════════════════════════════════════════ *
  *  3. SEARCH + FILTER BAR SKELETON                                            *
- *  Mirrors: ProfessionalSearchBar / JobSearchBar                             *
- *  - Section: max-w-7xl mx-auto px-4→px-8 py-6                              *
- *  - flex-row items-center gap-2, py-2                                       *
- *  - flex-1 pill input (py-2.5 ≈ h-40px), 3 filter chips (px-4 py-2.5),     *
- *    Apply chip (px-5 py-2.5)                                                *
+ *  Desktop: py-6, multi-chip flex wrap                                       *
+ *  Mobile:  py-2, single-row horizontal scrollable flex container            *
  * ══════════════════════════════════════════════════════════════════════════ */
 const SearchSkeleton = () => (
-  <div style={{
-    maxWidth: 1280,
-    margin: "0 auto",
-    padding: "24px 32px",
-    boxSizing: "border-box",
-  }}>
-    {/* py-2 wrapper */}
-    <div style={{ padding: "8px 0", display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-      {/* flex-1 search pill — real input is py-2.5 pl-11 pr-4 = ~40px tall */}
-      <Pill w={320} h={40} delay="0.05s" />
-      {/* 3 filter chips — px-4 py-2.5 ≈ h-40, widths match "Location", "Rating", "Budget" */}
-      <Pill w={118} h={40} delay="0.10s" />
-      <Pill w={104} h={40} delay="0.15s" />
-      <Pill w={96}  h={40} delay="0.20s" />
-      {/* Apply chip — px-5 py-2.5 */}
-      <Pill w={78}  h={40} delay="0.25s" />
+  <div
+    style={{ maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" }}
+    className="px-4 sm:px-6 lg:px-8 py-2 sm:py-6"
+  >
+    {/* Single horizontal scrollable row on mobile, wrap on desktop */}
+    <div className="flex items-center gap-2 overflow-x-auto flex-nowrap w-full py-1 sm:py-2 scrollbar-none">
+      <Pill w={200} h={36} delay="0.05s" className="min-w-[140px] sm:w-[320px] sm:h-[40px] shrink-0 sm:shrink" />
+      <Pill w={100} h={36} delay="0.10s" className="sm:w-[118px] sm:h-[40px] shrink-0" />
+      <Pill w={90}  h={36} delay="0.15s" className="sm:w-[104px] sm:h-[40px] shrink-0" />
+      <Pill w={85}  h={36} delay="0.20s" className="sm:w-[96px]  sm:h-[40px] shrink-0" />
+      <Pill w={72}  h={36} delay="0.25s" className="hidden sm:block sm:w-[78px] sm:h-[40px] shrink-0" />
     </div>
   </div>
 );
 
 /* ══════════════════════════════════════════════════════════════════════════ *
  *  4a. PROFESSIONAL CARD SKELETON                                             *
- *  Mirrors: ProfessionalCard                                                  *
- *  - article: bg-[#f9f9f9] rounded-2xl border border-transparent             *
- *  - body: p-5 flex flex-col gap-3                                           *
- *    • header: flex items-start justify-between gap-3                        *
- *      – avatar: w-12 h-12 rounded-full (48px)                               *
- *      – name:  text-sm font-semibold (≈13px bar)                            *
- *      – role:  text-xs mt-0.5       (≈11px bar, 60% width)                  *
- *      – bookmark btn: p-2 rounded-xl border ≈ 32px square                   *
- *    • stars row: flex items-center gap-1.5 (5 x 12px stars + text bar)      *
- *    • bio: text-xs line-clamp-3 (3 bars, shrinking)                         *
- *  - footer: px-5 pb-4 pt-3 border-t flex justify-between                   *
- *    • price: text-sm font-bold  → bar 80px                                  *
- *    • contact: px-4 py-2 rounded-full → 80px pill                           *
  * ══════════════════════════════════════════════════════════════════════════ */
 const ProfessionalCardSkeleton = ({ delay = "0s" }) => (
   <article style={{
@@ -212,21 +213,16 @@ const ProfessionalCardSkeleton = ({ delay = "0s" }) => (
     flexDirection: "column",
     overflow: "hidden",
   }}>
-    {/* Card body — p-5, gap-3 */}
-    <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
+    <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
       {/* Header row: avatar + name/role + bookmark */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
-          {/* w-12 h-12 = 48px avatar */}
-          <Circle size={48} delay={delay} />
+          <Circle size={44} delay={delay} />
           <div style={{ flex: 1, minWidth: 0 }}>
-            {/* text-sm name bar */}
             <Bar w="65%" h={13} r={6} delay={delay} />
-            {/* text-xs role bar, mt-0.5 ≈ 2px */}
-            <Bar w="45%" h={10} r={5} mt={6} delay={delay} />
+            <Bar w="45%" h={10} r={5} mt={5} delay={delay} />
           </div>
         </div>
-        {/* bookmark btn ≈ p-2 + w-4 h-4 icon = ~32px */}
         <div style={{
           width: 32, height: 32, borderRadius: 10,
           border: "1px solid #E8ECF0",
@@ -234,9 +230,8 @@ const ProfessionalCardSkeleton = ({ delay = "0s" }) => (
         }} />
       </div>
 
-      {/* Stars row — flex items-center gap-1.5 */}
+      {/* Stars row */}
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        {/* 5 star icons each w-3 h-3 = 12px */}
         {[0, 0.05, 0.10, 0.15, 0.20].map((d, i) => (
           <div key={i} style={{
             width: 12, height: 12, borderRadius: 2,
@@ -244,37 +239,31 @@ const ProfessionalCardSkeleton = ({ delay = "0s" }) => (
             animation: shAnim, animationDelay: `calc(${delay} + ${d}s)`,
           }} />
         ))}
-        {/* "(32 review)" text bar */}
-        <Bar w={60} h={10} r={5} delay={delay} style={{ marginLeft: 2 }} />
+        <Bar w={55} h={9} r={5} delay={delay} style={{ marginLeft: 2 }} />
       </div>
 
-      {/* Bio — text-xs line-clamp-3: 3 lines */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+      {/* Bio lines */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1 }}>
         <Bar w="100%" h={10} r={5} delay={delay} />
         <Bar w="92%"  h={10} r={5} delay={delay} />
-        <Bar w="78%"  h={10} r={5} delay={delay} />
+        <Bar w="75%"  h={10} r={5} delay={delay} />
       </div>
     </div>
 
-    {/* Footer — px-5 pb-4 pt-3 border-t */}
+    {/* Footer */}
     <div style={{
-      padding: "12px 20px 16px",
+      padding: "12px 18px 14px",
       borderTop: "1px solid #EAEEF1",
       display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>
-      {/* Price: text-sm font-bold */}
-      <Bar w={80} h={13} r={6} delay={delay} />
-      {/* Contact button: px-4 py-2 rounded-full ≈ h-32px */}
-      <Pill w={76} h={32} delay={delay} />
+      <Bar w={76} h={13} r={6} delay={delay} />
+      <Pill w={72} h={30} delay={delay} />
     </div>
   </article>
 );
 
 /* ══════════════════════════════════════════════════════════════════════════ *
  *  4b. JOB CARD SKELETON                                                      *
- *  Mirrors: JobCard (DefaultProfessionalScreen)                               *
- *  Identical structure to ProfessionalCard but avatar is w-11 h-11 = 44px    *
- *  and role bar is replaced by "Posted X ago" timestamp bar                   *
  * ══════════════════════════════════════════════════════════════════════════ */
 const JobCardSkeleton = ({ delay = "0s" }) => (
   <article style={{
@@ -285,15 +274,13 @@ const JobCardSkeleton = ({ delay = "0s" }) => (
     flexDirection: "column",
     overflow: "hidden",
   }}>
-    <div style={{ padding: 20, display: "flex", flexDirection: "column", gap: 12, flex: 1 }}>
-      {/* Header */}
+    <div style={{ padding: 18, display: "flex", flexDirection: "column", gap: 10, flex: 1 }}>
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
-          {/* w-11 h-11 = 44px employer avatar */}
-          <Circle size={44} delay={delay} />
+          <Circle size={40} delay={delay} />
           <div style={{ flex: 1, minWidth: 0 }}>
             <Bar w="60%" h={13} r={6} delay={delay} />
-            <Bar w="40%" h={10} r={5} mt={6} delay={delay} />
+            <Bar w="40%" h={10} r={5} mt={5} delay={delay} />
           </div>
         </div>
         <div style={{
@@ -303,67 +290,52 @@ const JobCardSkeleton = ({ delay = "0s" }) => (
         }} />
       </div>
 
-      {/* Description — text-xs line-clamp-3 */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 5, flex: 1 }}>
         <Bar w="100%" h={10} r={5} delay={delay} />
-        <Bar w="90%"  h={10} r={5} delay={delay} />
-        <Bar w="75%"  h={10} r={5} delay={delay} />
+        <Bar w="88%"  h={10} r={5} delay={delay} />
+        <Bar w="72%"  h={10} r={5} delay={delay} />
       </div>
     </div>
 
-    {/* Footer */}
     <div style={{
-      padding: "12px 20px 16px",
+      padding: "12px 18px 14px",
       borderTop: "1px solid #EAEEF1",
       display: "flex", alignItems: "center", justifyContent: "space-between",
     }}>
-      <Bar w={80} h={13} r={6} delay={delay} />
-      <Pill w={68} h={32} delay={delay} />
+      <Bar w={76} h={13} r={6} delay={delay} />
+      <Pill w={64} h={30} delay={delay} />
     </div>
   </article>
 );
 
 /* ══════════════════════════════════════════════════════════════════════════ *
  *  4c. RESULTS SECTION SKELETON                                               *
- *  Mirrors: bg-white rounded-2xl border border-gray-100 p-6 sm:p-8           *
- *  - Section header: mb-6 → h2 text-lg + p text-sm mt-1                     *
- *  - Grid: grid-cols-3 gap-5                                                  *
+ *  Desktop: p-6 sm:p-8, grid-cols-3, 9 cards                                 *
+ *  Mobile:  p-4, grid-cols-1, 4 cards                                        *
  * ══════════════════════════════════════════════════════════════════════════ */
 const GridSkeleton = ({ cardType = "professional" }) => {
   const CardComp = cardType === "job" ? JobCardSkeleton : ProfessionalCardSkeleton;
-  // Stagger each card's shimmer animation slightly for a wave effect
   const delays = ["0s","0.07s","0.14s","0.07s","0.14s","0.21s","0.14s","0.21s","0.28s"];
 
   return (
-    <div style={{
-      maxWidth: 1280,
-      margin: "0 auto",
-      padding: "0 32px 48px",
-      boxSizing: "border-box",
-    }}>
-      {/* bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 */}
-      <div style={{
-        background: "#ffffff",
-        borderRadius: 20,
-        border: "1px solid #F0F4F6",
-        padding: "32px",
-      }}>
-        {/* Section header — mb-6 */}
-        <div style={{ marginBottom: 24 }}>
-          {/* h2 text-lg font-semibold */}
-          <Bar w="30%" h={18} r={8} delay="0.05s" />
-          {/* p text-sm mt-1 */}
-          <Bar w="18%" h={12} r={6} mt={8} delay="0.10s" />
+    <div
+      style={{ maxWidth: 1280, margin: "0 auto", boxSizing: "border-box" }}
+      className="px-4 sm:px-6 lg:px-8 pb-12"
+    >
+      <div
+        style={{ background: "#ffffff", borderRadius: 20, border: "1px solid #F0F4F6" }}
+        className="p-4 sm:p-8"
+      >
+        <div className="mb-4 sm:mb-6">
+          <Bar w="45%" h={16} r={7} delay="0.05s" className="sm:w-[30%] sm:h-[18px]" />
+          <Bar w="25%" h={10} r={5} mt={6} delay="0.10s" className="sm:w-[18%] sm:h-[12px]" />
         </div>
 
-        {/* grid grid-cols-3 gap-5 */}
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 20,
-        }}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
           {delays.map((d, i) => (
-            <CardComp key={i} delay={d} />
+            <div key={i} className={i >= 4 ? "hidden sm:block" : "block"}>
+              <CardComp delay={d} />
+            </div>
           ))}
         </div>
       </div>
@@ -372,25 +344,40 @@ const GridSkeleton = ({ cardType = "professional" }) => {
 };
 
 /* ══════════════════════════════════════════════════════════════════════════ *
+ *  5. MOBILE BOTTOM NAVIGATION SKELETON                                       *
+ *  Fixed bottom navigation bar visible only on mobile screens (< 768px)       *
+ * ══════════════════════════════════════════════════════════════════════════ */
+const BottomNavSkeleton = () => (
+  <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 h-16 flex items-center justify-around px-2 md:hidden">
+    {[0, 1, 2, 3, 4].map((i) => (
+      <div key={i} className="flex flex-col items-center justify-center gap-1 flex-1">
+        <Circle size={20} delay={`${i * 0.04}s`} />
+        <Bar w={32} h={8} r={4} delay={`${i * 0.04 + 0.02}s`} />
+      </div>
+    ))}
+  </div>
+);
+
+/* ══════════════════════════════════════════════════════════════════════════ *
  *  ROOT EXPORT                                                                *
- *  Props:                                                                     *
- *    variant  "buyer" (default) | "professional"                              *
- *             "buyer"        → ProfessionalCardSkeleton (DefaultBuyerScreen)  *
- *             "professional" → JobCardSkeleton (DefaultProfessionalScreen)    *
  * ══════════════════════════════════════════════════════════════════════════ */
 const SkeletonLoader = ({ variant = "buyer" }) => {
   injectSK();
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "#F6F8FA",
-      overflowY: "hidden",
-      fontFamily: "'Inter', 'Segoe UI', sans-serif",
-    }}>
-      <NavSkeleton />
-      <HeroSkeleton />
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#F6F8FA",
+        overflowY: "hidden",
+        fontFamily: "'Inter', 'Segoe UI', sans-serif",
+      }}
+      className="pb-20 md:pb-0"
+    >
+      <NavSkeleton variant={variant} />
+      <HeroSkeleton variant={variant} />
       <SearchSkeleton />
       <GridSkeleton cardType={variant === "professional" ? "job" : "professional"} />
+      <BottomNavSkeleton />
     </div>
   );
 };

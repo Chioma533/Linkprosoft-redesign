@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 import ProfessionalNavbar from "../../layouts/professional/ProfessionalNavbar";
 import JobSearchBar from "../../components/professional/JobSearchBar";
 import JobCard from "../../components/professional/JobCard";
 import ProfessionalBottomNav from "../../components/professional/ProfessionalBottomNav";
+import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 
 /* ─────────────────────────────────────────────────────────────
    Mock data — 108 jobs, 9 per page (3×3 grid), 5 pages total display
@@ -106,6 +107,16 @@ const DefaultProfessionalScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [verificationDismissed, setVerificationDismissed] = useState(false);
   const [filters, setFilters] = useState({});
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [minTimePassed, setMinTimePassed] = useState(false);
+
+  useEffect(() => {
+    const minTimer = setTimeout(() => {
+      setMinTimePassed(true);
+      setIsInitialLoading(false);
+    }, 2500);
+    return () => clearTimeout(minTimer);
+  }, []);
 
   /* ── Filtering ─────────────────────────────────────────────── */
   const filteredJobs = useMemo(() => {
@@ -171,6 +182,10 @@ const DefaultProfessionalScreen = () => {
   const handleDismissVerification = () => {
     setVerificationDismissed(true);
   };
+
+  if (isInitialLoading || !minTimePassed) {
+    return <LoadingScreen variant="professional" />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-24 md:pb-12">

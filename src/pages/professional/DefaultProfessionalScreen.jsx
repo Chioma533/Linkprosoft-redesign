@@ -186,44 +186,35 @@ const DefaultProfessionalScreen = () => {
               <h1 className="text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
                 Find Your Next Opportunity
               </h1>
-              <p className="mt-0 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">
+              <p className="mt-0.5 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">
                 Looking for jobs? Browse our latest job openings to view
               </p>
 
               {/* Mobile verification banner + illustration */}
               {!verificationDismissed && (
-                <div className="mt-1 flex items-end justify-between gap-2 sm:hidden">
+                <div className="mt-0 flex items-end justify-between gap-2 sm:hidden z-10">
                   <div
                     id="verification-banner"
-                    className="w-[248px] rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
+                    className="w-[248px] shrink-0. rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
                   >
                     <div className="flex items-center justify-between gap-1.5">
                       <div className="flex min-w-0 items-center gap-1.5">
                         <FiAlertCircle className="h-3 w-3 shrink-0 translate-y-[0.5px] text-orange-500" />
-                        <p className="text-[0.66rem] font-semibold leading-[1.1] tracking-[-0.01em] text-[#59310e]">
+                        <p className="text-[7.14px] font-semibold leading-[1.1] tracking-[-0.01em] text-[#59310e]">
                           Verification Required
                         </p>
                       </div>
-
-                     {/* <button
-                        id="dismiss-verification-btn"
-                        onClick={handleDismissVerification}
-                        className="shrink-0 rounded-full p-0.5 text-gray-400 transition-colors hover:text-gray-700"
-                        aria-label="Dismiss verification banner"
-                      >
-                        <FiX className="h-2.5 w-2.5" />
-                      </button>*/}
                     </div>
 
-                    <div className="mt-1 ml-1.5 flex items-center justify-between gap-1.5">
-                      <p className="flex-1 min-w-0 ml-[12px] self-center text-[5.8px] leading-[1.1] tracking-[-0.01em] text-[#ff8d28]">
+                    <div className="mt-0 ml-1.5 flex items-center justify-between gap-1.5">
+                      <p className="flex-1 min-w-0 ml-[12px] self-center text-[5.5px] leading-[1.1] tracking-[-0.01em] text-[#ff8d28]">
                         Complete your verification to apply for jobs and receive
                         payments securely.
                       </p>
 
                       <button
                         id="complete-verification-btn"
-                        className="inline-flex -translate-y-1 h-[15px] min-w-[64px] shrink-0 items-center justify-center rounded-full bg-orange-500 px-1 text-[0.26rem] font-bold leading-none text-white transition-all duration-200 hover:bg-orange-600"
+                        className="inline-flex -translate-y-1 h-[15px] min-w-[64px] shrink-0 items-center justify-center rounded-full bg-orange-500 px-1 text-[4.71px] font-bold leading-none text-white transition-all duration-200 hover:bg-orange-600"
                       >
                         Complete Verification
                       </button>
@@ -231,13 +222,13 @@ const DefaultProfessionalScreen = () => {
                   </div>
 
                   <div
-                    className="w-[42%] shrink-0"
+                    className="w-[43%] z-0"
                     style={{ mixBlendMode: "multiply" }}
                   >
                     <img
                       src="/tools_bucket_illustration.png"
                       alt="Construction Tools"
-                      className="w-full object-contain translate-y-[28px] translate-x-[30px]"
+                      className="w-full object-contain translate-y-[8px] translate-x-[25px]"
                     />
                   </div>
                 </div>

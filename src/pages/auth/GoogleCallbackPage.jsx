@@ -5,6 +5,8 @@ import { useAuthStore } from "../../store/authStore";
 import { getDashboardRoute } from "../../utils/getDashboardRoute";
 import { API_BASE_URL } from "../../utils/apiPaths";
 import debugLog from "../../utils/debugLogger.js";
+import Preloader from "../../components/common/preloader/PreLoader";
+
 const GoogleCallbackPage = () => {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
@@ -42,14 +44,7 @@ const GoogleCallbackPage = () => {
     verifyGoogleSignIn();
   }, [navigate, setAuth]);
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#EBF3FA]/40 px-4">
-      <div className="text-center">
-        <p className="text-lg font-medium text-slate-700">Finishing sign-in...</p>
-        <p className="mt-2 text-sm text-slate-500">Please wait while we redirect you to your dashboard.</p>
-      </div>
-    </div>
-  );
+  return <Preloader />;
 };
 
 export default GoogleCallbackPage;

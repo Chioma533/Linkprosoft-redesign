@@ -104,7 +104,7 @@ const JobSearchBar = ({ onApply }) => {
   return (
     <div
       ref={barRef}
-      className="flex items-center gap-2 overflow-x-auto flex-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden w-full py-1 sm:py-2"
+      className="flex items-center gap-2 overflow-x-auto flex-nowrap w-full py-1 sm:py-2 hide-scrollbar"
     >
       {/* Search input — pill shaped in single row */}
       <div className="relative flex-1 min-w-[140px] sm:min-w-[200px] shrink-0 sm:shrink">

@@ -51,7 +51,7 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
   const userName = user?.fullName || user?.full_name || "Professional";
 
   return (
-    <nav className="w-full bg-white border-b border-gray-100 sticky top-0 z-40">
+    <nav className="relative w-full bg-white border-b border-gray-100 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Desktop Logo */}
@@ -219,7 +219,7 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg flex flex-col p-6 gap-4">
+        <div className="md:hidden absolute left-0 right-0 top-full z-50 bg-white border-t border-gray-100 shadow-lg flex flex-col p-6 gap-4">
           {navLinks.map((link) => (
             <Link
               key={link.id}

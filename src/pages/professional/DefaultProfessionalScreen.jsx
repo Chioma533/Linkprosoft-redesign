@@ -183,7 +183,7 @@ const DefaultProfessionalScreen = () => {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
             {/* Left: headline + verification banner */}
             <div className="flex-1 max-w-full sm:max-w-xl">
-              <h1 className="text-[1.125rem] font-extrabold leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
+              <h1 className="text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
                 Find Your Next Opportunity
               </h1>
               <p className="mt-0.5 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">

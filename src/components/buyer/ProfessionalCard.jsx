@@ -73,7 +73,7 @@ const ProfessionalCard = ({
       className="bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border border-transparent hover:border-[#016EA6]"
     >
       {/* Card body */}
-      <div className="p-6 flex flex-col gap-4 flex-1">
+      <div className="p-4 sm:p-6 flex flex-col gap-4 flex-1">
         {/* Header row: avatar + name/role + bookmark */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ const ProfessionalCard = ({
         </p>
       </div>
       {/* Footer: price + contact */}
-      <div className="px-6 pb-5 flex items-center justify-between border-t border-gray-100 pt-4">
+      <div className="px-4 sm:px-6 pb-4 sm:pb-5 flex items-center justify-between border-t border-gray-100 pt-4">
         <div className="flex items-baseline gap-2">
           <span className="text-lg text-gray-900 font-medium">₦</span>
           <span className="text-xl font-bold text-gray-900">{pricePerDay.toLocaleString()}</span>

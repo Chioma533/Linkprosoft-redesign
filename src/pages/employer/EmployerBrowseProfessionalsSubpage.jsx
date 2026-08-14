@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FiStar, FiCheckCircle, FiSearch, FiMapPin, FiMail, FiBookmark, FiCalendar } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { searchService } from "../../api/services/searchService";
@@ -16,7 +16,8 @@ const EmployerBrowseProfessionalsSubpage = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [totalPages, setTotalPages] = useState(0);
-  const [loading, setLoading] = useState(true);  // true from the start — skeleton first
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
   const [minTimePassed, setMinTimePassed] = useState(false);
 
@@ -63,11 +64,13 @@ const EmployerBrowseProfessionalsSubpage = () => {
   };
 
   // Fetch professionals based on current filters
-  const fetchProfessionals = async () => {
-    setLoading(true);
+  const fetchProfessionals = async (isInitial = false) => {
+    if (isInitial) {
+      setIsInitialLoading(true);
+    } else {
+      setIsSearching(true);
+    }
     setError(null);
-    /* 2.5 s minimum skeleton display time */
-    const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
     try {
       const params = {
         profession: searchQuery.trim() || undefined,
@@ -84,10 +87,6 @@ const EmployerBrowseProfessionalsSubpage = () => {
 
       const response = await searchService.searchProfessionalsByProfession(filteredParams);
 
-      // Support multiple backend response shapes:
-      // - { success: true, data: { professionals: [...], meta: {...} } }
-      // - { professionals: [...] } or { items: [...] }
-      // - an array of professionals
       const payload = response?.data ?? response;
 
       const items = Array.isArray(payload?.professionals)
@@ -106,8 +105,11 @@ const EmployerBrowseProfessionalsSubpage = () => {
       setError(err.message || "Something went wrong");
       toast.error(err.message || "Failed to load professionals");
     } finally {
-      setLoading(false);
-      clearTimeout(minTimer);
+      if (isInitial) {
+        setIsInitialLoading(false);
+      } else {
+        setIsSearching(false);
+      }
     }
   };
 
@@ -127,12 +129,22 @@ const EmployerBrowseProfessionalsSubpage = () => {
     }
   };
 
-  // Effect to fetch professionals when filters or page change.
-  // When filters change we reset to page 1; including `page` in the deps
-  // ensures pagination updates trigger fetches as expected.
+  const isFirstMount = useRef(true);
+
+  // Initial page mount
   useEffect(() => {
-    // If current page is not 1 (user clicked pagination), fetch for that page
-    fetchProfessionals();
+    const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
+    fetchProfessionals(true);
+    return () => clearTimeout(minTimer);
+  }, []);
+
+  // Effect to fetch professionals when filters or page change.
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    fetchProfessionals(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedLocation, selectedSort, selectedSkills, limit, page]);
 
@@ -161,7 +173,7 @@ const EmployerBrowseProfessionalsSubpage = () => {
 
   const handleFilterClick = () => {
     // Trigger fetch with current filters
-    fetchProfessionals();
+    fetchProfessionals(false);
   };
 
   const locationFiltered = professionals.filter((pro) => {
@@ -169,7 +181,7 @@ const EmployerBrowseProfessionalsSubpage = () => {
     return selectedLocation === "All Locations" || loc.includes(selectedLocation.toLowerCase());
   });
 
-  if (loading || !minTimePassed) {
+  if (isInitialLoading || !minTimePassed) {
     return <LoadingScreen />;
   }
 
@@ -261,88 +273,97 @@ const EmployerBrowseProfessionalsSubpage = () => {
         </div>
 
         {/* Card List of Professionals */}
-        <div className="space-y-4">
-          {locationFiltered.map((pro) => (
-            <div
-              key={pro.id}
-              className="bg-white p-5 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col gap-4 relative"
-            >
-              {/* Header: Avatar, Info, Bookmark icon */}
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  {/* Round Avatar */}
-                  <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center font-extrabold text-sm relative shrink-0">
-                    {pro.avatarUrl ? (
-                      <img
-                        src={pro.avatarUrl}
-                        alt={`${pro.name} avatar`}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <>
-                        {pro.name
-                          .split(" ")
-                          .map((part) => part[0])
-                          .slice(0, 2)
-                          .join("")
-                          .toUpperCase()}
-                      </>
-                    )}
-                    <span
-                      className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
-                      title="Verified Pro"
-                    >
-                      <FiCheckCircle className="w-3 h-3 text-white fill-current" />
+        <div className="space-y-4 min-h-[200px]">
+          {isSearching ? (
+            <div className="py-16 flex flex-col items-center justify-center gap-3">
+              <div className="w-9 h-9 border-3 border-[#016EA6]/20 border-t-[#016EA6] rounded-full animate-spin" />
+              <p className="text-xs font-semibold text-gray-500 animate-pulse">
+                Searching professionals...
+              </p>
+            </div>
+          ) : (
+            locationFiltered.map((pro) => (
+              <div
+                key={pro.id}
+                className="bg-white p-5 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col gap-4 relative"
+              >
+                {/* Header: Avatar, Info, Bookmark icon */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    {/* Round Avatar */}
+                    <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center font-extrabold text-sm relative shrink-0">
+                      {pro.avatarUrl ? (
+                        <img
+                          src={pro.avatarUrl}
+                          alt={`${pro.name} avatar`}
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <>
+                          {pro.name
+                            .split(" ")
+                            .map((part) => part[0])
+                            .slice(0, 2)
+                            .join("")
+                            .toUpperCase()}
+                        </>
+                      )}
+                      <span
+                        className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
+                        title="Verified Pro"
+                      >
+                        <FiCheckCircle className="w-3 h-3 text-white fill-current" />
+                      </span>
+                    </div>
+
+                    {/* Name and Professional details */}
+                    <div className="space-y-0.5">
+                      <h4 className="font-bold text-gray-900 text-sm leading-snug">
+                        {pro.name}
+                      </h4>
+                      <div className="text-[11px] text-[#016EA6] font-semibold">
+                        {pro.profession || pro.role || "Professional"}
+                      </div>
+                      <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1.5">
+                        <span className="text-amber-500 flex items-center gap-0.5">
+                          <FiStar className="w-3 h-3 fill-current" />
+                          {pro.rating}
+                        </span>
+                        <span>•</span>
+                        <span>{pro.successRate}% Success</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bookmark Button */}
+                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer shrink-0">
+                    <FiBookmark className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Bio Description */}
+                <p className="text-xs text-gray-400 leading-relaxed font-medium line-clamp-3">
+                  {pro.bio}
+                </p>
+
+                {/* Footer: Price and Invite button */}
+                <div className="flex items-center justify-between border-t border-gray-50/80 pt-3 mt-1">
+                  <div>
+                    <span className="text-[10px] text-gray-400 block font-medium">Starting rate</span>
+                    <span className="text-sm font-extrabold text-gray-800">
+                      {formatCurrency(pro.hourlyRate || pro.rate || 10000)}/hr
                     </span>
                   </div>
-
-                  {/* Name and Professional details */}
-                  <div className="space-y-0.5">
-                    <h4 className="font-bold text-gray-900 text-sm leading-snug">
-                      {pro.name}
-                    </h4>
-                    <div className="text-[11px] text-[#016EA6] font-semibold">
-                      {pro.profession || pro.role || "Professional"}
-                    </div>
-                    <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1.5">
-                      <span className="text-amber-500 flex items-center gap-0.5">
-                        <FiStar className="w-3 h-3 fill-current" />
-                        {pro.rating}
-                      </span>
-                      <span>•</span>
-                      <span>{pro.successRate}% Success</span>
-                    </div>
-                  </div>
+                  <button
+                    onClick={() => toast.success(`Invitation request sent to ${pro.name}!`)}
+                    className="px-5 py-2 bg-[#EBF3FA] hover:bg-[#016EA6]/10 text-[#016EA6] rounded-full text-xs font-bold transition-all cursor-pointer"
+                  >
+                    Invite
+                  </button>
                 </div>
-
-                {/* Bookmark Button */}
-                <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer shrink-0">
-                  <FiBookmark className="w-4 h-4" />
-                </button>
               </div>
-
-              {/* Bio Description */}
-              <p className="text-xs text-gray-400 leading-relaxed font-medium line-clamp-3">
-                {pro.bio}
-              </p>
-
-              {/* Footer: Price and Invite button */}
-              <div className="flex items-center justify-between border-t border-gray-50/80 pt-3 mt-1">
-                <div>
-                  <span className="text-[10px] text-gray-400 block font-medium">Starting rate</span>
-                  <span className="text-sm font-extrabold text-gray-800">
-                    {formatCurrency(pro.hourlyRate || pro.rate || 10000)}/hr
-                  </span>
-                </div>
-                <button
-                  onClick={() => toast.success(`Invitation request sent to ${pro.name}!`)}
-                  className="px-5 py-2 bg-[#EBF3FA] hover:bg-[#016EA6]/10 text-[#016EA6] rounded-full text-xs font-bold transition-all cursor-pointer"
-                >
-                  Invite
-                </button>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Mobile Pagination */}
@@ -452,21 +473,29 @@ const EmployerBrowseProfessionalsSubpage = () => {
 
             <button
               onClick={handleFilterClick}
-              disabled={loading}
+              disabled={isSearching}
               className="bg-[#016EA6] hover:bg-[#061EA6] text-white px-6 py-2.5 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer text-center"
             >
-              {loading ? "Filtering..." : "Filter"}
+              {isSearching ? "Filtering..." : "Filter"}
             </button>
           </div>
         </div>
 
         {/* Grid List */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {locationFiltered.map((pro) => (
-            <div
-              key={pro.id}
-              className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-300"
-            >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 min-h-[240px]">
+          {isSearching ? (
+            <div className="col-span-full py-16 flex flex-col items-center justify-center gap-3">
+              <div className="w-9 h-9 border-3 border-[#016EA6]/20 border-t-[#016EA6] rounded-full animate-spin" />
+              <p className="text-xs font-semibold text-gray-500 animate-pulse">
+                Searching professionals...
+              </p>
+            </div>
+          ) : (
+            locationFiltered.map((pro) => (
+              <div
+                key={pro.id}
+                className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-300"
+              >
               {/* Header info */}
               <div>
                 <div className="flex items-center gap-4">
@@ -546,7 +575,8 @@ const EmployerBrowseProfessionalsSubpage = () => {
                 </button>
               </div>
             </div>
-          ))}
+          ))
+        )}
         </div>
 
         {/* Pagination */}

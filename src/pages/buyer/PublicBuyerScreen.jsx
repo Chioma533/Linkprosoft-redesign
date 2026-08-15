@@ -1,13 +1,22 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
-import { FiAlertCircle, FiChevronRight, FiChevronLeft, FiX } from "react-icons/fi";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import {
+  FiChevronRight,
+  FiChevronLeft,
+  FiMenu,
+  FiX,
+  FiHome,
+  FiSearch,
+  FiBriefcase,
+  FiMessageSquare,
+  FiUser,
+} from "react-icons/fi";
 import { toast } from "react-hot-toast";
-import BuyerNavbar from "../../layouts/buyer/BuyerNavbar";
 import ProfessionalSearchBar from "../../components/buyer/ProfessionalSearchBar";
 import ProfessionalCard from "../../components/buyer/ProfessionalCard";
-import BuyerBottomNav from "../../components/buyer/BuyerBottomNav";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import { searchService } from "../../api/services/searchService";
+import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 
 /* ─────────────────────────────────────────────────────────────
    Pagination sub-component (responsive format)
@@ -42,7 +51,7 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
 
       <div className="flex items-center gap-1.5">
         <button
-          id="pagination-prev-btn"
+          id="public-pagination-prev-btn"
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
           className="w-8 h-8 rounded-full border border-gray-100 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer"
@@ -58,12 +67,13 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
           ) : (
             <button
               key={page}
-              id={`pagination-page-${page}-btn`}
+              id={`public-pagination-page-${page}-btn`}
               onClick={() => onPageChange(page)}
-              className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === page
-                ? "bg-[#016EA6] text-white shadow-sm"
-                : "border border-gray-100 text-gray-500 hover:bg-gray-50"
-                }`}
+              className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer ${
+                currentPage === page
+                  ? "bg-[#016EA6] text-white shadow-sm"
+                  : "border border-gray-100 text-gray-500 hover:bg-gray-50"
+              }`}
             >
               {page}
             </button>
@@ -71,7 +81,7 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
         )}
 
         <button
-          id="pagination-next-btn"
+          id="public-pagination-next-btn"
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
           className="w-8 h-8 rounded-full border border-gray-100 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all cursor-pointer"
@@ -84,14 +94,204 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   Main Page
+   Public Buyer Navbar (no auth dependency — Sign In / Get Started)
    ───────────────────────────────────────────────────────────── */
-const DefaultBuyerScreen = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [verificationDismissed, setVerificationDismissed] = useState(false);
+const PublicBuyerNavbar = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navLinks = [
+    { id: "browse", label: "Browse Professionals", path: "/browse-professionals" },
+    { id: "community", label: "Community", path: "/community" },
+    { id: "trending", label: "Trending Professionals", path: "/trending" },
+  ];
+
+  return (
+    <nav className="relative w-full bg-white border-b border-gray-100 sticky top-0 z-40">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+
+          {/* Desktop Logo */}
+          <Link
+            to="/browse-professionals"
+            className="hidden md:flex items-center shrink-0 hover:opacity-90 transition-opacity gap-2"
+          >
+            <img src={Logo} alt="Linkprosoft" className="w-9 h-9 rounded-lg object-cover" />
+          </Link>
+
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-4 lg:gap-6">
+            {navLinks.map((link) => (
+              <Link
+                key={link.id}
+                to={link.path}
+                id={`public-nav-${link.id}`}
+                className={`text-sm font-semibold tracking-wide transition-colors whitespace-nowrap pb-1 ${
+                  link.id === "browse"
+                    ? "text-[#016EA6] border-b-2 border-[#016EA6]"
+                    : "text-gray-600 hover:text-[#016EA6]"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+
+          {/* Desktop Right: Sign In / Get Started */}
+          <div className="hidden md:flex items-center gap-3">
+            <Link
+              to="/login"
+              id="public-nav-login-btn"
+              className="text-sm font-semibold text-gray-700 hover:text-[#016EA6] transition-colors px-4 py-2 rounded-full hover:bg-gray-50"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signup"
+              id="public-nav-signup-btn"
+              className="text-sm font-bold text-white bg-[#016EA6] hover:bg-[#015a8c] transition-colors px-5 py-2 rounded-full shadow-sm"
+            >
+              Get Started
+            </Link>
+          </div>
+
+          {/* Mobile Navigation Header */}
+          <div className="flex md:hidden items-center justify-between w-full h-full">
+            <div className="flex items-center gap-3">
+              <button
+                id="public-mobile-menu-btn"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-1.5 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50"
+                aria-label="Toggle Menu"
+              >
+                {mobileMenuOpen ? (
+                  <FiX className="w-6 h-6 text-gray-700" />
+                ) : (
+                  <FiMenu className="w-6 h-6 text-gray-700" />
+                )}
+              </button>
+              <h1 className="text-base font-bold text-gray-900 tracking-tight">
+                Browse Professionals
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Link
+                to="/login"
+                id="public-mobile-login-btn"
+                className="text-xs font-semibold text-gray-700 hover:text-[#016EA6] transition-colors px-3 py-1.5 rounded-full border border-gray-200 hover:border-[#016EA6]/40"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                id="public-mobile-signup-btn"
+                className="text-xs font-bold text-white bg-[#016EA6] hover:bg-[#015a8c] transition-colors px-3 py-1.5 rounded-full"
+              >
+                Get Started
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden absolute left-0 right-0 top-full z-50 bg-white border-t border-gray-100 shadow-lg flex flex-col p-6 gap-4">
+          {navLinks.map((link) => (
+            <Link
+              key={link.id}
+              to={link.path}
+              onClick={() => setMobileMenuOpen(false)}
+              className={`text-base font-medium hover:text-[#016EA6] transition-colors ${
+                link.id === "browse" ? "text-[#016EA6]" : "text-gray-700"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+          <div className="h-px bg-gray-100 my-1" />
+          <div className="flex flex-col gap-3">
+            <Link
+              to="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-semibold text-center text-gray-700 border border-gray-200 rounded-full py-2.5 hover:text-[#016EA6] hover:border-[#016EA6]/40 transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signup"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-bold text-center text-white bg-[#016EA6] hover:bg-[#015a8c] rounded-full py-2.5 transition-colors"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────
+   Public Bottom Nav (auth-gated links redirect to /login)
+   ───────────────────────────────────────────────────────────── */
+const PublicBuyerBottomNav = () => {
+  const navItems = [
+    { id: "overview", label: "Overview", icon: FiHome, path: "/login" },
+    { id: "browse", label: "Browse", icon: FiSearch, path: "/browse-professionals" },
+    { id: "my-jobs", label: "My Jobs", icon: FiBriefcase, path: "/login" },
+    { id: "community", label: "Community", icon: FiMessageSquare, path: "/community" },
+    { id: "profile", label: "Profile", icon: FiUser, path: "/login" },
+  ];
+
+  return (
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-lg md:hidden">
+      <nav className="flex items-center justify-around py-2 px-2 max-w-md mx-auto">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = item.id === "browse";
+
+          return (
+            <Link
+              key={item.id}
+              to={item.path}
+              id={`public-mobile-bottom-nav-${item.id}`}
+              className={`flex flex-col items-center justify-center flex-1 py-1 px-1 transition-all duration-150 cursor-pointer ${
+                isActive
+                  ? "text-[#016EA6] font-semibold"
+                  : "text-gray-400 hover:text-gray-600 font-normal"
+              }`}
+            >
+              <Icon
+                className={`w-5 h-5 transition-transform duration-150 ${
+                  isActive ? "scale-110 text-[#016EA6]" : "text-gray-400"
+                }`}
+              />
+              <span className="text-[10px] mt-1 tracking-tight truncate max-w-full">
+                {item.label}
+              </span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* iOS Home Indicator Bar */}
+      <div className="pb-1 pt-0.5 flex justify-center">
+        <div className="w-32 h-1 bg-gray-900/80 rounded-full" />
+      </div>
+    </div>
+  );
+};
+
+/* ─────────────────────────────────────────────────────────────
+   Main Public Page
+   ───────────────────────────────────────────────────────────── */
+const PublicBuyerScreen = () => {
+  const navigate = useNavigate();
   const location = useLocation();
+  const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState(() => {
-    const q = new URLSearchParams(location.search).get('q') || "";
+    const q = new URLSearchParams(location.search).get("q") || "";
     return {
       searchQuery: q,
       location: "",
@@ -121,7 +321,15 @@ const DefaultBuyerScreen = () => {
       const proLocation = pro.location || pro.user?.location || "";
       const proRating = pro.rating ?? pro.avgRating ?? 0;
       const proPrice = pro.pricePerDay ?? pro.hourlyRate ?? 0;
-      const proRole = pro.profession || pro.role || (pro.skills && pro.skills.length > 0 ? (typeof pro.skills[0] === 'string' ? pro.skills[0] : pro.skills[0].name || "") : "") || "Professional";
+      const proRole =
+        pro.profession ||
+        pro.role ||
+        (pro.skills && pro.skills.length > 0
+          ? typeof pro.skills[0] === "string"
+            ? pro.skills[0]
+            : pro.skills[0].name || ""
+          : "") ||
+        "Professional";
 
       const matchesSearch =
         !search ||
@@ -133,21 +341,27 @@ const DefaultBuyerScreen = () => {
         !location ||
         proLocation.toLowerCase().includes(location.toLowerCase());
 
-      const matchesRating = !rating || rating === "Any Rating" || (() => {
-        const minStars = Number(rating?.match(/\d+/)?.[0] || 0);
-        return proRating >= minStars;
-      })();
+      const matchesRating =
+        !rating ||
+        rating === "Any Rating" ||
+        (() => {
+          const minStars = Number(rating?.match(/\d+/)?.[0] || 0);
+          return proRating >= minStars;
+        })();
 
       const normalizedBudget = budget?.replace(/–/g, "-") || "";
-      const matchesBudget = !normalizedBudget || normalizedBudget === "Any Budget" || (() => {
-        if (normalizedBudget === "Under ₦5,000") return proPrice < 5000;
-        if (normalizedBudget === "₦5,000 - ₦20,000")
-          return proPrice >= 5000 && proPrice <= 20000;
-        if (normalizedBudget === "₦20,000 - ₦50,000")
-          return proPrice >= 20000 && proPrice <= 50000;
-        if (normalizedBudget === "₦50,000+") return proPrice > 50000;
-        return true;
-      })();
+      const matchesBudget =
+        !normalizedBudget ||
+        normalizedBudget === "Any Budget" ||
+        (() => {
+          if (normalizedBudget === "Under ₦5,000") return proPrice < 5000;
+          if (normalizedBudget === "₦5,000 - ₦20,000")
+            return proPrice >= 5000 && proPrice <= 20000;
+          if (normalizedBudget === "₦20,000 - ₦50,000")
+            return proPrice >= 20000 && proPrice <= 50000;
+          if (normalizedBudget === "₦50,000+") return proPrice > 50000;
+          return true;
+        })();
 
       return matchesSearch && matchesLocation && matchesRating && matchesBudget;
     });
@@ -203,20 +417,24 @@ const DefaultBuyerScreen = () => {
       page: 1,
       limit: 100,
     };
+
     try {
       const response = await searchService.smartSearchProfessionals(searchParams);
 
-      const isSuccess = response?.status === "success" || response?.success === true || Boolean(response?.data);
+      const isSuccess =
+        response?.status === "success" ||
+        response?.success === true ||
+        Boolean(response?.data);
       const dataObj = response?.data || response;
 
       if (isSuccess && dataObj) {
         const items = Array.isArray(dataObj.professionals)
           ? dataObj.professionals
           : Array.isArray(dataObj.items)
-            ? dataObj.items
-            : Array.isArray(dataObj)
-              ? dataObj
-              : [];
+          ? dataObj.items
+          : Array.isArray(dataObj)
+          ? dataObj
+          : [];
         setApiProfessionals(items);
         setTotal(dataObj.meta?.total || dataObj.total || items.length);
         setTotalPagesAPI(dataObj.meta?.pages || dataObj.totalPages || 1);
@@ -245,9 +463,14 @@ const DefaultBuyerScreen = () => {
     setCurrentPage(1);
   };
 
-  const handleDismissVerification = () => {
-    setVerificationDismissed(true);
-  };
+  // Sync filters if URL search params change
+  useEffect(() => {
+    const q = new URLSearchParams(location.search).get("q") || "";
+    setFilters((prev) => {
+      if (prev.searchQuery === q) return prev;
+      return { ...prev, searchQuery: q };
+    });
+  }, [location.search]);
 
   // Initial page mount
   useEffect(() => {
@@ -286,17 +509,17 @@ const DefaultBuyerScreen = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-24 md:pb-12">
-      {/* ── Navbar ───────────────────────────────────────────── */}
-      <BuyerNavbar activePage="browse" />
+      {/* ── Public Navbar ──────────────────────────────────────── */}
+      <PublicBuyerNavbar />
 
       {/* ── Hero Section ─────────────────────────────────────── */}
       <section
-        id="hero-section"
+        id="public-hero-section"
         className="bg-[#EEF5F9] relative overflow-hidden"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-14">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-            {/* Left: Text + Verification banner */}
+            {/* Left: Text */}
             <div className="flex-1 max-w-full sm:max-w-xl">
               <h1 className="text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
                 Find The Right Professional
@@ -305,85 +528,16 @@ const DefaultBuyerScreen = () => {
                 Need help with a project? Browse verified professionals.
               </p>
 
-              {/* Mobile verification banner + illustration */}
-              {!verificationDismissed && (
-                <div className="-mt-6 flex items-end justify-between gap-2 sm:hidden z-10">
-                  <div
-                    id="verification-banner"
-                    className="w-[248px] shrink-0. rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
-                  >
-                    <div className="flex items-center justify-between gap-1.5">
-                      <div className="flex min-w-0 items-center gap-1.5">
-                        <FiAlertCircle className="h-3 w-3 shrink-0 translate-y-[0.5px] text-orange-500" />
-                        <p className="text-[7.14px] font-semibold leading-[1.1] tracking-[-0.01em] text-[#59310e]">
-                          Verification Required
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="mt-0 ml-1.5 flex items-center justify-between gap-1.5">
-                      <p className="flex-1 min-w-0 ml-[12px] self-center text-[5.5px] leading-[1.1] tracking-[-0.01em] text-[#ff8d28]">
-                        Complete your verification to apply for jobs and receive
-                        payments securely.
-                      </p>
-
-                      <button
-                        id="complete-verification-btn"
-                        className="inline-flex -translate-y-1 h-[15px] min-w-[64px] shrink-0 items-center justify-center rounded-full bg-orange-500 px-1 text-[4.71px] font-bold leading-none text-white transition-all duration-200 hover:bg-orange-600"
-                      >
-                        Complete Verification
-                      </button>
-                    </div>
-                  </div>
-
-                  <div
-                    className="w-[43%] z-0"
-                    style={{ mixBlendMode: "multiply" }}
-                  >
-                    <img
-                      src="/tools_illustration.png"
-                      alt="Construction Tools"
-                      className="w-full object-contain translate-y-[38px] translate-x-[25px]"
-                    />
-                  </div>
+              {/* Mobile illustration (no verification banner in public view) */}
+              <div className="-mt-6 flex items-end justify-end gap-2 sm:hidden z-10">
+                <div className="w-[43%] z-0" style={{ mixBlendMode: "multiply" }}>
+                  <img
+                    src="/tools_illustration.png"
+                    alt="Construction Tools"
+                    className="w-full object-contain translate-y-[38px] translate-x-[25px]"
+                  />
                 </div>
-              )}
-
-
-              {/* Desktop verification banner */}
-              {!verificationDismissed && (
-                <div className="hidden sm:block">
-                  <div
-                    id="verification-banner"
-                    className="mt-6 flex max-w-md items-center gap-3 rounded-xl border border-[#ff8d28]/30 bg-[#fff4ea] p-3 px-5 py-4"
-                  >
-                    <FiAlertCircle className="h-5 w-5 shrink-0 text-orange-500" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-[#59310e]">
-                        Verification Required
-                      </p>
-                      <p className="mt-0.5 text-[11px] leading-relaxed text-[#ff8d28]">
-                        Complete your verification to apply for jobs and receive
-                        payments securely.
-                      </p>
-                    </div>
-                    <button
-                      id="complete-verification-btn"
-                      className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-orange-500 px-3.5 py-2 text-[10px] font-bold text-white transition-all duration-200 hover:bg-orange-600"
-                    >
-                      Complete Verification
-                    </button>
-                    <button
-                      id="dismiss-verification-btn"
-                      onClick={handleDismissVerification}
-                      className="rounded-full p-1 text-gray-400 transition-colors hover:text-gray-700"
-                      aria-label="Dismiss verification banner"
-                    >
-                      <FiX className="h-4 w-4" />
-                    </button>
-                  </div>
-                </div>
-              )}
+              </div>
             </div>
 
             {/* Right: Desktop Tools illustration */}
@@ -406,7 +560,10 @@ const DefaultBuyerScreen = () => {
       </section>
 
       {/* ── Search & Filter Bar ───────────────────────────────── */}
-      <section id="search-filter-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <section
+        id="public-search-filter-section"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
+      >
         <ProfessionalSearchBar
           onApply={handleApplyFilters}
           initialQuery={filters.searchQuery}
@@ -415,7 +572,7 @@ const DefaultBuyerScreen = () => {
 
       {/* ── Results Grid ─────────────────────────────────────── */}
       <section
-        id="professionals-results-section"
+        id="public-professionals-results-section"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
       >
         <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-8">
@@ -439,7 +596,7 @@ const DefaultBuyerScreen = () => {
 
           {/* 3-column professional grid */}
           <div
-            id="professionals-grid"
+            id="public-professionals-grid"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 min-h-[240px]"
           >
             {isSearching ? (
@@ -451,8 +608,18 @@ const DefaultBuyerScreen = () => {
               </div>
             ) : paginatedProfessionals.length > 0 ? (
               paginatedProfessionals.map((pro, idx) => {
-                const fullName = pro.name || `${pro.user?.firstName || ''} ${pro.user?.lastName || ''}`.trim() || "Unknown";
-                const roleName = pro.profession || pro.role || (pro.skills && pro.skills.length > 0 ? (typeof pro.skills[0] === 'string' ? pro.skills[0] : pro.skills[0].name || "Professional") : "Professional");
+                const fullName =
+                  pro.name ||
+                  `${pro.user?.firstName || ""} ${pro.user?.lastName || ""}`.trim() ||
+                  "Unknown";
+                const roleName =
+                  pro.profession ||
+                  pro.role ||
+                  (pro.skills && pro.skills.length > 0
+                    ? typeof pro.skills[0] === "string"
+                      ? pro.skills[0]
+                      : pro.skills[0].name || "Professional"
+                    : "Professional");
                 const locationName = pro.location || pro.user?.location || "";
                 return (
                   <ProfessionalCard
@@ -468,14 +635,16 @@ const DefaultBuyerScreen = () => {
                     pricePerDay={pro.pricePerDay ?? pro.hourlyRate ?? 0}
                     isBookmarked={false}
                     isSelected={idx === 0 && safeCurrentPage === 1}
-                    onContact={() => console.log(`Contacting ${fullName}`)}
-                    onBookmark={(val) => console.log(`Bookmarked ${fullName}: ${val}`)}
+                    onContact={() => navigate("/login")}
+                    onBookmark={() => navigate("/login")}
                   />
                 );
               })
             ) : (
               <div className="col-span-full py-20 text-center">
-                <p className="text-sm text-gray-500">No professionals match your current filters. Try expanding your search or adjusting the filters.</p>
+                <p className="text-sm text-gray-500">
+                  No professionals match your current filters. Try expanding your search or adjusting the filters.
+                </p>
               </div>
             )}
           </div>
@@ -492,9 +661,9 @@ const DefaultBuyerScreen = () => {
       </section>
 
       {/* ── Mobile Bottom Navigation ─────────────────────────────── */}
-      <BuyerBottomNav activeTab="browse" />
+      <PublicBuyerBottomNav />
     </div>
   );
 };
 
-export default DefaultBuyerScreen;
+export default PublicBuyerScreen;

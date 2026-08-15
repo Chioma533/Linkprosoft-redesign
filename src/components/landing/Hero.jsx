@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaMicrophone, FaArrowUp } from "react-icons/fa";
 
@@ -10,6 +10,44 @@ const HERO_IMAGES = [
   // 3. Construction/Renovation builder
   "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?auto=format&fit=crop&w=1600&q=80"
 ];
+
+function ContentEditable({ value, onChange, onKeyDown }) {
+  const ref = useRef(null);
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+    const current = el.textContent || "";
+    if (value !== current) {
+      el.textContent = value || "";
+    }
+  }, [value]);
+
+  return (
+    <div className="flex-1 relative">
+      <div
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        role="textbox"
+        aria-multiline="true"
+        onInput={(e) => onChange?.(e.currentTarget.textContent)}
+        onKeyDown={onKeyDown}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className="w-full h-full bg-transparent border-none outline-none text-gray-900 text-base md:text-lg focus:ring-0 focus:outline-none resize-none font-normal leading-normal break-words text-left"
+        style={{ whiteSpace: "pre-wrap" }}
+      />
+
+      {!value && !focused && (
+        <div className="absolute left-0 top-0 pointer-events-none text-gray-400 text-base md:text-lg leading-normal text-left">
+          I am looking for a plumber..
+        </div>
+      )}
+    </div>
+  );
+}
 
 /**
  * Landing page Hero with AI search input.
@@ -101,14 +139,15 @@ const Hero = ({ searchVal, onSearchChange, onSearchSubmit, isSearching = false }
           transition={{ duration: 0.8, delay: 0.6 }}
           className="w-full max-w-lg bg-white rounded-3xl p-4  shadow-2xl flex justify-between h-20 border border-white/20 relative"
         >
-          {/* Top text input region */}
-          <textarea
-            value={searchVal}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="I am looking for a plumber.."
-            className="flex-1 bg-transparent border-none outline-none text-gray-900 placeholder-gray-400 text-base md:text-lg focus:ring-0 focus:outline-none resize-none font-normal leading-normal h-20"
-          />
+            {/* Top text input region (now a contentEditable div that fills the box) */}
+            {
+              /* Controlled contentEditable: sync textContent -> searchVal via ref */
+            }
+            <ContentEditable
+              value={searchVal}
+              onChange={onSearchChange}
+              onKeyDown={handleKeyDown}
+            />
 
           {/* Bottom right action button panel */}
           <div className="flex justify-end items-center gap-3 shrink-0 mt-auto">

@@ -1,27 +1,28 @@
 ---
-description: "Use the Darkify agent to extract Figma design tokens and implement a dark/default/white theme in the app stylesheet."
+description: "Use the Darkify agent to extract theme colors from a Figma file, design snapshot, uploaded image, or mockup and implement a dark/default/white theme in the app stylesheet."
 name: "darkify-theme-extraction"
-argument-hint: "Provide the Figma file URL/key and token, plus any target framework or token format preferences."
+argument-hint: "Provide the Figma file URL/key and token if available, or upload the mockup/screenshot/snapshot to infer the HEX palette."
 agent: "darkify"
 ---
 
 Use the implementation guide and workflow in @file:darkify.agent.md as the authoritative behavior for this task.
 
 Goal
-- Extract design tokens from a Figma file and convert them into theme-ready CSS variables.
-- Implement dark/default/white styling in the repo with the smallest possible, maintainable change set.
+- Extract design tokens from a Figma file, mockup, uploaded image, or design snapshot and convert them into theme-ready CSS variables.
+- Produce a dark theme palette in HEX values and apply it to the repo with the smallest possible, maintainable change set.
 - Update the primary stylesheet, especially `src/index.css`, so the app supports a theme toggle without breaking existing UI.
 
 Required inputs
-- `figma_file_id` or `figma_file_url` (required)
-- `figma_token` (required)
+- `source_reference` (required): a Figma file URL/key, uploaded mockup image, screenshot, or design snapshot
+- `figma_file_id` or `figma_file_url` (optional if direct Figma access is not available)
+- `figma_token` (optional if using a mockup or image-based source)
 - `framework` (optional; default: `react+tailwind`)
 - `token_format` (optional; `css-variables`, `tailwind-config`, or `both`)
 
 Required behavior
-1. Ask for the Figma file URL/key and personal access token before accessing the file.
-2. If the user does not provide a valid `figma_file_id`/`figma_file_url` or a valid `figma_token`, stop and request valid credentials.
-3. Use the Darkify workflow to fetch colors, text styles, and other design tokens from the Figma file.
+1. Determine the available source: direct Figma access, uploaded mockup, or image snapshot.
+2. If Figma access is available, fetch colors and text styles via the Figma API.
+3. If Figma access is unavailable, analyze the provided screenshot/mockup/snapshot and estimate the dominant dark theme palette in HEX values.
 4. Normalize tokens into a consistent semantic structure for `default`, `dark`, and `white` themes.
 5. Apply the extracted values to the codebase, prioritizing `src/index.css`, and ensure the theme variables are compatible with the existing app styling.
 6. Keep the implementation minimal and maintainable: prefer CSS variables and existing React/Tailwind conventions over broad rewrites.
@@ -29,19 +30,21 @@ Required behavior
 
 Constraints
 - Never store Figma tokens in the repo.
-- Never access a Figma file without explicit user-provided credentials.
+- When direct Figma access is unavailable, use the uploaded image or mockup as the primary extracted source.
 - Prefer small, reversible changes to the existing design.
 - Preserve current app behavior while adding dark-theme support.
 - If the design is ambiguous, request clarification instead of guessing.
+- Convert extracted colors into HEX values for the dark theme implementation.
 
 Example invocations
-- "Darkify this repo using Figma file URL https://www.figma.com/file/ABC123 and token ABC123. Extract tokens and apply them to src/index.css with dark/default/white themes."
-- "Use Figma file ID xyz123 and token TOKEN_456 to generate CSS variables for the app theme and wire a default/dark/white toggle."
+- "Darkify this repo using the attached mockup image and extract the dominant HEX palette for a dark/default/white theme. Apply the tokens to src/index.css."
+- "Use the Figma file if available; otherwise infer the dark theme palette from the uploaded design snapshot and generate CSS variables for the app."
+- "Extract a dark theme color system from the provided screenshot and map it to Tailwind-compatible theme tokens."
 
 Output expectations
-- A clear token summary for the extracted Figma values
+- A clear token summary for the extracted colors in HEX format
 - CSS variables or equivalent theme output in the project stylesheet
 - Minimal theme support for `default`, `dark`, and `white` modes
 - Any required follow-up notes for manual refinement or QA
 
-This prompt should be treated as repo-scoped and production-safe: it should use the Darkify agent’s rules to safely convert Figma tokens into a usable theme implementation without exposing secrets or breaking the app.
+This prompt should be treated as repo-scoped and production-safe: it should use the Darkify agent’s rules to safely convert visual references, mockups, snapshots, and optional Figma access into a usable dark theme implementation without exposing secrets or breaking the app.

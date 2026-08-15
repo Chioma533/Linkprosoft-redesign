@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { FiSearch, FiMapPin, FiStar, FiChevronDown } from "react-icons/fi";
 
-const ProfessionalSearchBar = ({ onApply }) => {
-  const [searchQuery, setSearchQuery] = useState("");
+const ProfessionalSearchBar = ({ onApply, initialQuery = "" }) => {
+  const [searchQuery, setSearchQuery] = useState(initialQuery);
   const [location, setLocation] = useState("");
   const [rating, setRating] = useState("");
   const [budget, setBudget] = useState("");
@@ -10,6 +10,12 @@ const ProfessionalSearchBar = ({ onApply }) => {
   const [openDropdown, setOpenDropdown] = useState(null); // 'location' | 'rating' | 'budget' | null
 
   const barRef = useRef(null);
+
+  useEffect(() => {
+    if (initialQuery !== undefined) {
+      setSearchQuery(initialQuery);
+    }
+  }, [initialQuery]);
 
   useEffect(() => {
     const handler = (e) => {

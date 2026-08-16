@@ -11,6 +11,7 @@ import NotificationList from "../../components/ui/NotificationList";
 import MessageList from "../../components/messages/MessageList";
 import { useNavigate } from "react-router-dom";
 import DashboardStats from "../../components/common/DashboardStats";
+import MoneyBag02Icon from "../../components/icons/MoneyBag02Icon";
 import { formatCurrency } from "../../utils/formatCurrency";
 
 const OverviewSubpage = () => {
@@ -28,7 +29,7 @@ const OverviewSubpage = () => {
       id: "earnings",
       title: "Earnings",
       value: formatCurrency(metrics?.earningsTotal ?? 0),
-      icon: FiBriefcase,
+      icon: MoneyBag02Icon,
       iconColor: "text-blue-500",
       iconBg: "bg-blue-50",
     },

@@ -20,6 +20,7 @@ import { usePagination } from "../../hooks/usePagination";
 import SearchInput from "../../components/filters/SearchInput";
 import FilterSelect from "../../components/filters/FilterSelect";
 import { categoryOptions, statusOptions } from "../../constants/filterOptions";
+import MoneyBag02Icon from "../../components/icons/MoneyBag02Icon";
 
 const MyJobsSubpage = () => {
   const { myJobs = [], metrics, setSelectedJob, setPreviousTab, setActiveTab } = useDashboardStore();
@@ -53,7 +54,7 @@ const MyJobsSubpage = () => {
       id: "earnings",
       title: "Total Earnings",
       value: formatCurrency(metrics?.earningsTotal ?? 0),
-      icon: FiBriefcase,
+      icon: MoneyBag02Icon,
       iconColor: "text-blue-500",
       iconBg: "bg-blue-50",
     },

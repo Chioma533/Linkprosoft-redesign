@@ -16,6 +16,7 @@ import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
 import TestPreloaderPage from './pages/TestPreloaderPage';
 import PublicBuyerScreen from './pages/buyer/PublicBuyerScreen';
 import PublicProfessionalScreen from './pages/professional/PublicProfessionalScreen';
+import CommunityPage from './pages/CommunityPage';
 
 const App = () => {
   return (
@@ -31,6 +32,7 @@ const App = () => {
             <Route path="/test-preloader" element={<TestPreloaderPage />} />
             <Route path="/browse-professionals" element={<PublicBuyerScreen />} />
             <Route path="/professionals" element={<PublicProfessionalScreen />} />
+            <Route path="/community" element={<CommunityPage />} />
 
             <Route element={<PrivateRoutes allowedRoles={['employer']} />}>
               <Route path="/home" element={<DefaultBuyerScreen />} />

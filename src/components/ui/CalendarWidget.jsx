@@ -54,7 +54,7 @@ const CalendarWidget = ({ onSelectDate, selectedDate = "2026-07-02" }) => {
   ];
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm w-full max-w-sm">
+    <div className="bg-white p-6 rounded-3xl border border-gray-100/50  w-full max-w-sm">
       {/* Month Year Header */}
       <div className="flex items-center justify-between mb-6">
         <h4 className="font-bold text-gray-900 text-sm">
@@ -88,13 +88,12 @@ const CalendarWidget = ({ onSelectDate, selectedDate = "2026-07-02" }) => {
               key={idx}
               onClick={() => item.currentMonth && onSelectDate(item.dateStr)}
               disabled={!item.currentMonth}
-              className={`w-9 h-9 flex items-center justify-center text-xs font-bold rounded-full transition-all cursor-pointer ${
-                isSelected
-                  ? "bg-[#016EA6] text-white shadow-md shadow-[#016EA6]/20"
-                  : item.currentMonth
-                  ? "text-gray-700 hover:bg-gray-50"
+              className={`w-9 h-9 flex items-center justify-center text-xs font-bold rounded-full transition-all cursor-pointer ${isSelected
+                ? "bg-[#016EA6] text-white "
+                : item.currentMonth
+                  ? "text-gray-700 "
                   : "text-gray-300"
-              }`}
+                }`}
             >
               {String(item.day).padStart(2, "0")}
             </button>

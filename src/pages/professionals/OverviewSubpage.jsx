@@ -101,7 +101,7 @@ const OverviewSubpage = () => {
       {/* Middle Grid: Active Jobs Table & Recent Messages */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Active Jobs Table */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs flex flex-col justify-between">
+        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6 gap-3">
               <div className="flex items-center gap-2.5">
@@ -236,8 +236,8 @@ const OverviewSubpage = () => {
             ) : (
               /* Modern Empty State for Active Jobs */
               <div className="py-12 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
-                <div className="w-14 h-14 rounded-2xl bg-sky-50 text-[#016EA6] flex items-center justify-center mb-3.5 shadow-xs border border-sky-100/50">
-                  <FiBriefcase className="w-6 h-6 stroke-[2]" />
+                <div className="text-[#016EA6] mb-3 flex items-center justify-center">
+                  <FiBriefcase className="w-8 h-8 stroke-[2]" />
                 </div>
                 <h4 className="text-sm font-bold text-gray-900 mb-1">No Active Jobs Right Now</h4>
                 <p className="text-xs text-gray-400 font-medium max-w-sm mb-5 leading-relaxed">
@@ -292,8 +292,8 @@ const OverviewSubpage = () => {
               />
             ) : (
               <div className="py-10 px-4 rounded-2xl bg-gray-50/50 border border-dashed border-gray-100 flex flex-col items-center justify-center text-center">
-                <div className="w-11 h-11 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center mb-3">
-                  <FiMessageSquare className="w-5 h-5" />
+                <div className="text-indigo-500 mb-2.5 flex items-center justify-center">
+                  <FiMessageSquare className="w-7 h-7" />
                 </div>
                 <h5 className="text-xs font-bold text-gray-800 mb-0.5">No Messages Found</h5>
                 <p className="text-[11px] text-gray-400 font-medium">
@@ -344,8 +344,8 @@ const OverviewSubpage = () => {
               <NotificationList notifications={filteredNotifications} />
             ) : (
               <div className="py-10 px-4 rounded-2xl bg-gray-50/50 border border-dashed border-gray-100 flex flex-col items-center justify-center text-center">
-                <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center mb-3">
-                  <FiBell className="w-5 h-5" />
+                <div className="text-amber-500 mb-2.5 flex items-center justify-center">
+                  <FiBell className="w-7 h-7" />
                 </div>
                 <h5 className="text-xs font-bold text-gray-800 mb-0.5">You're All Caught Up!</h5>
                 <p className="text-[11px] text-gray-400 font-medium">
@@ -382,8 +382,8 @@ const OverviewSubpage = () => {
               <span className="text-[10px] font-semibold text-gray-400">Live Feed</span>
             </div>
             <div className="py-8 px-4 rounded-2xl bg-gray-50/50 border border-dashed border-gray-100 flex flex-col items-center justify-center text-center">
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-[#016EA6] flex items-center justify-center mb-2.5">
-                <FiFileText className="w-5 h-5" />
+              <div className="text-[#016EA6] mb-2 flex items-center justify-center">
+                <FiFileText className="w-7 h-7" />
               </div>
               <h5 className="text-xs font-bold text-gray-800 mb-1">Find Your Next Contract</h5>
               <p className="text-[11px] text-gray-400 font-medium max-w-[220px] leading-relaxed mb-4">

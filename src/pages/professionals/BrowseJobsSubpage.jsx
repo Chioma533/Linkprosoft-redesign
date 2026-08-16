@@ -164,9 +164,9 @@ const BrowseJobsSubpage = () => {
             <JobCard key={job.id} job={job} onApply={handleOpenApplyModal} />
           ))
         ) : (
-          <div className="col-span-full py-14 px-4 rounded-3xl bg-white border border-gray-100/60 flex flex-col items-center justify-center text-center shadow-xs">
-            <div className="w-14 h-14 rounded-2xl bg-sky-50 text-[#016EA6] flex items-center justify-center mb-3">
-              <FiBriefcase className="w-6 h-6" />
+          <div className="col-span-full py-14 px-4 rounded-3xl bg-white border border-gray-100/60 flex flex-col items-center justify-center text-center">
+            <div className="text-[#016EA6] mb-3 flex items-center justify-center">
+              <FiBriefcase className="w-8 h-8" />
             </div>
             <h4 className="text-sm font-bold text-gray-900 mb-1">No Open Jobs Found</h4>
             <p className="text-xs text-gray-400 max-w-sm mb-4">
@@ -201,7 +201,7 @@ const BrowseJobsSubpage = () => {
       {/* Proposal / Bid Submission Modal */}
       {selectedJobToApply && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4 animate-fade-in text-gray-800">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative animate-scale-up max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 relative animate-scale-up max-h-[90vh] overflow-y-auto">
             <button
               onClick={() => setSelectedJobToApply(null)}
               className="absolute right-6 top-6 p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
@@ -210,8 +210,8 @@ const BrowseJobsSubpage = () => {
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-2xl bg-sky-50 text-[#016EA6] flex items-center justify-center shrink-0 border border-sky-100/50">
-                <FiSend className="w-6 h-6" />
+              <div className="text-[#016EA6] flex items-center justify-center shrink-0">
+                <FiSend className="w-7 h-7" />
               </div>
               <div>
                 <span className="text-[10px] uppercase font-bold tracking-wider text-[#016EA6]">Submit Proposal</span>
@@ -279,7 +279,7 @@ const BrowseJobsSubpage = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50 inline-flex items-center gap-1.5"
+                  className="px-6 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer disabled:opacity-50 inline-flex items-center gap-1.5"
                 >
                   <FiSend className="w-3.5 h-3.5" />
                   <span>{isSubmitting ? "Submitting..." : "Send Proposal"}</span>

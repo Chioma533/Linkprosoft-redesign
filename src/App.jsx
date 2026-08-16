@@ -41,7 +41,7 @@ const App = () => {
 
             <Route element={<PrivateRoutes allowedRoles={['admin']} />}>
               <Route path="/admin/dashboard" element={<AdminDahboardPage />} />
-            </Route> 
+            </Route>
           </Routes>
           <Toaster position="top-center" reverseOrder={false} />
         </div>

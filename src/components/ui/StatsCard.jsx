@@ -6,9 +6,7 @@ const StatsCard = ({
   value,
   icon: Icon,
   iconColor = "text-[#016EA6]",
-  iconBg,
   BgColor = "bg-white",
-  iconBgStyle = {},
   trend = {
     direction: "up",
     percentage: 20,
@@ -32,11 +30,8 @@ const StatsCard = ({
           <h3 className="text-lg sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{value}</h3>
         </div>
         {Icon && (
-          <div
-            className={`p-3 rounded-full ${iconBg ? iconBg : ""} ${iconColor} flex items-center justify-center shrink-0`}
-            style={iconBgStyle}
-          >
-            <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className={`${iconColor} flex items-center justify-center shrink-0`}>
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
         )}
       </div>
@@ -59,3 +54,4 @@ const StatsCard = ({
 };
 
 export default StatsCard;
+

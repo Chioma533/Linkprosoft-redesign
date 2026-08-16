@@ -136,33 +136,6 @@ const ApplicationsSubpage = () => {
                 icon={FiChevronDown}
               />
             </div>
-
-            {/* Mobile Filters */}
-            {/* <div className="flex lg:hidden items-center justify-between gap-4 w-full max-w-70"> */}
-            {/* Dropdown status text */}
-
-            {/* <div className="relative flex items-center">
-              <FilterSelect
-                options={statusOptions}
-                icon={FiChevronDown}
-                value={statusFilter}
-                onChange={setStatusFilter}
-                className="w-full sm:w-auto pr-4 py-2 pl-0 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
-              />
-            </div> */}
-
-            {/* Search input */}
-            {/* <div className="relative max-w-32.5 sm:max-w-xs">
-              <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3" />
-              <input
-                type="text"
-                placeholder="Search Jobs"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-7 pr-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] outline-none focus:border-[#016EA6] focus:bg-white transition-all font-medium text-gray-800"
-              />
-            </div> */}
-            {/* </div> */}
           </div>
 
           {/* Desktop Table View */}

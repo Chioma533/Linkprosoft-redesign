@@ -14,6 +14,7 @@ import TieIcon from "../icons/TieIcon";
 import Logo from "../../assets/images/logo2.jpg";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
+import { Link } from "react-router-dom";
 
 const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
   const { user } = useAuthStore();
@@ -59,12 +60,14 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
           ${isOpen ? "px-6 justify-between" : "px-3 justify-center"}
         `}>
           <div className="flex items-center gap-3">
+            <Link to ="/home">
             <img src={Logo} className="w-10 h-10 rounded-xl object-contain shrink-0" alt="Logo" />
             <span className={`font-bold text-xl tracking-tight text-gray-900 transition-all duration-300 whitespace-nowrap overflow-hidden
               ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}
             `}>
               Linkprosoft
             </span>
+            </Link>
           </div>
           {isOpen && (
             <button 

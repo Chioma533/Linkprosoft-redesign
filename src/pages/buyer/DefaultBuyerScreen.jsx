@@ -355,7 +355,7 @@ const DefaultBuyerScreen = () => {
                 <div className="hidden sm:block">
                   <div
                     id="verification-banner"
-                    className="mt-6 flex max-w-md items-center gap-3 rounded-xl border border-[#ff8d28]/30 bg-[#fff4ea] p-3 px-5 py-4"
+                    className="mt-6 flex max-w-md items-center gap-3 rounded-full border border-[#ff8d28]/30 bg-[#fff4ea] p-3 px-5 py-4"
                   >
                     <FiAlertCircle className="h-5 w-5 shrink-0 text-orange-500" />
                     <div className="flex-1 min-w-0">

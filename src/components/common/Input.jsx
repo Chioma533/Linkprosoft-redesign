@@ -47,7 +47,7 @@ const Input = React.forwardRef(
             placeholder={placeholder}
             disabled={disabled || loading}
             className={clsx(
-              "w-full px-4 py-3 bg-white border rounded-xl text-gray-900 transition-all duration-200 outline-none placeholder:text-gray-400 text-sm md:text-base",
+              "w-full px-4 py-3 bg-white border rounded-full text-gray-900 transition-all duration-200 outline-none placeholder:text-gray-400 text-sm md:text-base",
               LeftIcon ? "pl-11" : "pl-4",
               isPassword || RightIcon ? "pr-11" : "pr-4",
               error

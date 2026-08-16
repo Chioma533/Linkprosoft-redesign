@@ -44,13 +44,13 @@ const ScheduleSubpage = () => {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <h3 className="text-base font-bold text-gray-900">Today's Schedule</h3>
             <div className="flex flex-wrap gap-2">
-              <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors">
+              <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors">
                 This week
               </button>
-              <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors">
+              <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors">
                 This month
               </button>
-              <button className="px-3.5 py-1.5 bg-blue-50 text-[#016EA6] border border-blue-100 rounded-xl text-xs font-semibold transition-colors">
+              <button className="px-3.5 py-1.5 bg-blue-50 text-[#016EA6] border border-blue-100 rounded-full text-xs font-semibold transition-colors">
                 This Week
               </button>
             </div>
@@ -92,7 +92,7 @@ const ScheduleSubpage = () => {
                             setPreviousTab("schedule");
                             setActiveTab("project-details");
                           }}
-                          className="bg-sky-50 hover:bg-[#016EA6] text-[#016EA6] hover:text-white px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer inline-flex items-center gap-1"
+                          className="bg-sky-50 hover:bg-[#016EA6] text-[#016EA6] hover:text-white px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer inline-flex items-center gap-1"
                         >
                           <span>View Details</span>
                           <FiChevronRight className="w-3.5 h-3.5" />

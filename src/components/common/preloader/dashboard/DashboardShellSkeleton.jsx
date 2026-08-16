@@ -24,7 +24,7 @@ const SK_KF = `
   100% { background-position:  800px 0; }
 }
 `;
-function injectSK() {
+export function injectSK() {
   if (typeof document === "undefined") return;
   if (document.getElementById("skeleton-kf")) return;
   const t = document.createElement("style");
@@ -33,17 +33,25 @@ function injectSK() {
   document.head.appendChild(t);
 }
 
+// Auto-inject immediately in browser context
+if (typeof document !== "undefined") {
+  injectSK();
+}
+
 /* ─────────────────── Primitive building blocks ───────────────────────────── */
 const BASE = "#EAEFF3", SHINE = "#F8FAFB";
 const shBg   = `linear-gradient(90deg,${BASE} 25%,${SHINE} 50%,${BASE} 75%)`;
 const shSize = "1600px 100%";
 const shAnim = "sk-shimmer 1.8s ease-in-out infinite";
 
-export const Bar = ({ w="100%", h=12, r=8, mt=0, mb=0, delay="0s", style:x={} }) => (
-  <div style={{ width:w, height:h, borderRadius:r, marginTop:mt, marginBottom:mb,
-    background:shBg, backgroundSize:shSize, animation:shAnim,
-    animationDelay:delay, flexShrink:0, ...x }} />
-);
+export const Bar = ({ w="100%", h=12, r=8, mt=0, mb=0, delay="0s", style:x={} }) => {
+  injectSK();
+  return (
+    <div style={{ width:w, height:h, borderRadius:r, marginTop:mt, marginBottom:mb,
+      background:shBg, backgroundSize:shSize, animation:shAnim,
+      animationDelay:delay, flexShrink:0, ...x }} />
+  );
+};
 
 export const Circle = ({ size=40, delay="0s" }) => (
   <div style={{ width:size, height:size, borderRadius:"50%",

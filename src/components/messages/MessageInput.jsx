@@ -49,7 +49,7 @@ const MessageInput = ({
             onClick={onSend}
             disabled={!inputText.trim()}
             title="Send"
-            className={`p-2 rounded-xl transition-all duration-200 cursor-pointer ${
+            className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${
               inputText.trim()
                 ? "bg-[#016EA6] text-white hover:bg-[#0158a0] shadow-sm hover:shadow-md active:scale-95"
                 : "bg-gray-100 text-gray-300 cursor-not-allowed"

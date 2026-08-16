@@ -70,7 +70,7 @@ const WalletSubpage = () => {
           <div className="flex flex-col gap-4 w-full">
             {/* Top row for mobile or standard logo row */}
             <div className="flex items-center justify-between w-full md:w-auto">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-xl text-xs font-semibold backdrop-blur-xs border border-white/10">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full text-xs font-semibold backdrop-blur-xs border border-white/10">
                 {/* <span className="text-sm">🇳🇬</span> */}
                 <span>NGN</span>
               </div>
@@ -224,7 +224,7 @@ const WalletSubpage = () => {
           <div className="bg-white rounded-[32px] max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative animate-scale-up max-h-[90vh] overflow-y-auto">
             <button 
               onClick={() => { setIsWithdrawOpen(false); setWithdrawStep(1); setPinDigits([]); setWithdrawAmount(""); }}
-              className="absolute right-6 top-6 p-2 text-gray-400 hover:text-gray-900 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+              className="absolute right-6 top-6 p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -286,7 +286,7 @@ const WalletSubpage = () => {
                           <h3 className="text-lg font-bold tracking-tight">₦ 500,000</h3>
                         </div>
                       </div>
-                      <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/10 relative z-10">
+                      <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0 border border-white/10 relative z-10">
                         <Eye className="w-5 h-5 text-sky-200" />
                       </div>
                     </div>
@@ -325,13 +325,13 @@ const WalletSubpage = () => {
                     <div className="flex flex-col gap-2 pt-6">
                       <button 
                         onClick={() => setWithdrawStep(2)}
-                        className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                        className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer"
                       >
                         Continue
                       </button>
                       <button 
                         onClick={() => { setIsWithdrawOpen(false); setWithdrawAmount(""); }}
-                        className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-full text-xs font-bold transition-all cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -433,13 +433,13 @@ const WalletSubpage = () => {
                 <div className="flex flex-col gap-2 pt-4 w-full max-w-[240px] mx-auto">
                   <button 
                     onClick={() => { setIsWithdrawOpen(false); setWithdrawStep(1); setPinDigits([]); setWithdrawAmount(""); }}
-                    className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-full text-xs font-bold transition-all cursor-pointer"
                   >
                     Go to wallet
                   </button>
                   <button 
                     onClick={() => { setIsWithdrawOpen(false); setWithdrawStep(1); setPinDigits([]); setWithdrawAmount(""); setActiveTab("overview"); }}
-                    className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-full text-xs font-bold transition-all cursor-pointer"
                   >
                     Go back home
                   </button>

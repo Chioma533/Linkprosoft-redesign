@@ -54,7 +54,7 @@ const WhyChooseUs = () => {
               className="bg-white hover:bg-gray-50 border border-gray-100 rounded-3xl p-6 md:p-8 flex flex-col items-start gap-4 hover:shadow-lg transition-all"
             >
               {/* Icon Container */}
-              <div className="p-3 bg-[#E8F0FE] text-[#061EA6] rounded-xl flex items-center justify-center">
+              <div className="p-3 bg-[#E8F0FE] text-[#061EA6] rounded-full flex items-center justify-center">
                 <IconComponent className="text-2xl" />
               </div>
 

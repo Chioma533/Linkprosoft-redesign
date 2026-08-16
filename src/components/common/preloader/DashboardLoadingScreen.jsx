@@ -108,7 +108,7 @@ const FloatingPreloader = ({ onFinish }) => {
 };
 
 /* ── Subpage → skeleton mapping ─────────────────────────────────────────── */
-const resolveContent = (subpage) => {
+export const resolveContent = (subpage) => {
   switch (subpage) {
     /* Table-based pages */
     case "my-jobs":
@@ -143,6 +143,10 @@ const resolveContent = (subpage) => {
     case "browse-professionals":
       return <GridPageSkeleton cardType="professional" />;
 
+    /* Premium */
+    case "premium":
+      return <OverviewSkeleton />;
+
     /* Overview (default) */
     case "overview":
     default:
@@ -150,8 +154,13 @@ const resolveContent = (subpage) => {
   }
 };
 
-/* ── Root export ────────────────────────────────────────────────────────── */
-const DashboardLoadingScreen = ({ subpage = "overview", onFinish }) => {
+/* ── Content Skeleton (without outer layout/shell) ────────────────────────── */
+export const DashboardContentSkeleton = ({ subpage = "overview" }) => {
+  return resolveContent(subpage);
+};
+
+/* ── Root export (Full page skeleton with shell) ─────────────────────────── */
+const DashboardLoadingScreen = ({ subpage = "overview", onFinish, withShell = true }) => {
   const isOverview = subpage === "overview" || !subpage;
 
   useEffect(() => {
@@ -161,11 +170,17 @@ const DashboardLoadingScreen = ({ subpage = "overview", onFinish }) => {
     }
   }, [isOverview, onFinish]);
 
+  const content = resolveContent(subpage);
+
   return (
     <>
-      <DashboardShellSkeleton>
-        {resolveContent(subpage)}
-      </DashboardShellSkeleton>
+      {withShell ? (
+        <DashboardShellSkeleton>
+          {content}
+        </DashboardShellSkeleton>
+      ) : (
+        content
+      )}
       {isOverview && <FloatingPreloader onFinish={onFinish} />}
     </>
   );

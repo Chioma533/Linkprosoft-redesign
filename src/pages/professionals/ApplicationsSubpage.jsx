@@ -117,14 +117,14 @@ const ApplicationsSubpage = () => {
                 value={search}
                 onChange={setSearch}
                 debounce={500}
-                className="md:w-80! w-50.5! pr-4 py-2.5 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all duration-200"
+                className="md:w-80! w-50.5! pr-4 py-2.5 rounded-full text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all duration-200"
               />
 
               <FilterSelect
                 value={categoryFilter}
                 onChange={setCategoryFilter}
                 options={categoryOptions}
-                className=" hidden lg:flex w-full sm:w-auto pr-4 py-2.5 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
+                className=" hidden lg:flex w-full sm:w-auto pr-4 py-2.5 rounded-full text-xs outline-none cursor-pointer text-gray-500 font-semibold"
                 icon={FiChevronDown}
               />
 
@@ -132,7 +132,7 @@ const ApplicationsSubpage = () => {
                 value={statusFilter}
                 onChange={setStatusFilter}
                 options={statusOptions}
-                className="hidden lg:flex w-full sm:w-auto pr-4 py-2.5 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
+                className="hidden lg:flex w-full sm:w-auto pr-4 py-2.5 rounded-full text-xs outline-none cursor-pointer text-gray-500 font-semibold"
                 icon={FiChevronDown}
               />
             </div>
@@ -147,7 +147,7 @@ const ApplicationsSubpage = () => {
                 icon={FiChevronDown}
                 value={statusFilter}
                 onChange={setStatusFilter}
-                className="w-full sm:w-auto pr-4 py-2 pl-0 rounded-xl text-xs outline-none cursor-pointer text-gray-500 font-semibold"
+                className="w-full sm:w-auto pr-4 py-2 pl-0 rounded-full text-xs outline-none cursor-pointer text-gray-500 font-semibold"
               />
             </div> */}
 

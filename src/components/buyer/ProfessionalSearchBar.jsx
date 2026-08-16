@@ -62,7 +62,7 @@ const ProfessionalSearchBar = ({ onApply, initialQuery = "" }) => {
         />
       </button>
       {openDropdown === name && (
-        <div className="absolute top-full left-0 mt-1.5 min-w-[160px] bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-40">
+        <div className="absolute top-full left-0 mt-1.5 min-w-[160px] bg-white border border-gray-100 rounded-full shadow-lg py-1 z-40">
           {options.map((opt) => (
             <button
               type="button"

@@ -92,7 +92,7 @@ const JobApplicationPage = () => {
 
                 <button
                   type="button"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-400 transition hover:text-[#016EA6]"
+                  className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-400 transition hover:text-[#016EA6]"
                   aria-label="Save job"
                 >
                   <FiBookmark className="h-4 w-4" />
@@ -136,7 +136,7 @@ const JobApplicationPage = () => {
                 <span className="mb-2 block text-sm font-medium text-gray-700">Cover message</span>
                 <textarea
                   rows={4}
-                  className="w-full rounded-xl border border-[#dfeaf0] bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
+                  className="w-full rounded-full border border-[#dfeaf0] bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
                   placeholder="Tell the client why you're the best fit."
                 />
               </label>
@@ -148,7 +148,7 @@ const JobApplicationPage = () => {
                   <input
                     type="text"
                     placeholder="Enter a price"
-                    className="w-full rounded-xl border border-[#dfeaf0] bg-gray-50 py-3 pl-10 pr-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
+                    className="w-full rounded-full border border-[#dfeaf0] bg-gray-50 py-3 pl-10 pr-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
                   />
                 </div>
               </label>
@@ -159,7 +159,7 @@ const JobApplicationPage = () => {
                   type="text"
                   value="6 days"
                   readOnly
-                  className="w-full rounded-xl border border-[#dfeaf0] bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none"
+                  className="w-full rounded-full border border-[#dfeaf0] bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none"
                 />
               </label>
 
@@ -169,7 +169,7 @@ const JobApplicationPage = () => {
                   type="text"
                   value="Immediately"
                   readOnly
-                  className="w-full rounded-xl border border-[#dfeaf0] bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none"
+                  className="w-full rounded-full border border-[#dfeaf0] bg-gray-50 px-3.5 py-3 text-sm text-gray-700 outline-none"
                 />
               </label>
 
@@ -200,14 +200,14 @@ const JobApplicationPage = () => {
                 <button
                   type="button"
                   onClick={() => navigate("/professional/home")}
-                  className="rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
+                  className="rounded-full border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-700 transition hover:border-gray-300 hover:bg-gray-50"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="button"
-                  className="rounded-xl bg-[#016EA6] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_18px_rgba(1,110,166,0.22)] transition hover:bg-[#015f92]"
+                  className="rounded-full bg-[#016EA6] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_18px_rgba(1,110,166,0.22)] transition hover:bg-[#015f92]"
                 >
                   Submit Application
                 </button>

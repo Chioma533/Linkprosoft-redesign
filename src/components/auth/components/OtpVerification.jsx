@@ -145,7 +145,7 @@ const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
                 onChange={(e) => handleChange(e.target, idx)}
                 onKeyDown={(e) => handleKeyDown(e, idx)}
                 onPaste={handlePaste}
-                className="w-11 h-11 md:w-12 md:h-12 border border-gray-200 focus:border-[#016EA6] focus:ring-1 focus:ring-[#016EA6]/20 rounded-xl text-center font-semibold text-gray-900 text-lg md:text-xl outline-none transition-all"
+                className="w-11 h-11 md:w-12 md:h-12 border border-gray-200 focus:border-[#016EA6] focus:ring-1 focus:ring-[#016EA6]/20 rounded-full text-center font-semibold text-gray-900 text-lg md:text-xl outline-none transition-all"
                 disabled={isLoading}
               />
             ))}
@@ -164,7 +164,7 @@ const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
                   onChange={(e) => handleChange(e.target, realIdx)}
                   onKeyDown={(e) => handleKeyDown(e, realIdx)}
                   onPaste={handlePaste}
-                  className="w-11 h-11 md:w-12 md:h-12 border border-gray-200 focus:border-[#016EA6] focus:ring-1 focus:ring-[#016EA6]/20 rounded-xl text-center font-semibold text-gray-900 text-lg md:text-xl outline-none transition-all"
+                  className="w-11 h-11 md:w-12 md:h-12 border border-gray-200 focus:border-[#016EA6] focus:ring-1 focus:ring-[#016EA6]/20 rounded-full text-center font-semibold text-gray-900 text-lg md:text-xl outline-none transition-all"
                   disabled={isLoading}
                 />
               );

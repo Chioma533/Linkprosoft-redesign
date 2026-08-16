@@ -155,15 +155,15 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                 <h3 className="text-base font-bold text-gray-900">Active jobs</h3>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-full text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
                     <FiFilter className="w-3.5 h-3.5" />
                     <span>Filter</span>
                   </button>
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
+                  <button className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-full text-xs font-semibold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-colors cursor-pointer">
                     <FiDownload className="w-3.5 h-3.5" />
                     <span>Export data</span>
                   </button>
-                  <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-bold transition-colors cursor-pointer">
+                  <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-colors cursor-pointer">
                     <FiPlus className="w-3.5 h-3.5" />
                     <span>Post a project</span>
                   </button>
@@ -195,7 +195,7 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
                         <td className="py-3.5">
                           <button
                             onClick={() => onViewProject("job-1")}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${getActionButtonStyle(job.actionText)}`}
+                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${getActionButtonStyle(job.actionText)}`}
                           >
                             {job.actionText}
                           </button>
@@ -267,9 +267,9 @@ const EmployerOverviewSubpage = ({ onViewProject }) => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <h3 className="text-base font-bold text-gray-900">Upcoming Schedule</h3>
           <div className="flex gap-2">
-            <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors cursor-pointer">Today</button>
-            <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors cursor-pointer">This week</button>
-            <button className="px-3.5 py-1.5 bg-blue-50 text-[#016EA6] border border-blue-100 rounded-xl text-xs font-bold transition-colors cursor-pointer">This month</button>
+            <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors cursor-pointer">Today</button>
+            <button className="px-3.5 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs font-semibold text-gray-400 hover:text-gray-900 transition-colors cursor-pointer">This week</button>
+            <button className="px-3.5 py-1.5 bg-blue-50 text-[#016EA6] border border-blue-100 rounded-full text-xs font-bold transition-colors cursor-pointer">This month</button>
           </div>
         </div>
 

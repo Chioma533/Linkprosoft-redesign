@@ -42,6 +42,8 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
   };
 
   const menuItems = getMenuItems();
+  const activeIndex = Math.max(menuItems.findIndex((item) => item.id === activeTab), 0);
+  const indicatorOffset = 24 + activeIndex * 54;
 
   return (
     <>
@@ -61,7 +63,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
           ${isOpen ? "px-6 justify-between" : "px-3 justify-center"}
         `}>
           <div className="flex items-center gap-3">
-            <img src={Logo} className="w-10 h-10 rounded-xl object-contain shrink-0" alt="Logo" />
+            <img src={Logo} className="w-10 h-10 rounded-full object-contain shrink-0" alt="Logo" />
             <span className={`font-bold text-xl tracking-tight text-gray-900 transition-all duration-300 whitespace-nowrap overflow-hidden
               ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}
             `}>
@@ -89,7 +91,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
             <input
               type="text"
               placeholder="Search anything"
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all"
             />
           </div>
           
@@ -105,7 +107,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
               }, 100);
               onClose();
             }}
-            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all cursor-pointer"
+            className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-full text-xs font-semibold text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <Bell className="w-4 h-4 shrink-0" />
@@ -120,9 +122,17 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         </div>
 
         {/* Navigation Links */}
-        <nav className={`flex-1 py-6 space-y-1.5 overflow-y-auto transition-all duration-300
+        <nav className={`relative flex-1 py-6 space-y-1.5 overflow-y-auto transition-all duration-300
           ${isOpen ? "px-4" : "px-2"}
         `}>
+          <div
+            className="absolute left-1 right-1 rounded-xl bg-[#016EA6] shadow-md shadow-[#016EA6]/10 transition-all duration-500 ease-out z-0"
+            style={{
+              top: `${indicatorOffset}px`,
+              height: "48px",
+            }}
+          />
+
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -130,12 +140,12 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
               <button
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={`w-full flex items-center justify-start rounded-xl text-sm font-medium transition-all duration-300 group relative cursor-pointer
+                className={`relative z-10 w-full flex items-center justify-start rounded-xl text-sm font-medium transition-all duration-300 group cursor-pointer
                   py-3.5 gap-3
                   ${isOpen ? "px-4" : "px-3.5"}
                   ${
                     isActive
-                      ? "bg-[#016EA6] text-white shadow-md shadow-[#016EA6]/10"
+                      ? "text-white"
                       : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 title={!isOpen ? item.name : undefined}
@@ -148,7 +158,6 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
                 `}>
                   {item.name}
                 </span>
-                <div className={`h-5 bg-white rounded-full shrink-0 transition-all duration-300 ml-auto ${isActive && isOpen ? "w-1.5 opacity-100" : "w-0 opacity-0 pointer-events-none"}`} />
               </button>
             );
           })}

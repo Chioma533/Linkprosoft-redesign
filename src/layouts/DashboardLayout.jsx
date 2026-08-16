@@ -5,7 +5,7 @@ import { useDashboardStore } from "../store/dashboardStore";
 import { useAuthStore } from "../store/authStore";
 import { Home, Search, Briefcase, FileText, Wallet } from "lucide-react";
 import { debugLog } from "../utils/debugLogger";
-import DashboardLoadingScreen from "../components/common/preloader/DashboardLoadingScreen";
+import { DashboardContentSkeleton } from "../components/common/preloader/DashboardLoadingScreen";
 
 const DashboardLayout = ({ children }) => {
   const { activeTab, setActiveTab, fetchDashboardData, isLoading } = useDashboardStore();
@@ -45,16 +45,7 @@ const DashboardLayout = ({ children }) => {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    // Automatically collapse sidebar after selecting a tab
-    setIsSidebarOpen(false);
   };
-
-  /* ── Skeleton gate ───────────────────────────────────────────────────── *
-   * Show skeleton when the tab-switch timer is still running OR the API    *
-   * fetch is still in flight. Whichever resolves last wins.                */
-  if (showSkeleton || isLoading) {
-    return <DashboardLoadingScreen subpage={activeTab} />;
-  }
 
   return (
     <div className="flex bg-[#EBF3FA]/30 h-screen text-gray-800 font-sans relative overflow-hidden">
@@ -66,7 +57,7 @@ const DashboardLayout = ({ children }) => {
         onClick={() => setIsSidebarOpen(false)}
       />
 
-      {/* Sidebar Component */}
+      {/* Sidebar Component - stays mounted and intact across tab switches */}
       <DashboardSidebar 
         activeTab={activeTab} 
         onTabChange={handleTabChange} 
@@ -83,9 +74,13 @@ const DashboardLayout = ({ children }) => {
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
         />
 
-        {/* Viewport Content */}
+        {/* Viewport Content - renders subpage skeleton or real content */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-w-7xl w-full mx-auto pb-24 md:pb-8">
-          {children}
+          {(showSkeleton || isLoading) ? (
+            <DashboardContentSkeleton subpage={activeTab} />
+          ) : (
+            children
+          )}
         </main>
 
         {/* Bottom Navigation for Mobile */}

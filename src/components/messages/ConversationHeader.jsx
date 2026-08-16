@@ -35,19 +35,19 @@ const ConversationHeader = ({ thread, onBackMobile }) => {
       <div className="flex items-center gap-1">
         <button
           title="Voice call"
-          className="p-2 rounded-xl text-gray-400 hover:text-[#016EA6] hover:bg-[#EBF3FA] transition-all duration-200 cursor-pointer"
+          className="p-2 rounded-full text-gray-400 hover:text-[#016EA6] hover:bg-[#EBF3FA] transition-all duration-200 cursor-pointer"
         >
           <Phone className="w-4 h-4" />
         </button>
         <button
           title="Block user"
-          className="p-2 rounded-xl text-gray-400 hover:text-rose-500 hover:bg-rose-50 transition-all duration-200 cursor-pointer"
+          className="p-2 rounded-full text-gray-400 hover:text-rose-500 hover:bg-rose-50 transition-all duration-200 cursor-pointer"
         >
           <Ban className="w-4 h-4" />
         </button>
         <button
           title="More options"
-          className="p-2 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+          className="p-2 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all duration-200 cursor-pointer"
         >
           <MoreVertical className="w-4 h-4" />
         </button>

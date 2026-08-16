@@ -104,7 +104,7 @@ const ProfessionalCard = ({
           <button
             id={`bookmark-btn-${id}`}
             onClick={handleBookmark}
-            className="p-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer shrink-0 mt-0.5"
+            className="p-2 rounded-full border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer shrink-0 mt-0.5"
             title={bookmarked ? "Remove bookmark" : "Bookmark"}
           >
             <FiBookmark

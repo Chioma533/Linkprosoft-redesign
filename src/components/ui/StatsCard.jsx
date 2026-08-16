@@ -33,7 +33,7 @@ const StatsCard = ({
         </div>
         {Icon && (
           <div
-            className={`p-3 rounded-xl ${iconBg ? iconBg : ""} ${iconColor} flex items-center justify-center shrink-0`}
+            className={`p-3 rounded-full ${iconBg ? iconBg : ""} ${iconColor} flex items-center justify-center shrink-0`}
             style={iconBgStyle}
           >
             <Icon className="w-4 h-4 sm:w-5 sm:h-5" />

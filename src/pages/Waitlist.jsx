@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiChevronDown } from "react-icons/fi";
 import toast from "react-hot-toast";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
+import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 
 /* ─── Design Tokens ────────────────────────────────────────── */
 const BG_IMAGE = "/temp_figma_mockups/Waitlsit-bg.jpg";
@@ -267,6 +269,59 @@ const Waitlist = () => {
           }}
         />
 
+        {/* ── Top Header / Logo ─────────────────────────────────── */}
+        <motion.header
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          style={{
+            position: "relative",
+            zIndex: 10,
+            width: "100%",
+            maxWidth: 1280,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+            padding: "24px 24px 0",
+          }}
+        >
+          <Link
+            to="/"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 12,
+              textDecoration: "none",
+            }}
+            className="hover:opacity-90 transition-opacity"
+            aria-label="Linkprosoft Home"
+          >
+            <img
+              src={Logo}
+              alt="Linkprosoft"
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 10,
+                objectFit: "cover",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+              }}
+            />
+            <span
+              style={{
+                color: "#fff",
+                fontWeight: 700,
+                fontSize: "1.25rem",
+                letterSpacing: "-0.02em",
+                fontFamily: "var(--font-heading, sans-serif)",
+                textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+              }}
+            >
+              Linkprosoft
+            </span>
+          </Link>
+        </motion.header>
+
         {/* ── Content ─────────────────────────────────────────── */}
         <div
           style={{
@@ -274,7 +329,7 @@ const Waitlist = () => {
             zIndex: 2,
             width: "100%",
             maxWidth: 720,
-            padding: "80px 24px 0",
+            padding: "48px 24px 0",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",

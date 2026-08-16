@@ -121,7 +121,7 @@ const PopularCategories = ({ searchQuery }) => {
                   <img
                     src={cat.image}
                     alt={cat.title}
-                    className="w-16 h-16 rounded-xl object-cover shrink-0"
+                    className="w-16 h-16 rounded-full object-cover shrink-0"
                   />
 
                   {/* Category Text */}

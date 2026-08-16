@@ -76,10 +76,10 @@ const ProjectModals = ({
               </p>
             </div>
             <div className="flex flex-col gap-2 pt-2">
-              <button onClick={onConfirmCancel} className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-xl text-xs font-bold transition-all cursor-pointer">
+              <button onClick={onConfirmCancel} className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-full text-xs font-bold transition-all cursor-pointer">
                 Yes, Cancel Project
               </button>
-              <button onClick={onClose} className="w-full border border-gray-100 hover:bg-gray-50 text-gray-500 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer">
+              <button onClick={onClose} className="w-full border border-gray-100 hover:bg-gray-50 text-gray-500 py-3 rounded-full text-xs font-bold transition-all cursor-pointer">
                 No, Go back
               </button>
             </div>
@@ -99,7 +99,7 @@ const ProjectModals = ({
               </p>
             </div>
             <div className="pt-2">
-              <button onClick={onGoBackHome} className="w-full border border-gray-100 hover:bg-gray-50 text-gray-500 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer">
+              <button onClick={onGoBackHome} className="w-full border border-gray-100 hover:bg-gray-50 text-gray-500 py-3 rounded-full text-xs font-bold transition-all cursor-pointer">
                 Okay
               </button>
             </div>

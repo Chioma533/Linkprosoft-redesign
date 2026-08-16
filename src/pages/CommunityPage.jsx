@@ -69,8 +69,8 @@ const DesktopCommunityPage = () => (
 
     <main className="mx-auto max-w-[1320px] px-4 py-8 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[290px_minmax(0,1fr)_300px]">
-        <aside className="rounded-[30px] border border-[#e7e7e7] bg-[#f8f8f8] p-4">
-          <div className="relative overflow-hidden rounded-[28px] border border-[#e7e7e7] bg-[#f5f5f5] p-3">
+        <aside className="rounded-[30px]  bg-[#f8f8f8] p-4">
+          <div className="relative overflow-hidden rounded-[28px]  bg-[#f5f5f5] p-3">
             <div className="relative h-28 overflow-hidden rounded-[20px] bg-gradient-to-br from-[#f7d7d8] via-[#f0f2f4] to-[#f3f3f3]">
               <div className="absolute -left-10 top-4 h-40 w-40 rounded-full bg-[#f3c0c6] opacity-80" />
               <div className="absolute -right-8 top-1 h-32 w-32 rounded-full bg-[#6ec7c5] opacity-90" />
@@ -119,8 +119,8 @@ const DesktopCommunityPage = () => (
         </aside>
 
         <section className="space-y-6">
-          <div className="rounded-[26px] border border-[#e7e7e7] bg-[#f8f8f8] p-4">
-            <div className="flex items-center gap-3 rounded-full border border-[#e7e7e7] bg-[#f2f2f2] px-4 py-3">
+          <div className="rounded-[26px]  bg-[#f8f8f8] p-4">
+            <div className="flex items-center gap-3 rounded-full  bg-[#f2f2f2] px-4 py-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#1f4d75] via-[#7aa6bd] to-[#dfeaf0] text-white">
                 <FiUser className="h-5 w-5" />
               </div>
@@ -151,7 +151,7 @@ const DesktopCommunityPage = () => (
           </div>
 
           {feedPosts.map((post) => (
-            <article key={post.id} className="rounded-[26px] border border-[#e7e7e7] bg-[#f8f8f8] p-4">
+            <article key={post.id} className="rounded-[26px]  bg-[#f8f8f8] p-4">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div className={avatarStyle}>E</div>
@@ -201,7 +201,7 @@ const DesktopCommunityPage = () => (
           ))}
         </section>
 
-        <aside className="rounded-[30px] border border-[#e7e7e7] bg-[#f8f8f8] p-4">
+        <aside className="rounded-[30px]  bg-[#f8f8f8] p-4">
           <div className="flex items-center justify-between border-b border-[#ebebeb] pb-4">
             <h3 className="text-[1.8rem] font-medium tracking-[-0.04em] text-[#1d1d1d]">Messages</h3>
             <button className="text-2xl font-light text-[#5d5d5d]">×</button>
@@ -252,8 +252,8 @@ const MobileCommunityPage = () => (
     </header>
 
     <main className="mx-auto max-w-[420px] px-3 pb-6 pt-4">
-      <div className="rounded-[22px] border border-[#e7e7e7] bg-[#f8f8f8] p-3">
-        <div className="flex items-center gap-3 rounded-full border border-[#e7e7e7] bg-[#f2f2f2] px-3 py-2.5">
+      <div className="rounded-[22px]  bg-[#f8f8f8] p-3">
+        <div className="flex items-center gap-3 rounded-full  bg-[#f2f2f2] px-3 py-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#1f4d75] via-[#7aa6bd] to-[#dfeaf0] text-white">
             <FiUser className="h-4 w-4" />
           </div>
@@ -284,7 +284,7 @@ const MobileCommunityPage = () => (
       </div>
 
       {feedPosts.map((post) => (
-        <article key={post.id} className="mt-4 rounded-[22px] border border-[#e7e7e7] bg-[#f8f8f8] p-3">
+        <article key={post.id} className="mt-4 rounded-[22px]  bg-[#f8f8f8] p-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2.5">
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#254d78] via-[#7a9db8] to-[#dce5eb] text-[10px] font-bold text-white">

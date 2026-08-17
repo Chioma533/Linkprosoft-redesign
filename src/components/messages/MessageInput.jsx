@@ -7,6 +7,7 @@ const MessageInput = ({
   onSend,
   onKeyDown,
   inputRef,
+  sending = false,
 }) => {
   return (
     <div className="shrink-0 px-5 py-4 rounded-br-2xl bg-white border-t border-gray-100">
@@ -22,6 +23,7 @@ const MessageInput = ({
         <input
           ref={inputRef}
           type="text"
+          maxLength={2000}
           placeholder="Type Something"
           value={inputText}
           onChange={(e) => onInputChange(e.target.value)}
@@ -47,10 +49,10 @@ const MessageInput = ({
           <button
             type="button"
             onClick={onSend}
-            disabled={!inputText.trim()}
+            disabled={!inputText.trim() || sending}
             title="Send"
             className={`p-2 rounded-full transition-all duration-200 cursor-pointer ${
-              inputText.trim()
+              inputText.trim() && !sending
                 ? "bg-[#016EA6] text-white hover:bg-[#0158a0] shadow-sm hover:shadow-md active:scale-95"
                 : "bg-gray-100 text-gray-300 cursor-not-allowed"
             }`}

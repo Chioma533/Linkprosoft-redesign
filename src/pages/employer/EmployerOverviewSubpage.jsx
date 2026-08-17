@@ -6,6 +6,7 @@ import StatsCard from "../../components/ui/StatsCard";
 import MobileJobCard from "../../components/ui/MobileJobCard";
 import NotificationList from "../../components/ui/NotificationList";
 import MoneyBag02Icon from "../../components/icons/MoneyBag02Icon";
+import ToggleOffIcon from "../../components/icons/ToggleOffIcon";
 import InformationCircleIcon from "../../components/icons/InformationCircleIcon";
 import DatabaseLockedIcon from "../../components/icons/DatabaseLockedIcon";
 import BorderFullIcon from "../../components/icons/BorderFullIcon";

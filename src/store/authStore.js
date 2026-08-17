@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { authService } from "../api/services/authService";
 import { toast } from "react-hot-toast"
+import { useMessagingStore } from "./messagingStore";
+import { socketManager } from "../utils/socketManager";
 
 
 const storedUser = JSON.parse(localStorage.getItem("user")) || null;
@@ -140,6 +142,8 @@ export const useAuthStore = create((set) => ({
     } catch (error) {
       console.warn("API logout call failed, completing local logout: ", error);
     } finally {
+      socketManager.disconnect();
+      useMessagingStore.getState().reset();
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       set({

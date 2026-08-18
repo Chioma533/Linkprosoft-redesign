@@ -1,5 +1,5 @@
 import React from "react";
-import { Search, Circle } from "lucide-react";
+import { Search, Circle, Plus } from "lucide-react";
 import MessageThreadItem from "./MessageThreadItem";
 import { TAB_OPTIONS } from "../../constants/messagesData";
 
@@ -13,6 +13,10 @@ const MessageSidebar = ({
   activeThreadId,
   onSelectThread,
   archiveCount,
+  currentUserId,
+  onAcceptRequest,
+  onDeclineRequest,
+  onStartConversation,
 }) => {
   return (
     <aside
@@ -28,7 +32,7 @@ const MessageSidebar = ({
       <div className="flex items-center gap-1 px-4 pt-5 pb-3">
         {TAB_OPTIONS.map((tab) => {
           const isActive = activeTab === tab;
-          const count = tab === "Archives" ? archiveCount : null;
+          const count = tab === "Requests" ? archiveCount : null;
           return (
             <button
               key={tab}
@@ -54,6 +58,12 @@ const MessageSidebar = ({
             </button>
           );
         })}
+      </div>
+
+      <div className="px-4 pb-3">
+        <button onClick={onStartConversation} className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#016EA6] px-3 py-2.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-[#015889]">
+          <Plus className="h-4 w-4" /> New conversation
+        </button>
       </div>
 
       {/* Search bar */}
@@ -90,6 +100,9 @@ const MessageSidebar = ({
               thread={thread}
               isActive={thread.id === activeThreadId}
               onClick={() => onSelectThread(thread)}
+              currentUserId={currentUserId}
+              onAccept={() => onAcceptRequest(thread.id)}
+              onDecline={() => onDeclineRequest(thread.id)}
             />
           ))
         )}

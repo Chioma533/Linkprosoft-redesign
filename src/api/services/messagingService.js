@@ -30,4 +30,14 @@ export const messagingService = {
   async getUserInfo(userId) {
     return dataOf(await axiosInstance.get(API_PATHS.MESSAGING.USER_INFO(userId)));
   },
+  async getApprovedContacts(limit = 50) {
+    const data = dataOf(await axiosInstance.get(API_PATHS.MESSAGING.APPROVED_CONTACTS, { params: { limit } }));
+    return data.contacts ?? data ?? [];
+  },
+  async acceptMessageRequest(threadId) {
+    return dataOf(await axiosInstance.patch(API_PATHS.MESSAGING.ACCEPT_REQUEST(threadId)));
+  },
+  async declineMessageRequest(threadId) {
+    return dataOf(await axiosInstance.patch(API_PATHS.MESSAGING.DECLINE_REQUEST(threadId)));
+  },
 };

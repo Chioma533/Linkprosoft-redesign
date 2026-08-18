@@ -119,10 +119,10 @@ const WalletSubpage = () => {
 
       {/* Row of Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <StatsCard title="Available Balance" value="₦500,000" icon={Wallet} iconColor="text-blue-500" iconBg="bg-blue-50" />
-        <StatsCard title="Pending Earnings" value="₦59,000" icon={Clock} iconColor="text-orange-500" iconBg="bg-orange-50" />
-        <StatsCard title="Total Earnings" value="₦1.8M" icon={DollarSign} iconColor="text-green-500" iconBg="bg-green-50" />
-        <StatsCard title="Total Withdrawn" value="₦1.8M" icon={ArrowUpRight} iconColor="text-[#016EA6]" iconBg="bg-sky-50" />
+        <StatsCard title="Available Balance" value="₦500,000" icon={Wallet} iconColor="text-blue-500" />
+        <StatsCard title="Pending Earnings" value="₦59,000" icon={Clock} iconColor="text-orange-500" />
+        <StatsCard title="Total Earnings" value="₦1.8M" icon={DollarSign} iconColor="text-green-500" />
+        <StatsCard title="Total Withdrawn" value="₦1.8M" icon={ArrowUpRight} iconColor="text-[#016EA6]" />
       </div>
 
       {/* Table Section Redesigned from Figma */}
@@ -181,8 +181,8 @@ const WalletSubpage = () => {
             {recentTransactions.map((tx, idx) => (
               <div key={idx} className="flex items-center justify-between gap-4 rounded-3xl border border-gray-100 bg-gray-50/80 p-4 ">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#016EA6] text-white">
-                    <Wallet className="w-5 h-5" />
+                  <div className="text-[#016EA6] flex items-center justify-center shrink-0">
+                    <Wallet className="w-6 h-6" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{tx.title}</p>
@@ -206,7 +206,7 @@ const WalletSubpage = () => {
         <div className="space-y-4">
           {[1, 2, 3].map((item, idx) => (
             <div key={idx} className="flex items-center gap-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100/30 hover:bg-gray-50 transition-colors cursor-pointer">
-              <div className="w-10 h-10 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center shrink-0">
+              <div className="text-[#016EA6] flex items-center justify-center shrink-0">
                 <Wallet className="w-5 h-5" />
               </div>
               <div>
@@ -231,8 +231,8 @@ const WalletSubpage = () => {
             {withdrawStep === 1 && (
               <div>
                 <div className="flex items-center gap-4 mb-8">
-                  <div className="w-14 h-14 bg-[#EBF3FA] rounded-2xl flex items-center justify-center shrink-0 border border-gray-100/60">
-                    <Wallet className="w-7 h-7 text-[#016EA6]" />
+                  <div className="text-[#016EA6] flex items-center justify-center shrink-0">
+                    <Wallet className="w-8 h-8" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-900 leading-tight">Withdraw Funds</h3>
@@ -343,8 +343,8 @@ const WalletSubpage = () => {
             {withdrawStep === 2 && (
               <div className="max-w-md mx-auto py-4">
                 <div className="flex flex-col items-center gap-6">
-                  <div className="w-16 h-16 bg-[#EBF3FA] rounded-2xl flex items-center justify-center border border-gray-100/60">
-                    <Wallet className="w-8 h-8 text-[#016EA6]" />
+                  <div className="text-[#016EA6] flex items-center justify-center">
+                    <Wallet className="w-10 h-10" />
                   </div>
 
                   <div className="text-center">
@@ -415,8 +415,8 @@ const WalletSubpage = () => {
 
             {withdrawStep === 3 && (
               <div className="max-w-md mx-auto text-center py-6 space-y-6">
-                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto ">
-                  <Check className="w-10 h-10 stroke-[3px]" />
+                <div className="text-emerald-500 flex items-center justify-center mx-auto">
+                  <Check className="w-12 h-12 stroke-[3px]" />
                 </div>
 
                 <div className="space-y-2">

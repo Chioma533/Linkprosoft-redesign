@@ -4,6 +4,7 @@ import ConversationHeader from "../components/messages/ConversationHeader";
 import MessageBubble from "../components/messages/MessageBubble";
 import MessageInput from "../components/messages/MessageInput";
 import EmptyConversationState from "../components/messages/EmptyConversationState";
+import StartConversationModal from "../components/messages/StartConversationModal";
 import { SOCKET_EVENTS } from "../constants/messagingConstants";
 import { useMessaging } from "../hooks/useMessaging";
 import { socketManager } from "../utils/socketManager";
@@ -16,16 +17,18 @@ const MessagesPage = () => {
   const {
     threads, activeThreadId, messages, pagination, messageInput, sendingMessage, messagesLoading,
     onlineUsers, typingUsers, currentUser, loadThreads, setActiveThread, loadMessages,
-    markThreadAsRead, sendMessage, setMessageInput,
+    markThreadAsRead, sendMessage, setMessageInput, approvedContacts, approvedContactsLoading,
+    loadApprovedContacts, startConversation, respondToMessageRequest,
   } = useMessaging();
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [showConversation, setShowConversation] = useState(false);
+  const [showStartConversation, setShowStartConversation] = useState(false);
   const typingTimeout = useRef(null);
   const typingActive = useRef(false);
   const endRef = useRef(null);
 
-  useEffect(() => { if (currentUser?.id) loadThreads(currentUser.id); }, [currentUser?.id]);
+  useEffect(() => { if (currentUser?.id) { loadThreads(currentUser.id); loadApprovedContacts(); } }, [currentUser?.id]);
 
   const uiThreads = useMemo(() => threads.map((thread) => {
     const participant = thread.participant ?? {};
@@ -39,7 +42,9 @@ const MessagesPage = () => {
   const activeThread = uiThreads.find((thread) => thread.id === activeThreadId);
   const filteredThreads = useMemo(() => uiThreads.filter((thread) => {
     const matchesSearch = `${thread.sender} ${thread.preview}`.toLowerCase().includes(searchQuery.toLowerCase());
-    return activeTab === "Unread" ? matchesSearch && thread.unread > 0 : matchesSearch;
+    if (activeTab === "Unread") return matchesSearch && thread.unread > 0;
+    if (activeTab === "Requests") return matchesSearch && thread.status === "request" && thread.initiatorId !== currentUser?.id;
+    return matchesSearch;
   }), [uiThreads, activeTab, searchQuery]);
 
   useEffect(() => {
@@ -53,6 +58,11 @@ const MessagesPage = () => {
   useEffect(() => () => clearTimeout(typingTimeout.current), []);
 
   const selectThread = (thread) => { setActiveThread(thread.id); setShowConversation(true); };
+  const selectApprovedContact = async (contact) => {
+    await startConversation(contact);
+    setShowStartConversation(false);
+    setShowConversation(true);
+  };
   const stopTyping = () => {
     if (typingActive.current && activeThreadId) socketManager.emit(SOCKET_EVENTS.TYPING_STOP, { threadId: activeThreadId });
     typingActive.current = false;
@@ -79,7 +89,10 @@ const MessagesPage = () => {
       <MessageSidebar showConversation={showConversation} activeTab={activeTab} onTabChange={setActiveTab}
         searchQuery={searchQuery} onSearchChange={setSearchQuery} filteredThreads={filteredThreads}
         activeThreadId={activeThreadId} onSelectThread={selectThread}
-        archiveCount={uiThreads.filter((thread) => thread.unread === 0).length} />
+        archiveCount={uiThreads.filter((thread) => thread.status === "request" && thread.initiatorId !== currentUser?.id).length}
+        currentUserId={currentUser?.id} onAcceptRequest={(threadId) => respondToMessageRequest(threadId, "accept")}
+        onDeclineRequest={(threadId) => respondToMessageRequest(threadId, "decline")}
+        onStartConversation={() => setShowStartConversation(true)} />
       <section className={`${showConversation ? "flex" : "hidden"} md:flex flex-col flex-1 bg-[#F7FAFC] min-w-0`}>
         {activeThread ? <>
           <ConversationHeader thread={activeThread} onBackMobile={() => setShowConversation(false)} />
@@ -95,6 +108,8 @@ const MessagesPage = () => {
             sending={sendingMessage} inputRef={null} />
         </> : <EmptyConversationState />}
       </section>
+      {showStartConversation && <StartConversationModal contacts={approvedContacts} loading={approvedContactsLoading}
+        onClose={() => setShowStartConversation(false)} onSelect={selectApprovedContact} />}
     </div>
   );
 };

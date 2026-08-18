@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { FiSearch, FiBriefcase, FiClock, FiCheckCircle, FiXCircle, FiPlus, FiMapPin, FiCalendar } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
+import { useDashboardStore } from "../../store/dashboardStore";
 import StatsCard from "../../components/ui/StatsCard";
 import MobileJobCard from "../../components/ui/MobileJobCard";
 import PostJobWizard from "./PostJobWizard";
@@ -12,12 +13,19 @@ import BorderFullIcon from "../../components/icons/BorderFullIcon";
 
 const EmployerManageJobsSubpage = ({ onViewProject }) => {
   const { user } = useAuthStore();
+  const { globalSearchQuery } = useDashboardStore();
   const userName = user?.fullName || user?.full_name || "Elvis Chimamanda";
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState(globalSearchQuery || "");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeSubTab, setActiveSubTab] = useState("All");
   const [showWizard, setShowWizard] = useState(false);
+
+  useEffect(() => {
+    if (globalSearchQuery) {
+      setSearchTerm(globalSearchQuery);
+    }
+  }, [globalSearchQuery]);
 
   const [jobs, setJobs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

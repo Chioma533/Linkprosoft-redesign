@@ -8,30 +8,29 @@ import { toast } from "react-hot-toast";
 
 const ProfileSubpage = () => {
   const { user } = useAuthStore();
-  const userId = user?.id || user?.userId;
+  const userId = user?.id || user?.userId || user?.data?.id || user?.data?.userId;
 
   const [profileData, setProfileData] = useState(null);
   const [skills, setSkills] = useState([]);
   const [certifications, setCertifications] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
   const [reviews, setReviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editForm, setEditForm] = useState({
-    bio: "",
-    profession: "",
+    bio: user?.bio || "",
+    profession: user?.profession || "",
     hourlyRate: "",
-    location: "",
+    location: user?.location || "",
     availabilityStatus: "available",
   });
 
   useEffect(() => {
     let isMounted = true;
     const fetchProfileInfo = async () => {
-      setIsLoading(true);
       try {
         const [profileRes, skillsRes, certsRes, portfolioRes, reviewsRes] = await Promise.allSettled([
           profileService.getMyProfile(),
@@ -43,14 +42,16 @@ const ProfileSubpage = () => {
 
         if (isMounted) {
           const profile = profileRes.status === "fulfilled" ? profileRes.value : null;
-          setProfileData(profile);
-          setEditForm({
-            bio: profile?.bio || user?.bio || "",
-            profession: profile?.profession || user?.profession || "",
-            hourlyRate: profile?.hourlyRate || profile?.hourly_rate || "",
-            location: user?.location || profile?.location || "",
-            availabilityStatus: profile?.availabilityStatus || "available",
-          });
+          if (profile) {
+            setProfileData(profile);
+            setEditForm({
+              bio: profile.bio || user?.bio || "",
+              profession: profile.profession || user?.profession || "",
+              hourlyRate: profile.hourlyRate || profile.hourly_rate || "",
+              location: user?.location || profile.location || "",
+              availabilityStatus: profile.availabilityStatus || "available",
+            });
+          }
 
           if (skillsRes.status === "fulfilled" && Array.isArray(skillsRes.value)) {
             setSkills(skillsRes.value);
@@ -258,8 +259,8 @@ const ProfileSubpage = () => {
             <div className="space-y-3">
               {certifications.map((cert, idx) => (
                 <div key={cert.id || idx} className="flex gap-3 items-start hover:bg-gray-50/50 p-2 rounded-2xl transition-all">
-                  <div className="p-2 bg-blue-50 text-[#016EA6] rounded-full mt-0.5">
-                    <Award className="w-4 h-4" />
+                  <div className="text-[#016EA6] mt-0.5 shrink-0">
+                    <Award className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-gray-800 leading-snug">{cert.title}</h4>
@@ -310,8 +311,8 @@ const ProfileSubpage = () => {
             </div>
           ) : (
             <div className="py-12 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-100 flex flex-col items-center justify-center">
-              <div className="w-10 h-10 rounded-full bg-sky-50 text-[#016EA6] flex items-center justify-center mb-2">
-                <Briefcase className="w-5 h-5" />
+              <div className="text-[#016EA6] flex items-center justify-center mb-2">
+                <Briefcase className="w-7 h-7" />
               </div>
               <h5 className="text-xs font-bold text-gray-800">Your Portfolio is Empty</h5>
               <p className="text-[11px] text-gray-400 font-medium mt-0.5">
@@ -372,8 +373,8 @@ const ProfileSubpage = () => {
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-full bg-sky-50 text-[#016EA6] flex items-center justify-center">
-                <Edit3 className="w-5 h-5" />
+              <div className="text-[#016EA6] flex items-center justify-center">
+                <Edit3 className="w-6 h-6" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-gray-900">Edit Professional Profile</h3>

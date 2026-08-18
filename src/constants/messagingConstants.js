@@ -10,4 +10,6 @@ export const SOCKET_EVENTS = {
   TYPING: "typing",
   PRESENCE_UPDATE: "presenceUpdate",
   MESSAGE_READ: "messageRead",
+  REQUEST_ACCEPTED: "requestAccepted",
+  REQUEST_DECLINED: "requestDeclined",
 };

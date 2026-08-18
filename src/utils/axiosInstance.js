@@ -34,29 +34,45 @@ axiosInstance.interceptors.request.use(
     }
 )
 
-    // request interceptors
+    // response interceptor
     axiosInstance.interceptors.response.use(
         (response) => {
-            return(response)
+            return response;
         },
         (error) => {
-        if(error.response){
+            if (error.response) {
                 try {
-                    debugLog("axios_response_error", { url: error.config?.url, status: error.response.status, data: error.response.data });
+                    debugLog("axios_response_error", {
+                        url: error.config?.url,
+                        status: error.response.status,
+                        data: error.response.data
+                    });
                 } catch (e) {
                     console.debug("[axiosInstance] debugLog response failed", e);
                 }
-                if(error.response.status === 401){
-                window.location.href = "/login"
-            }else if(error.response.status === 500){
-                console.error("Server error, Please try again later")
-            }else if (error.code === "ECONNABORTED"){
-                console.error("Request timeout, Please try again")
+
+                // Handle 401 Unauthorized
+                if (error.response.status === 401) {
+                    const reqUrl = error.config?.url || "";
+                    const isAuthCheck = reqUrl.includes("/api/auth/me") || reqUrl.includes("/api/auth/verify");
+                    const currentPath = window.location.pathname;
+                    const isPublicRoute = ["/login", "/signup", "/verify-otp", "/forgot-password", "/reset-password", "/"].includes(currentPath);
+
+                    // Only force redirect to /login if a core auth verification fails and we are not already on a public route
+                    if (isAuthCheck && !isPublicRoute) {
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("user");
+                        window.location.href = "/login";
+                    }
+                } else if (error.response.status === 500) {
+                    console.error("Server error, Please try again later");
+                } else if (error.code === "ECONNABORTED") {
+                    console.error("Request timeout, Please try again");
+                }
             }
-        }
             return Promise.reject(error);
-      }
-    )
+        }
+    );
 
 export default axiosInstance
 

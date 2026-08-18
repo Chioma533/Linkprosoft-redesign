@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiSearch,
   FiFilter,
@@ -23,7 +23,7 @@ import { categoryOptions, statusOptions } from "../../constants/filterOptions";
 import MoneyBag02Icon from "../../components/icons/MoneyBag02Icon";
 
 const MyJobsSubpage = () => {
-  const { myJobs = [], metrics, setSelectedJob, setPreviousTab, setActiveTab } = useDashboardStore();
+  const { myJobs = [], metrics, setSelectedJob, setPreviousTab, setActiveTab, globalSearchQuery } = useDashboardStore();
 
   const stats = [
     {
@@ -81,6 +81,12 @@ const MyJobsSubpage = () => {
     setStatusFilter,
     filteredJobs,
   } = useJobFilter(normalizedJobs);
+
+  useEffect(() => {
+    if (globalSearchQuery) {
+      setSearch(globalSearchQuery);
+    }
+  }, [globalSearchQuery, setSearch]);
 
   const getStatusStyle = (status) => {
     switch ((status || "").toLowerCase()) {
@@ -246,8 +252,8 @@ const MyJobsSubpage = () => {
           ) : (
             /* Modern Empty State */
             <div className="py-14 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
-              <div className="w-14 h-14 rounded-2xl bg-sky-50 text-[#016EA6] flex items-center justify-center mb-3.5 shadow-xs border border-sky-100/50">
-                <FiBriefcase className="w-6 h-6 stroke-[2]" />
+              <div className="text-[#016EA6] mb-3 flex items-center justify-center">
+                <FiBriefcase className="w-8 h-8 stroke-[2]" />
               </div>
               <h4 className="text-sm font-bold text-gray-900 mb-1">No Contracted Jobs Found</h4>
               <p className="text-xs text-gray-400 font-medium max-w-sm mb-5 leading-relaxed">

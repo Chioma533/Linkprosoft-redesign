@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
-export const useJobFilter = (jobs = []) => {
-  const [search, setSearch] = useState("");
+export const useJobFilter = (jobs = [], initialSearch = "") => {
+  const [search, setSearch] = useState(initialSearch);
   const [dateFilter, setDateFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [budgetFilter, setBudgetFilter] = useState("");
@@ -11,20 +11,25 @@ export const useJobFilter = (jobs = []) => {
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
-      const matchesSearch =
-        job.title.toLowerCase().includes(search.toLowerCase()) ||
-        job.description.toLowerCase().includes(search.toLowerCase());
+      const q = (search || "").toLowerCase().trim();
+      const matchesSearch = !q
+        ? true
+        : (job.title || "").toLowerCase().includes(q) ||
+          (job.description || "").toLowerCase().includes(q) ||
+          (job.client || "").toLowerCase().includes(q) ||
+          (job.category || "").toLowerCase().includes(q) ||
+          (job.orderId || "").toLowerCase().includes(q);
 
       const matchesCategory = categoryFilter
-        ? job.category.toLowerCase().includes(categoryFilter.toLowerCase())
+        ? (job.category || "").toLowerCase().includes(categoryFilter.toLowerCase())
         : true;
 
       const matchesLocation = locationFilter
-        ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
+        ? (job.location || "").toLowerCase().includes(locationFilter.toLowerCase())
         : true;
 
       const matchesStatus = statusFilter
-        ? job.status.toLowerCase().includes(statusFilter.toLowerCase())
+        ? (job.status || "").toLowerCase().includes(statusFilter.toLowerCase())
         : true;
 
       const matchesRating = (() => {

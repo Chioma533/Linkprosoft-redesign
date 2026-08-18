@@ -3,7 +3,7 @@
 ## Overview
 This plan outlines the integration of the backend messaging REST API and Socket.IO real-time features into the existing React + Zustand frontend architecture.
 
-**Current Status**: UI components exist (MessageBubble, MessageSidebar, etc.). Backend API is production-ready.  
+**Current Status**: UI components exist (MessageBub bble, MessageSidebar, etc.). Backend API is production-ready.  
 **Goal**: Full end-to-end real-time messaging with REST fallback.
 
 ---
@@ -11,7 +11,7 @@ This plan outlines the integration of the backend messaging REST API and Socket.
 ## 1. Architecture & State Management Strategy
 
 ### 1.1 Zustand Store Structure
-Create `src/store/messagingStore.js` with the following state shape:
+Create `src/store/messagingStore.js` with the following state shape:I
 
 ```typescript
 {

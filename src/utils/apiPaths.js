@@ -129,6 +129,9 @@ export const API_PATHS = {
     THREAD_MESSAGES: (threadId) => `/api/chat/threads/${threadId}/messages`,
     THREAD_READ: (threadId) => `/api/chat/threads/${threadId}/read`,
     USER_INFO: (userId) => `/api/chat/users/${userId}`,
+    APPROVED_CONTACTS: "/api/chat/contacts/approved",
+    ACCEPT_REQUEST: (threadId) => `/api/chat/threads/${threadId}/accept`,
+    DECLINE_REQUEST: (threadId) => `/api/chat/threads/${threadId}/decline`,
   },
 
   SEARCH: {

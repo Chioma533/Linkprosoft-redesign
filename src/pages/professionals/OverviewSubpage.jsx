@@ -116,15 +116,23 @@ const OverviewSubpage = () => {
 
               {/* Desktop Actions */}
               <div className="hidden sm:flex flex-wrap items-center gap-2">
-                <div className="relative max-w-[180px]">
+                <div className="relative max-w-[190px]">
                   <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
                   <input
                     type="text"
                     value={jobSearch}
                     onChange={(e) => setJobSearch(e.target.value)}
                     placeholder="Search active jobs..."
-                    className="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all font-medium text-gray-800"
+                    className="w-full pl-8 pr-7 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all font-medium text-gray-800"
                   />
+                  {jobSearch && (
+                    <button
+                      onClick={() => setJobSearch("")}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    >
+                      <FiX className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
 
                 <ExportButton
@@ -151,15 +159,23 @@ const OverviewSubpage = () => {
               </div>
 
               {/* Mobile Search Input */}
-              <div className="relative sm:hidden max-w-[130px]">
+              <div className="relative sm:hidden max-w-[140px]">
                 <FiSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3" />
                 <input
                   type="text"
                   value={jobSearch}
                   onChange={(e) => setJobSearch(e.target.value)}
-                  placeholder="Search Jobs"
-                  className="w-full pl-7 pr-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] outline-none focus:border-[#016EA6] focus:bg-white transition-all font-medium text-gray-800"
+                  placeholder="Search..."
+                  className="w-full pl-7 pr-6 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-[10px] outline-none focus:border-[#016EA6] focus:bg-white transition-all font-medium text-gray-800"
                 />
+                {jobSearch && (
+                  <button
+                    onClick={() => setJobSearch("")}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <FiX className="w-2.5 h-2.5" />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -257,7 +273,7 @@ const OverviewSubpage = () => {
                   ) : (
                     <button
                       onClick={() => setActiveTab("browse-jobs")}
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer active:scale-95"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer active:scale-95"
                     >
                       <span>Explore Open Jobs</span>
                       <FiArrowRight className="w-3.5 h-3.5" />
@@ -270,7 +286,7 @@ const OverviewSubpage = () => {
         </div>
 
         {/* Recent Messages Widget */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-3xl border border-gray-100/50  flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-base font-bold text-gray-900">Recent Messages</h3>
@@ -319,7 +335,7 @@ const OverviewSubpage = () => {
       {/* Bottom Grid: Notifications, Performance meters, Recent Jobs placeholder */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Notifications list */}
-        <div id="notifications-section" className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs flex flex-col justify-between">
+        <div id="notifications-section" className="bg-white p-6 rounded-3xl border border-gray-100/50  flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
@@ -358,7 +374,7 @@ const OverviewSubpage = () => {
         </div>
 
         {/* Your Performance Metrics */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-3xl border border-gray-100/50  flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-base font-bold text-gray-900">Your performance</h3>
@@ -376,7 +392,7 @@ const OverviewSubpage = () => {
         </div>
 
         {/* Recent Jobs Recommendations */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-3xl border border-gray-100/50  flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-base font-bold text-gray-900">Recommended Jobs</h3>

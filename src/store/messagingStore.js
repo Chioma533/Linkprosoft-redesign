@@ -12,6 +12,7 @@ export const useMessagingStore = create((set, get) => ({
   pagination: { page: 1, limit: MESSAGE_PAGE_SIZE, total: 0, totalPages: 0 },
   messageInput: "", sendingMessage: false,
   typingUsers: {}, onlineUsers: {}, messageReadReceipts: {},
+  approvedContacts: [], approvedContactsLoading: false, approvedContactsError: null,
 
   loadThreads: async (currentUserId) => {
     set({ threadsLoading: true, threadsError: null });
@@ -28,6 +29,27 @@ export const useMessagingStore = create((set, get) => ({
     }
   },
   setActiveThread: (threadId) => set({ activeThreadId: threadId, messages: [], pagination: { page: 1, limit: MESSAGE_PAGE_SIZE, total: 0, totalPages: 0 } }),
+  loadApprovedContacts: async () => {
+    set({ approvedContactsLoading: true, approvedContactsError: null });
+    try {
+      set({ approvedContacts: await messagingService.getApprovedContacts(), approvedContactsLoading: false });
+    } catch (error) {
+      set({ approvedContactsLoading: false, approvedContactsError: error.response?.data?.message ?? "Unable to load approved contacts" });
+    }
+  },
+  startConversation: async (contact) => {
+    const thread = await messagingService.createThread(contact.id);
+    set((state) => {
+      const existing = state.threads.find((item) => item.id === thread.id);
+      return {
+        threads: existing ? state.threads.map((item) => item.id === thread.id ? { ...item, ...thread, participant: contact } : item) : [{ ...thread, participant: contact }, ...state.threads],
+        activeThreadId: thread.id,
+        messages: [],
+        pagination: { page: 1, limit: MESSAGE_PAGE_SIZE, total: 0, totalPages: 0 },
+      };
+    });
+    return thread;
+  },
   loadMessages: async (threadId, page = 1) => {
     set({ messagesLoading: true, messagesError: null });
     try {
@@ -61,6 +83,18 @@ export const useMessagingStore = create((set, get) => ({
     await messagingService.markThreadAsRead(threadId);
     set((state) => ({ threads: updateThread(state.threads, threadId, { unreadCount: 0 }) }));
   },
+  respondToMessageRequest: async (threadId, decision) => {
+    const thread = decision === "accept"
+      ? await messagingService.acceptMessageRequest(threadId)
+      : await messagingService.declineMessageRequest(threadId);
+    set((state) => ({
+      threads: decision === "accept"
+        ? updateThread(state.threads, threadId, { ...thread, status: "active" })
+        : state.threads.filter((item) => item.id !== threadId),
+      activeThreadId: decision === "decline" && state.activeThreadId === threadId ? null : state.activeThreadId,
+      messages: decision === "decline" && state.activeThreadId === threadId ? [] : state.messages,
+    }));
+  },
   handleNewMessage: (message, currentUserId) => set((state) => {
     const exists = state.messages.some((item) => item.id === message.id);
     const isActive = state.activeThreadId === message.threadId;
@@ -77,6 +111,8 @@ export const useMessagingStore = create((set, get) => ({
     messageReadReceipts: { ...state.messageReadReceipts, [messageId]: { userId, readAt } },
     messages: state.messages.map((message) => message.id === messageId ? { ...message, isRead: true, readAt } : message),
   })),
+  handleRequestAccepted: (threadId) => set((state) => ({ threads: updateThread(state.threads, threadId, { status: "active" }) })),
+  handleRequestDeclined: (threadId) => set((state) => ({ threads: state.threads.filter((item) => item.id !== threadId) })),
   setMessageInput: (messageInput) => set({ messageInput }),
-  reset: () => set({ threads: [], activeThreadId: null, messages: [], typingUsers: {}, onlineUsers: {}, messageReadReceipts: {} }),
+  reset: () => set({ threads: [], activeThreadId: null, messages: [], typingUsers: {}, onlineUsers: {}, messageReadReceipts: {}, approvedContacts: [] }),
 }));

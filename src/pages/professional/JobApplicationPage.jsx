@@ -1,8 +1,5 @@
 import React from "react";
 import { FiBookmark, FiArrowLeft, FiUploadCloud } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
-import ProfessionalNavbar from "../../layouts/professional/ProfessionalNavbar";
-import ProfessionalBottomNav from "../../components/professional/ProfessionalBottomNav";
 import wardrobeImg from "../../assets/images/progress_wardrobe.png";
 import tvStandImg from "../../assets/images/progress_tv_stand.png";
 
@@ -20,40 +17,11 @@ const jobApplication = {
   rating: "5.0",
 };
 
-const JobApplicationPage = () => {
-  const navigate = useNavigate();
+const JobApplicationPage = ({ job = jobApplication, onBack }) => {
+  const application = { ...jobApplication, ...job };
 
   return (
-    <div className="min-h-screen bg-[#f3f5f6] pb-24 md:pb-12">
-      <ProfessionalNavbar activePage="browse-jobs" />
-
-      <section className="bg-[#EEF5F9] relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-12">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
-            <div className="flex-1 max-w-full sm:max-w-xl">
-              <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Find Your Next Opportunity
-              </h1>
-              <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
-                Looking for jobs? Browse our latest job openings to view
-              </p>
-            </div>
-
-            <div
-              className="hidden sm:flex sm:shrink-0 sm:w-64 sm:max-w-xs sm:items-end sm:justify-center"
-              style={{ mixBlendMode: "multiply" }}
-            >
-              <img
-                src="/tools_bucket_illustration.png"
-                alt="Construction Tools"
-                className="w-full object-contain sm:translate-y-[80px] lg:w-72"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] xl:grid-cols-[410px_1fr] gap-6 lg:gap-8 items-start">
           {/* Left Card: Apply for Job preview */}
           <section className="rounded-[1.5rem] bg-white p-5 sm:p-6">
@@ -61,7 +29,7 @@ const JobApplicationPage = () => {
               <h2 className="text-xl font-semibold text-gray-900">Apply for job</h2>
               <button
                 type="button"
-                onClick={() => navigate("/professional/home")}
+                onClick={onBack}
                 className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-medium text-gray-600 transition hover:border-[#016EA6]/40 hover:text-[#016EA6]"
               >
                 <FiArrowLeft className="h-3.5 w-3.5" />
@@ -74,17 +42,17 @@ const JobApplicationPage = () => {
                 <div className="flex items-center gap-3">
                   <div className="h-12 w-12 overflow-hidden rounded-full border border-gray-200 bg-[#dfeaf0] shrink-0">
                     <img
-                      src={jobApplication.employerAvatarUrl}
-                      alt={jobApplication.employerName}
+                      src={application.employerAvatarUrl}
+                      alt={application.employerName}
                       className="h-full w-full object-cover"
                     />
                   </div>
 
                   <div className="min-w-0">
                     <h3 className="truncate text-base font-semibold text-gray-900">
-                      {jobApplication.title}
+                      {application.title}
                     </h3>
-                    <p className="text-xs font-medium text-[#016EA6]">{jobApplication.postedAgo}</p>
+                    <p className="text-xs font-medium text-[#016EA6]">{application.postedAgo}</p>
                   </div>
                 </div>
 
@@ -98,28 +66,28 @@ const JobApplicationPage = () => {
               </div>
 
               <p className="mt-4 text-xs sm:text-sm leading-relaxed text-gray-600">
-                {jobApplication.description}
+                {application.description}
               </p>
 
               <div className="my-4 border-t border-dashed border-gray-200" />
 
               <div className="space-y-1 text-sm">
                 <div className="flex items-center gap-1.5 text-gray-700">
-                  <span className="font-medium text-gray-800">{jobApplication.employerName}</span>
-                  <span className="text-gray-500">({jobApplication.rating})</span>
+                  <span className="font-medium text-gray-800">{application.employerName}</span>
+                  <span className="text-gray-500">({application.rating})</span>
                   <span className="text-amber-400 text-base leading-none">★</span>
                 </div>
 
                 <p className="text-xs font-medium text-gray-600">
-                  {jobApplication.spent} Spent
+                  {application.spent} Spent
                 </p>
 
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-xs sm:text-sm text-gray-600">
-                    {jobApplication.delivery}
+                    {application.delivery}
                   </span>
                   <span className="text-lg sm:text-xl font-bold text-gray-900">
-                    ₦ {jobApplication.budget.toLocaleString()}
+                    ₦ {application.budget.toLocaleString()}
                   </span>
                 </div>
               </div>
@@ -216,7 +184,7 @@ const JobApplicationPage = () => {
               <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
                 <button
                   type="button"
-                  onClick={() => navigate("/professional/home")}
+                  onClick={onBack}
                   className="rounded-full bg-[#f3f5f6] px-8 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-200"
                 >
                   Cancel
@@ -232,10 +200,7 @@ const JobApplicationPage = () => {
             </div>
           </section>
         </div>
-      </main>
-
-      <ProfessionalBottomNav activeTab="browse-jobs" />
-    </div>
+    </main>
   );
 };
 

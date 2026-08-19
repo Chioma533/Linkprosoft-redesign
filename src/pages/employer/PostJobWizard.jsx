@@ -6,6 +6,7 @@ import Step2 from "../../components/employer/PostJobWizard/Step2";
 import Step3 from "../../components/employer/PostJobWizard/Step3";
 import SuccessModal from "../../components/employer/PostJobWizard/SuccessModal";
 import { jobService } from "../../api/services/jobService";
+import DashboardNavbar from "../../components/layout/DashboardNavbar";
 
 const INITIAL_DATA = {
   title: "",
@@ -79,6 +80,8 @@ const PostJobWizard = ({ onClose, onSuccess }) => {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-[#F3F4F6] overflow-y-auto flex flex-col">
+        <DashboardNavbar title="post a job" onMenuClick={onClose} />
+
         <div className="flex justify-end px-6 pt-5">
           <button
             type="button"

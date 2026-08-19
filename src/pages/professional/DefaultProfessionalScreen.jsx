@@ -1,11 +1,11 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
 import ProfessionalNavbar from "../../layouts/professional/ProfessionalNavbar";
 import JobSearchBar from "../../components/professional/JobSearchBar";
 import JobCard from "../../components/professional/JobCard";
 import ProfessionalBottomNav from "../../components/professional/ProfessionalBottomNav";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
+import JobApplicationPage from "./JobApplicationPage";
 
 /* ─────────────────────────────────────────────────────────────
    Mock data — 108 jobs, 9 per page (3×3 grid), 5 pages total display
@@ -105,10 +105,10 @@ const ProfessionalPagination = ({ currentPage, totalPages, onPageChange }) => {
    Main Page
    ───────────────────────────────────────────────────────────── */
 const DefaultProfessionalScreen = () => {
-  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [verificationDismissed, setVerificationDismissed] = useState(false);
   const [filters, setFilters] = useState({});
+  const [selectedJob, setSelectedJob] = useState(null);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [minTimePassed, setMinTimePassed] = useState(false);
 
@@ -193,6 +193,11 @@ const DefaultProfessionalScreen = () => {
     <div className="min-h-screen bg-gray-50 font-sans pb-24 md:pb-12">
       {/* ── Navbar ─────────────────────────────────────────────── */}
       <ProfessionalNavbar activePage="browse-jobs" />
+
+      {selectedJob ? (
+        <JobApplicationPage job={selectedJob} onBack={() => setSelectedJob(null)} />
+      ) : (
+        <>
 
       {/* ── Hero Section ───────────────────────────────────────── */}
       <section id="professional-hero-section" className="bg-[#EEF5F9] relative overflow-hidden">
@@ -340,7 +345,7 @@ const DefaultProfessionalScreen = () => {
                 <JobCard
                   key={job.id}
                   {...job}
-                  onApply={() => navigate("/professional/jobs/apply")}
+                  onApply={() => setSelectedJob(job)}
                   onSave={(val) =>
                     console.log(`Saved job ${job.title}: ${val}`)
                   }
@@ -366,6 +371,9 @@ const DefaultProfessionalScreen = () => {
           </div>
         </div>
       </section>
+
+        </>
+      )}
 
       {/* ── Mobile Bottom Navigation ─────────────────────────────── */}
       <ProfessionalBottomNav activeTab="browse-jobs" />

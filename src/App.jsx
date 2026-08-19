@@ -2,7 +2,6 @@ import LandingPage from './pages/LandingPage';
 import Waitlist from './pages/Waitlist';
 import DefaultBuyerScreen from './pages/buyer/DefaultBuyerScreen';
 import DefaultProfessionalScreen from './pages/professional/DefaultProfessionalScreen';
-import JobApplicationPage from './pages/professional/JobApplicationPage';
 import SignupPage from './pages/auth/SignupPage';
 import LoginPage from "./pages/auth/LoginPage";
 import ProfessionalDashboardPage from './pages/professionals/ProfessionalDashboardPage';
@@ -41,7 +40,6 @@ const App = () => {
 
             <Route element={<PrivateRoutes allowedRoles={['professional']} />}>
               <Route path="/professional/home" element={<DefaultProfessionalScreen />} />
-              <Route path="/professional/jobs/apply" element={<JobApplicationPage />} />
               <Route path="/professional/dashboard" element={<ProfessionalDashboardPage />} />
             </Route>
 

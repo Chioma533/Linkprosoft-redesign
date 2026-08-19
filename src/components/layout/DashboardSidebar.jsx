@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   Search,
   FileText,
@@ -181,16 +182,18 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         <div className={`py-6 flex items-center transition-all duration-300
           ${isOpen ? "px-6 justify-between" : "px-3 justify-center"}
         `}>
-          <div className="flex items-center gap-3">
-            <Link to ="/home">
-            <img src={Logo} className="w-10 h-10 rounded-full object-contain shrink-0" alt="Logo" />
+          <Link
+            to={role === "employer" ? "/home" : "/professional/home"}
+            className="flex items-center gap-3"
+            aria-label="Go to home"
+          >
+            <img src={Logo} className="w-10 h-10 rounded-full object-contain shrink-0" alt="Linkprosoft" />
             <span className={`font-bold text-xl tracking-tight text-gray-900 transition-all duration-300 whitespace-nowrap overflow-hidden
               ${isOpen ? "opacity-100 max-w-50" : "opacity-0 max-w-0 pointer-events-none"}
             `}>
               Linkprosoft
             </span>
-            </Link>
-          </div>
+          </Link>
           <button 
             onClick={onClose}
             className={`p-1 text-gray-500 hover:text-gray-900 rounded-lg hover:bg-gray-50 md:hidden cursor-pointer shrink-0 transition-opacity duration-300 ${

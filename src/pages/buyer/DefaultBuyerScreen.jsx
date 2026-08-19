@@ -8,6 +8,7 @@ import ProfessionalCard from "../../components/buyer/ProfessionalCard";
 import BuyerBottomNav from "../../components/buyer/BuyerBottomNav";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import { searchService } from "../../api/services/searchService";
+import ProfessionalIllustration from "../../assets/images/professional_illustration.png"
 
 /* ─────────────────────────────────────────────────────────────
    Pagination sub-component (responsive format)
@@ -292,9 +293,9 @@ const DefaultBuyerScreen = () => {
       {/* ── Hero Section ─────────────────────────────────────── */}
       <section
         id="hero-section"
-        className="bg-[#EEF5F9] relative overflow-hidden"
+        className="bg-linear-to-r from-[#ddf5fd] via-[#eef7fa] to-[#B9DCE8] relative overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-7">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
             {/* Left: Text + Verification banner */}
             <div className="flex-1 max-w-full sm:max-w-xl">
@@ -341,14 +342,13 @@ const DefaultBuyerScreen = () => {
                     style={{ mixBlendMode: "multiply" }}
                   >
                     <img
-                      src="/tools_illustration.png"
+                      src={ProfessionalIllustration}
                       alt="Construction Tools"
                       className="w-full object-contain translate-y-[38px] translate-x-[25px]"
                     />
                   </div>
                 </div>
               )}
-
 
               {/* Desktop verification banner */}
               {!verificationDismissed && (
@@ -387,17 +387,12 @@ const DefaultBuyerScreen = () => {
             </div>
 
             {/* Right: Desktop Tools illustration */}
-            <div
-              className="hidden sm:flex items-center justify-center flex-1 max-w-xs"
-              style={{ mixBlendMode: "multiply" }}
-            >
-              <img
-                src="/tools_illustration.png"
-                alt="Professional Tools"
-                className="w-56 sm:w-64 lg:w-72 object-contain"
-                style={{ transform: "rotate(-10deg) translateY(8px)" }}
-              />
-            </div>
+
+            <img
+              src={ProfessionalIllustration}
+              alt="Professional Tools"
+              className="hidden sm:flex items-center justify-center"
+            />
           </div>
         </div>
 
@@ -406,7 +401,10 @@ const DefaultBuyerScreen = () => {
       </section>
 
       {/* ── Search & Filter Bar ───────────────────────────────── */}
-      <section id="search-filter-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <section
+        id="search-filter-section"
+        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
+      >
         <ProfessionalSearchBar
           onApply={handleApplyFilters}
           initialQuery={filters.searchQuery}
@@ -424,7 +422,10 @@ const DefaultBuyerScreen = () => {
             <h2 className="text-base sm:text-lg font-semibold text-gray-900">
               {filters.searchQuery ? (
                 <>
-                  Related to <span className="text-gray-700">&ldquo;{filters.searchQuery}&rdquo;</span>
+                  Related to{" "}
+                  <span className="text-gray-700">
+                    &ldquo;{filters.searchQuery}&rdquo;
+                  </span>
                 </>
               ) : filters.location || filters.rating || filters.budget ? (
                 "Filtered Professionals"
@@ -451,8 +452,18 @@ const DefaultBuyerScreen = () => {
               </div>
             ) : paginatedProfessionals.length > 0 ? (
               paginatedProfessionals.map((pro, idx) => {
-                const fullName = pro.name || `${pro.user?.firstName || ''} ${pro.user?.lastName || ''}`.trim() || "Unknown";
-                const roleName = pro.profession || pro.role || (pro.skills && pro.skills.length > 0 ? (typeof pro.skills[0] === 'string' ? pro.skills[0] : pro.skills[0].name || "Professional") : "Professional");
+                const fullName =
+                  pro.name ||
+                  `${pro.user?.firstName || ""} ${pro.user?.lastName || ""}`.trim() ||
+                  "Unknown";
+                const roleName =
+                  pro.profession ||
+                  pro.role ||
+                  (pro.skills && pro.skills.length > 0
+                    ? typeof pro.skills[0] === "string"
+                      ? pro.skills[0]
+                      : pro.skills[0].name || "Professional"
+                    : "Professional");
                 const locationName = pro.location || pro.user?.location || "";
                 return (
                   <ProfessionalCard
@@ -461,7 +472,11 @@ const DefaultBuyerScreen = () => {
                     name={fullName}
                     role={roleName}
                     location={locationName}
-                    avatarUrl={pro.avatarUrl || pro.user?.avatar || "/professional_avatar.png"}
+                    avatarUrl={
+                      pro.avatarUrl ||
+                      pro.user?.avatar ||
+                      "/professional_avatar.png"
+                    }
                     rating={pro.rating ?? pro.avgRating ?? 0}
                     reviewCount={pro.reviewCount ?? pro.totalReviews ?? 0}
                     bio={pro.bio || "No bio available"}
@@ -469,13 +484,18 @@ const DefaultBuyerScreen = () => {
                     isBookmarked={false}
                     isSelected={idx === 0 && safeCurrentPage === 1}
                     onContact={() => console.log(`Contacting ${fullName}`)}
-                    onBookmark={(val) => console.log(`Bookmarked ${fullName}: ${val}`)}
+                    onBookmark={(val) =>
+                      console.log(`Bookmarked ${fullName}: ${val}`)
+                    }
                   />
                 );
               })
             ) : (
               <div className="col-span-full py-20 text-center">
-                <p className="text-sm text-gray-500">No professionals match your current filters. Try expanding your search or adjusting the filters.</p>
+                <p className="text-sm text-gray-500">
+                  No professionals match your current filters. Try expanding
+                  your search or adjusting the filters.
+                </p>
               </div>
             )}
           </div>

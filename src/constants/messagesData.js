@@ -6,7 +6,7 @@ export const AVATAR_COLORS = [
   "bg-amber-100 text-amber-700",
 ];
 
-export const TAB_OPTIONS = ["Unread", "Archives", "Blocked"];
+export const TAB_OPTIONS = ["All", "Unread", "Requests"];
 
 export const INITIAL_THREADS = [
   {

@@ -29,8 +29,8 @@ const ProjectDetailsSubpage = () => {
   if (!selectedJob) {
     return (
       <div className="py-20 px-4 rounded-3xl bg-white border border-gray-100/60 flex flex-col items-center justify-center text-center shadow-xs">
-        <div className="w-16 h-16 rounded-2xl bg-sky-50 text-[#016EA6] flex items-center justify-center mb-3">
-          <FiBriefcase className="w-7 h-7" />
+        <div className="text-[#016EA6] mb-3 flex items-center justify-center">
+          <FiBriefcase className="w-8 h-8" />
         </div>
         <h3 className="text-base font-bold text-gray-900 mb-1">No Project Selected</h3>
         <p className="text-xs text-gray-400 max-w-sm mb-6">
@@ -272,8 +272,8 @@ const ProjectDetailsSubpage = () => {
             </button>
 
             <div className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100/50">
-                <FiAlertTriangle className="w-6 h-6" />
+              <div className="text-amber-500 flex items-center justify-center shrink-0">
+                <FiAlertTriangle className="w-7 h-7" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-gray-900 leading-snug">Open Project Dispute</h3>

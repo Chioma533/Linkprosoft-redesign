@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FiBriefcase,
   FiStar,
@@ -22,7 +22,7 @@ import { PAGINATION } from "../../constants/pagination";
 import { formatCurrency } from "../../utils/formatCurrency";
 
 const BrowseJobsSubpage = () => {
-  const { jobs = [], metrics, applyForJob } = useDashboardStore();
+  const { jobs = [], metrics, applyForJob, globalSearchQuery } = useDashboardStore();
 
   const [selectedJobToApply, setSelectedJobToApply] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -91,6 +91,12 @@ const BrowseJobsSubpage = () => {
     setRatingFilter,
     filteredJobs,
   } = useJobFilter(normalizedJobs);
+
+  useEffect(() => {
+    if (globalSearchQuery) {
+      setSearch(globalSearchQuery);
+    }
+  }, [globalSearchQuery, setSearch]);
 
   const { pagination, currentItems, handlePageChange } = usePagination(
     filteredJobs,

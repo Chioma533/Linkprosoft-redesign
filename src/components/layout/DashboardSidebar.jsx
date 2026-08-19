@@ -1,3 +1,4 @@
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
   Search,
   FileText,
@@ -18,9 +19,126 @@ import { Link } from "react-router-dom";
 
 const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
   const { user } = useAuthStore();
-  const { notifications } = useDashboardStore();
+  const {
+    notifications = [],
+    jobs = [],
+    myJobs = [],
+    setSelectedJob,
+    setGlobalSearchQuery,
+  } = useDashboardStore();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef(null);
+
   const role = user?.role || "professional";
-  const unreadNotificationsCount = notifications?.filter(n => n.unread).length || 0;
+  const unreadNotificationsCount = notifications?.filter((n) => n.unread || !n.is_read).length || 0;
+
+  // Close search suggestions on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setIsSearchFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const navigationItems = useMemo(() => {
+    if (role === "employer") {
+      return [
+        { id: "overview", label: "Overview", keywords: ["home", "dashboard", "overview"] },
+        { id: "manage-jobs", label: "Manage Jobs", keywords: ["manage", "my jobs", "contracts"] },
+        { id: "browse-professionals", label: "Browse Professionals", keywords: ["browse", "talent", "hire"] },
+        { id: "messages", label: "Messages", keywords: ["messages", "chat", "inbox"] },
+        { id: "wallet", label: "Wallet & Escrow", keywords: ["wallet", "funds", "balance"] },
+      ];
+    }
+    return [
+      { id: "overview", label: "Overview", keywords: ["home", "dashboard", "overview"] },
+      { id: "browse-jobs", label: "Browse Jobs", keywords: ["browse", "find jobs", "explore"] },
+      { id: "my-jobs", label: "My Jobs", keywords: ["my jobs", "contracts", "orders"] },
+      { id: "applications", label: "Applications", keywords: ["applications", "proposals"] },
+      { id: "schedule", label: "Schedule", keywords: ["schedule", "calendar"] },
+      { id: "wallet", label: "Wallet", keywords: ["wallet", "earnings", "withdraw"] },
+    ];
+  }, [role]);
+
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return { navMatches: [], jobMatches: [] };
+
+    const navMatches = navigationItems.filter(
+      (item) =>
+        item.label.toLowerCase().includes(q) ||
+        item.keywords.some((k) => k.includes(q))
+    );
+
+    const combinedJobs = [...(myJobs || []), ...(jobs || [])];
+    const seenJobIds = new Set();
+    const jobMatches = [];
+
+    for (const job of combinedJobs) {
+      const id = String(job.id || job.orderId || "");
+      if (seenJobIds.has(id)) continue;
+
+      const title = (job.title || job.jobTitle || "").toLowerCase();
+      const client = (job.client?.fullName || job.client?.name || job.client || job.employerName || "").toLowerCase();
+      const category = (job.category?.name || job.category || "").toLowerCase();
+
+      if (title.includes(q) || client.includes(q) || category.includes(q)) {
+        seenJobIds.add(id);
+        jobMatches.push(job);
+        if (jobMatches.length >= 3) break;
+      }
+    }
+
+    return { navMatches, jobMatches };
+  }, [searchQuery, navigationItems, myJobs, jobs]);
+
+  const hasResults = searchResults.navMatches.length > 0 || searchResults.jobMatches.length > 0;
+
+  const handleSelectNav = (tabId) => {
+    onTabChange(tabId);
+    setIsSearchFocused(false);
+    onClose?.();
+  };
+
+  const handleSelectJob = (job) => {
+    setSelectedJob?.(job);
+    setIsSearchFocused(false);
+    onClose?.();
+    if (role === "employer") {
+      onTabChange("manage-jobs");
+    } else {
+      onTabChange("project-details");
+    }
+  };
+
+  const handleFullSearch = (targetTab) => {
+    if (searchQuery.trim()) {
+      setGlobalSearchQuery?.(searchQuery.trim());
+    }
+    onTabChange(targetTab);
+    setIsSearchFocused(false);
+    onClose?.();
+  };
+
+  const handleKeyDownInput = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (searchResults.navMatches.length > 0) {
+        handleSelectNav(searchResults.navMatches[0].id);
+      } else if (searchResults.jobMatches.length > 0) {
+        handleSelectJob(searchResults.jobMatches[0]);
+      } else {
+        handleFullSearch(role === "employer" ? "browse-professionals" : "browse-jobs");
+      }
+    } else if (e.key === "Escape") {
+      setIsSearchFocused(false);
+    }
+  };
 
   const getMenuItems = () => {
     if (role === "employer") {
@@ -85,17 +203,120 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         </div>
 
         {/* Mobile Search & Notification Row */}
-        <div className={`md:hidden px-4 py-3 space-y-3 border-b border-gray-50 pb-4 transition-all duration-300 ${
-          isOpen ? "opacity-100 max-h-50" : "opacity-0 max-h-0 py-0 border-none overflow-hidden pointer-events-none"
+        <div className={`md:hidden px-4 py-3 space-y-3 border-b border-gray-100 pb-4 transition-all duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0 max-h-0 py-0 border-none overflow-hidden pointer-events-none"
         }`}>
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search anything"
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none focus:border-[#016EA6] focus:bg-white transition-all"
-            />
+          {/* Search Input Container with Dropdown */}
+          <div ref={searchContainerRef} className="relative">
+            <div className="relative flex items-center">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+                onKeyDown={handleKeyDownInput}
+                placeholder="Search anything..."
+                className="w-full pl-10 pr-8 py-2.5 bg-white border border-gray-200 rounded-full text-xs outline-none focus:border-[#016EA6] focus:ring-2 focus:ring-[#016EA6]/10 transition-all font-medium text-gray-800"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 rounded-full"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Sidebar Live Search Suggestions Dropdown */}
+            {isSearchFocused && (
+              <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 p-2.5 z-50 max-h-[320px] overflow-y-auto space-y-2.5 text-xs">
+                {searchQuery.trim() ? (
+                  hasResults ? (
+                    <>
+                      {/* Navigation Pages */}
+                      {searchResults.navMatches.length > 0 && (
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-1 mb-1">
+                            Pages
+                          </p>
+                          {searchResults.navMatches.map((item) => (
+                            <button
+                              key={item.id}
+                              onClick={() => handleSelectNav(item.id)}
+                              className="w-full flex items-center justify-between p-2 rounded-xl text-left hover:bg-sky-50 transition-colors"
+                            >
+                              <span className="font-semibold text-gray-800">{item.label}</span>
+                              <span className="text-[10px] text-[#016EA6] font-medium">Jump to</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Jobs & Contracts */}
+                      {searchResults.jobMatches.length > 0 && (
+                        <div className="border-t border-gray-100 pt-1.5">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-1 mb-1">
+                            Jobs
+                          </p>
+                          {searchResults.jobMatches.map((job, idx) => (
+                            <button
+                              key={job.id || idx}
+                              onClick={() => handleSelectJob(job)}
+                              className="w-full p-2 rounded-xl bg-gray-50/70 hover:bg-sky-50 text-left mb-1 flex items-center justify-between transition-colors"
+                            >
+                              <div className="min-w-0 pr-2">
+                                <p className="font-bold text-gray-800 truncate text-[11px]">{job.title || "Job Item"}</p>
+                                <p className="text-[10px] text-gray-400 truncate">{job.category?.name || job.category || "General"}</p>
+                              </div>
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 shrink-0">
+                                {job.status || "Active"}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Marketplace Action */}
+                      <button
+                        onClick={() => handleFullSearch(role === "employer" ? "browse-professionals" : "browse-jobs")}
+                        className="w-full py-2 px-2.5 bg-[#016EA6] text-white rounded-xl text-[11px] font-bold text-center mt-1 transition-colors hover:bg-[#061EA6]"
+                      >
+                        Search for "{searchQuery}" in Marketplace
+                      </button>
+                    </>
+                  ) : (
+                    <div className="py-4 text-center">
+                      <p className="text-xs font-semibold text-gray-700">No matches found</p>
+                      <button
+                        onClick={() => handleFullSearch(role === "employer" ? "browse-professionals" : "browse-jobs")}
+                        className="mt-2 px-3 py-1.5 bg-[#016EA6] text-white rounded-full text-[10px] font-bold"
+                      >
+                        Search in Market
+                      </button>
+                    </div>
+                  )
+                ) : (
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 px-1 mb-1.5">
+                      Quick Links
+                    </p>
+                    <div className="grid grid-cols-2 gap-1">
+                      {navigationItems.slice(0, 4).map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => handleSelectNav(item.id)}
+                          className="p-1.5 rounded-lg text-left bg-gray-50 hover:bg-sky-50 text-[11px] font-medium text-gray-700 hover:text-[#016EA6] transition-colors"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Notifications Link */}
@@ -103,7 +324,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
             onClick={() => {
               onTabChange("overview");
               setTimeout(() => {
-                const notificationsEl = document.getElementById("notifications-section");
+                const notificationsEl = document.getElementById("notifications-section") || document.getElementById("employer-notifications-mobile");
                 if (notificationsEl) {
                   notificationsEl.scrollIntoView({ behavior: "smooth" });
                 }

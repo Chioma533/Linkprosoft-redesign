@@ -13,12 +13,14 @@ export const useDashboardStore = create((set, get) => ({
   activeTab: "overview", // overview, browse-jobs, my-jobs, applications, schedule, wallet
   selectedJob: null,
   previousTab: "overview",
+  globalSearchQuery: "",
   isLoading: true,
   error: null,
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   setSelectedJob: (job) => set({ selectedJob: job }),
   setPreviousTab: (tab) => set({ previousTab: tab }),
+  setGlobalSearchQuery: (query) => set({ globalSearchQuery: query }),
 
   fetchDashboardData: async () => {
     set({ isLoading: true, error: null });

@@ -4,6 +4,7 @@ import { toast } from "react-hot-toast";
 import { searchService } from "../../api/services/searchService";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import { useAuthStore } from "../../store/authStore";
+import { useDashboardStore } from "../../store/dashboardStore";
 import StatsCard from "../../components/ui/StatsCard";
 import ToggleOffIcon from "../../components/icons/ToggleOffIcon";
 import InformationCircleIcon from "../../components/icons/InformationCircleIcon";
@@ -22,6 +23,7 @@ const EmployerBrowseProfessionalsSubpage = () => {
   const [minTimePassed, setMinTimePassed] = useState(false);
 
   const { user } = useAuthStore();
+  const { globalSearchQuery } = useDashboardStore();
   const userName = user?.fullName || user?.full_name || "Elvis Chimamanda";
 
   const getGreeting = () => {
@@ -41,11 +43,17 @@ const EmployerBrowseProfessionalsSubpage = () => {
   };
 
   // Filters
-  const [searchQuery, setSearchQuery] = useState(""); // for skill autocomplete
+  const [searchQuery, setSearchQuery] = useState(globalSearchQuery || ""); // for skill autocomplete
   const [selectedLocation, setSelectedLocation] = useState("All Locations");
   const [selectedSort, setSelectedSort] = useState("Sort by: Newest");
   const [selectedSkills, setSelectedSkills] = useState([]); // array of skill IDs
   const [skillSuggestions, setSkillSuggestions] = useState([]); // for autocomplete dropdown
+
+  useEffect(() => {
+    if (globalSearchQuery) {
+      setSearchQuery(globalSearchQuery);
+    }
+  }, [globalSearchQuery]);
 
   // Map UI sort to API sortBy
   const getSortBy = () => {

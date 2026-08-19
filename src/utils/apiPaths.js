@@ -1,5 +1,6 @@
-export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com"
-//export const API_BASE_URL = "http://localhost:5020"
+export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
+// export const API_BASE_URL = "http://localhost:5020";
+
 export const API_PATHS = {
   AUTH: {
     SIGNUP: "/api/auth/signup",
@@ -121,6 +122,16 @@ export const API_PATHS = {
     GET_NOTIFICATIONS: "/api/notifications",
     MARK_AS_READ: (id) => `/api/notifications/${id}/read`,
     MARK_ALL_READ: "/api/notifications/mark-all-read",
+  },
+
+  MESSAGING: {
+    THREADS: "/api/chat/threads",
+    THREAD_MESSAGES: (threadId) => `/api/chat/threads/${threadId}/messages`,
+    THREAD_READ: (threadId) => `/api/chat/threads/${threadId}/read`,
+    USER_INFO: (userId) => `/api/chat/users/${userId}`,
+    APPROVED_CONTACTS: "/api/chat/contacts/approved",
+    ACCEPT_REQUEST: (threadId) => `/api/chat/threads/${threadId}/accept`,
+    DECLINE_REQUEST: (threadId) => `/api/chat/threads/${threadId}/decline`,
   },
 
   SEARCH: {

@@ -16,6 +16,7 @@ import TieIcon from "../icons/TieIcon";
 import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
+import { Link } from "react-router-dom";
 
 const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
   const { user } = useAuthStore();
@@ -188,7 +189,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
           >
             <img src={Logo} className="w-10 h-10 rounded-full object-contain shrink-0" alt="Linkprosoft" />
             <span className={`font-bold text-xl tracking-tight text-gray-900 transition-all duration-300 whitespace-nowrap overflow-hidden
-              ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}
+              ${isOpen ? "opacity-100 max-w-50" : "opacity-0 max-w-0 pointer-events-none"}
             `}>
               Linkprosoft
             </span>
@@ -380,7 +381,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
                   className={`w-5 h-5 shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}
                 />
                 <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden
-                  ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}
+                  ${isOpen ? "opacity-100 max-w-50" : "opacity-0 max-w-0 pointer-events-none"}
                 `}>
                   {item.name}
                 </span>
@@ -400,7 +401,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
           >
             <CheckSquare className="w-4 h-4 shrink-0" />
             <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden
-              ${isOpen ? "opacity-100 max-w-[200px]" : "opacity-0 max-w-0 pointer-events-none"}
+              ${isOpen ? "opacity-100 max-w-50" : "opacity-0 max-w-0 pointer-events-none"}
             `}>
               Linkprosoft Premium
             </span>

@@ -194,11 +194,6 @@ const DefaultProfessionalScreen = () => {
       {/* ── Navbar ─────────────────────────────────────────────── */}
       <ProfessionalNavbar activePage="browse-jobs" />
 
-      {selectedJob ? (
-        <JobApplicationPage job={selectedJob} onBack={() => setSelectedJob(null)} />
-      ) : (
-        <>
-
       {/* ── Hero Section ───────────────────────────────────────── */}
       <section id="professional-hero-section" className="bg-[#EEF5F9] relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-14">
@@ -310,6 +305,10 @@ const DefaultProfessionalScreen = () => {
         <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#016EA6]/20 to-transparent" />
       </section>
 
+      {selectedJob ? (
+        <JobApplicationPage job={selectedJob} onBack={() => setSelectedJob(null)} />
+      ) : (
+        <>
       {/* ── Search & Filter Bar ─────────────────────────────────── */}
       <section
         id="job-search-filter-section"

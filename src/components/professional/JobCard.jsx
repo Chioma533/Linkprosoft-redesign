@@ -76,7 +76,7 @@ const JobCard = ({
           <button
             id={`save-job-btn-${id}`}
             onClick={handleSave}
-            className="p-2 rounded-xl border border-gray-100 bg-white hover:bg-gray-50 transition-colors cursor-pointer shrink-0 mt-0.5"
+            className="p-2 rounded-full border border-gray-100 bg-white hover:bg-gray-50 transition-colors cursor-pointer shrink-0 mt-0.5"
             title={saved ? "Unsave job" : "Save job"}
           >
             <FiBookmark

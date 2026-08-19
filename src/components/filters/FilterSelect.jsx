@@ -18,7 +18,7 @@ const FilterSelect = ({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full pl-11 pr-8 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none appearance-none cursor-pointer text-gray-500 font-semibold"
+        className="w-full pl-11 pr-8 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none appearance-none cursor-pointer text-gray-500 font-semibold"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

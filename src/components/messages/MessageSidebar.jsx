@@ -65,7 +65,7 @@ const MessageSidebar = ({
             placeholder="Search message"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs text-gray-700 placeholder-gray-400 outline-none focus:border-[#016EA6] focus:bg-white focus:ring-2 focus:ring-[#016EA6]/10 transition-all duration-200"
+            className="w-full pl-8 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs text-gray-700 placeholder-gray-400 outline-none focus:border-[#016EA6] focus:bg-white focus:ring-2 focus:ring-[#016EA6]/10 transition-all duration-200"
           />
         </div>
       </div>

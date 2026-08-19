@@ -69,7 +69,7 @@ const AuthLayout = ({children, icon: Icon = FiUserPlus}) => {
       <div className="w-full md:w-1/2 flex flex-col justify-center ">
         {/* Header Icon */}
         <div className="flex flex-col items-center justify-center">
-          <div className="w-12 h-12 rounded-xl bg-white border-[1px] border-[#E0E7FF] flex items-center justify-center text-[#016EA6] mb-4">
+          <div className="w-12 h-12 rounded-full bg-white border-[1px] border-[#E0E7FF] flex items-center justify-center text-[#016EA6] mb-4">
             <Icon className="w-6 h-6" />
           </div>
         </div>

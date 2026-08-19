@@ -118,7 +118,11 @@ body {
 }
 
 /* Headings: Manrope (regular) */
-h1,
+h1{
+  font-family: "Satoshi", sans-serif;
+  font-weight: 500;
+  line-height: 1.2;
+}
 h2,
 h3,
 h4,
@@ -168,12 +172,12 @@ figcaption {
 :root,
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(2, 132, 199, 0) transparent;
+  scrollbar-color: rgba(2, 132, 199, 0.12) transparent;
 }
 
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 *::-webkit-scrollbar-track {
@@ -181,18 +185,18 @@ figcaption {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: rgba(2, 132, 199, 0);
+  background-color: rgba(48, 170, 231, 0.12);
   border-radius: 9999px;
   border: 2px solid transparent;
   background-clip: padding-box;
-  opacity: 0;
+  opacity: 0.45;
   transition: background-color 0.2s ease, opacity 0.2s ease;
 }
 
 *::-webkit-scrollbar-thumb:hover,
 *::-webkit-scrollbar-thumb:active,
 *:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(2, 132, 199, 0.85);
+  background-color: rgba(2, 132, 199, 0.35);
   opacity: 1;
 }
 
@@ -201,5 +205,20 @@ figcaption {
 }
 
 *:hover {
-  scrollbar-color: rgba(2, 132, 199, 0.85) transparent;
+  scrollbar-color: rgba(2, 132, 199, 0.35) transparent;
+}
+
+.hide-scrollbar,
+.scrollbar-none,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }

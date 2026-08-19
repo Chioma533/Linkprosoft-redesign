@@ -208,24 +208,26 @@ export const projectService = {
   getJobs: async () => {
     try {
       const response = await axiosInstance.get(API_PATHS.JOBS.GET_JOBS);
-      // In case backend endpoint succeeds but is empty or not fully populated
-      return response.data?.length > 0 ? response.data : mockJobs;
+      if (Array.isArray(response.data)) return response.data;
+      if (Array.isArray(response.data?.jobs)) return response.data.jobs;
+      if (Array.isArray(response.data?.items)) return response.data.items;
+      return [];
     } catch (error) {
-      console.warn("Using mock data fallback for jobs list:", error.message);
-      return mockJobs;
+      console.warn("Live jobs endpoint not reachable:", error.message);
+      return [];
     }
   },
 
   getMyJobs: async () => {
     try {
-      // Simulate retrieving jobs assigned to professional
-      const response = await axiosInstance.get(
-        `${API_PATHS.JOBS.GET_JOBS}/my-jobs`,
-      );
-      return response.data?.length > 0 ? response.data : mockJobs;
+      const response = await axiosInstance.get(API_PATHS.JOBS.GET_MY_JOBS);
+      if (Array.isArray(response.data)) return response.data;
+      if (Array.isArray(response.data?.jobs)) return response.data.jobs;
+      if (Array.isArray(response.data?.items)) return response.data.items;
+      return [];
     } catch (error) {
-      console.warn("Using mock data fallback for user jobs:", error.message);
-      return mockJobs;
+      console.warn("Live user contracted jobs endpoint not reachable:", error.message);
+      return [];
     }
   },
 
@@ -234,10 +236,13 @@ export const projectService = {
       const response = await axiosInstance.get(
         API_PATHS.APPLICATIONS.GET_APPLICATIONS,
       );
-      return response.data?.length > 0 ? response.data : mockApplications;
+      if (Array.isArray(response.data)) return response.data;
+      if (Array.isArray(response.data?.applications)) return response.data.applications;
+      if (Array.isArray(response.data?.items)) return response.data.items;
+      return [];
     } catch (error) {
-      console.warn("Using mock data fallback for applications:", error.message);
-      return mockApplications;
+      console.warn("Live applications endpoint not reachable:", error.message);
+      return [];
     }
   },
 
@@ -253,24 +258,8 @@ export const projectService = {
       );
       return response.data;
     } catch (error) {
-      console.warn("Simulating application submission locally:", error.message);
-      // Generate simulated response
-      const matchedJob = mockJobs.find((j) => j.id === jobId);
-      return {
-        success: true,
-        message: "Application submitted successfully",
-        application: {
-          id: `app-${Date.now()}`,
-          jobId,
-          title: matchedJob ? matchedJob.title : "Job Title",
-          client: matchedJob ? matchedJob.client : "Client Name",
-          category: matchedJob ? matchedJob.category : "Category",
-          appliedOn: "Just now",
-          status: "Under review",
-          lastUpdate: "Just now",
-          budget: bidAmount,
-        },
-      };
+      console.warn("Error submitting application:", error.message);
+      throw error;
     }
   },
 };

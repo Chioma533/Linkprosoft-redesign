@@ -10,7 +10,7 @@ import {
   FiMenu,
   FiX,
 } from "react-icons/fi";
-import Logo from "../../assets/images/logo2.jpg";
+import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 
 /**
@@ -51,13 +51,13 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
   const userName = user?.fullName || user?.full_name || "Professional";
 
   return (
-    <nav className="w-full bg-white border-b border-gray-100 sticky top-0 z-40">
+    <nav className="relative w-full bg-white border-b border-gray-100 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
+          {/* Desktop Logo */}
           <Link
             to="/professional/home"
-            className="flex items-center shrink-0 hover:opacity-90 transition-opacity"
+            className="hidden md:flex items-center shrink-0 hover:opacity-90 transition-opacity"
           >
             <img
               src={Logo}
@@ -84,7 +84,7 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
             ))}
           </div>
 
-          {/* Right actions */}
+          {/* Desktop Right actions */}
           <div className="hidden md:flex items-center gap-3">
             <button
               id="nav-messages-btn"
@@ -163,32 +163,70 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
             </div>
           </div>
 
-          {/* Mobile menu trigger */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
-            aria-label="Toggle Menu"
-          >
-            {mobileMenuOpen ? (
-              <FiX className="text-2xl" />
-            ) : (
-              <FiMenu className="text-2xl" />
-            )}
-          </button>
+          {/* Mobile Navigation Header (Figma Mobile Design: Menu Icon | Browse Jobs | Messages | Avatar) */}
+          <div className="flex md:hidden items-center justify-between w-full h-full">
+            <div className="flex items-center gap-3">
+              <button
+                id="mobile-menu-btn"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-1.5 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-50"
+                aria-label="Toggle Menu"
+              >
+                {mobileMenuOpen ? (
+                  <FiX className="w-6 h-6 text-gray-700" />
+                ) : (
+                  <FiMenu className="w-6 h-6 text-gray-700" />
+                )}
+              </button>
+              <h1 className="text-base font-bold text-gray-900 tracking-tight">
+                Browse Jobs
+              </h1>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                id="mobile-messages-btn"
+                onClick={() => navigate("/professional/dashboard")}
+                className="p-2 text-gray-600 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50"
+                title="Messages"
+              >
+                <FiMessageSquare className="w-5 h-5 text-gray-600" />
+              </button>
+
+              <button
+                id="mobile-avatar-btn"
+                onClick={() => navigate("/professional/dashboard")}
+                className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 shrink-0 cursor-pointer"
+              >
+                <img
+                  src={user?.avatar || "/professional_avatar.png"}
+                  alt={userName}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    if (e.target.parentElement) {
+                      e.target.parentElement.className =
+                        "w-8 h-8 rounded-full bg-[#016EA6] text-white flex items-center justify-center text-xs font-bold";
+                      e.target.parentElement.innerHTML = userName.charAt(0);
+                    }
+                  }}
+                />
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 shadow-lg flex flex-col p-6 gap-4">
+        <div className="md:hidden absolute left-0 right-0 top-full z-50 bg-white border-t border-gray-100 shadow-lg flex flex-col p-6 gap-4">
           {navLinks.map((link) => (
             <Link
               key={link.id}
               to={link.path}
               onClick={() => setMobileMenuOpen(false)}
-              className={`text-base font-medium hover:text-[#016EA6] transition-colors ${
-                activePage === link.id ? "text-[#016EA6]" : "text-gray-700"
-              }`}
+              className={`text-base font-medium hover:text-[#016EA6] transition-colors ${activePage === link.id ? "text-[#016EA6]" : "text-gray-700"
+                }`}
             >
               {link.label}
             </Link>

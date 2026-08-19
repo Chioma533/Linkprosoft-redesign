@@ -3,6 +3,8 @@ import { Eye, EyeOff, Download, Filter, Plus, ArrowUpRight, DollarSign, Wallet, 
 import TopUpIcon from "../../components/icons/TopUpIcon";
 import StatsCard from "../../components/ui/StatsCard";
 import { useDashboardStore } from "../../store/dashboardStore";
+import { useAuthStore } from "../../store/authStore";
+import { greeting } from "../../utils/greeting";
 
 const WalletSubpage = () => {
   const [showBalance, setShowBalance] = useState(true);
@@ -10,7 +12,7 @@ const WalletSubpage = () => {
   const [withdrawStep, setWithdrawStep] = useState(1); // 1: details, 2: PIN, 3: Success
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [pinDigits, setPinDigits] = useState([]);
-  
+
   const { setActiveTab } = useDashboardStore();
 
   const activeEscrows = [
@@ -37,79 +39,82 @@ const WalletSubpage = () => {
     return showSign ? `+${value}` : value;
   };
 
+  const { user } = useAuthStore();
+  const userName = user?.fullName || user?.full_name || user?.name || "Samuel";
+
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Welcome Header */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Good Morning Samuel</h2>
+        <h2 className="text-2xl font-bold text-gray-900">{greeting(new Date())} {userName}</h2>
         <p className="text-sm text-gray-400 mt-1">Manage your earnings, withdrawals, and transaction history.</p>
       </div>
 
       {/* Outer pale-blue wrapper matching design */}
       <div className="p-5 sm:p-6 rounded-3xl bg-[#E6F1F6]">
 
-      {/* Blue Header Wallet Banner (inner) */}
-      <div
-        className="p-6 bg-[#00273A] sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden flex flex-col gap-6 md:flex-row md:items-center justify-between"
-      >
-        {/* Right-side decorative white flow image */}
-        <img
-          src="/white-flow-bgdesign.png"
-          alt=""
-          aria-hidden
-          className="pointer-events-none absolute right-0 top-0 h-full w-1/2 object-contain"
-        />
+        {/* Blue Header Wallet Banner (inner) */}
+        <div
+          className="p-6 bg-[#00273A] sm:p-8 rounded-3xl text-white  relative overflow-hidden flex flex-col gap-6 md:flex-row md:items-center justify-between"
+        >
+          {/* Right-side decorative white flow image */}
+          <img
+            src="/white-flow-bgdesign.png"
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute right-0 top-0 h-full w-1/2 object-contain"
+          />
 
-        {/* Flex container wrapping layout (content above bg images) */}
-        <div className="flex flex-col gap-6 w-full md:flex-row md:items-center md:justify-between relative z-10">
-          <div className="flex flex-col gap-4 w-full">
-            {/* Top row for mobile or standard logo row */}
-            <div className="flex items-center justify-between w-full md:w-auto">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-xl text-xs font-semibold backdrop-blur-xs border border-white/10">
-                {/* <span className="text-sm">🇳🇬</span> */}
-                <span>NGN</span>
-              </div>
-              
-              {/* Mobile-only Top Up Button */}
-              <button 
-                onClick={() => setIsWithdrawOpen(true)}
-                className="md:hidden bg-[#E8F3FF] text-[#104F84] hover:bg-[#D7E9FF] px-3.5 py-2 rounded-full text-[11px] font-semibold shadow-sm flex items-center gap-2.5 cursor-pointer"
-              >
-                <span>Top Up Wallet</span>
-                <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-white border border-[#D7E9FF]">
-                  <TopUpIcon className="w-4 h-4 text-[#104F84]" />
-                </span>
-              </button>
-            </div>
+          {/* Flex container wrapping layout (content above bg images) */}
+          <div className="flex flex-col gap-6 w-full md:flex-row md:items-center md:justify-between relative z-10">
+            <div className="flex flex-col gap-4 w-full">
+              {/* Top row for mobile or standard logo row */}
+              <div className="flex items-center justify-between w-full md:w-auto">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-full text-xs font-semibold backdrop-blur-xs border border-white/10">
+                  {/* <span className="text-sm">🇳🇬</span> */}
+                  <span>NGN</span>
+                </div>
 
-            <div>
-              <span className="text-xs text-sky-200 font-medium tracking-wide">Total Balance</span>
-              <div className="flex items-center gap-3 mt-1">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
-                  {showBalance ? "₦ 500,000" : "₦ ••••••••"}
-                </h1>
-                <button 
-                  onClick={() => setShowBalance(!showBalance)}
-                  className="p-1.5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                {/* Mobile-only Top Up Button */}
+                <button
+                  onClick={() => setIsWithdrawOpen(true)}
+                  className="md:hidden bg-[#E8F3FF] text-[#104F84] hover:bg-[#D7E9FF] px-3.5 py-2 rounded-full text-[11px] font-semibold  flex items-center gap-2.5 cursor-pointer"
                 >
-                  {showBalance ? <EyeOff className="w-5 h-5 text-sky-200" /> : <Eye className="w-5 h-5 text-sky-200" />}
+                  <span>Top Up Wallet</span>
+                  <span className="flex h-8 w-8 items-center justify-center rounded-2xl bg-white border border-[#D7E9FF]">
+                    <TopUpIcon className="w-4 h-4 text-[#104F84]" />
+                  </span>
                 </button>
               </div>
-            </div>
-          </div>
 
-          {/* Desktop-only Top Up Button */}
-          <button 
-            onClick={() => setIsWithdrawOpen(true)}
-            className="hidden whitespace-nowrap md:flex bg-[#E8F3FF] text-[#104F84] hover:bg-[#D7E9FF] px-5 py-3 rounded-full text-sm font-semibold shadow-sm hover:shadow-md transition-all duration-300 items-center justify-center gap-3 relative z-10 cursor-pointer active:scale-95"
-          >
-            <span>Top Up Wallet</span>
-            <span className="flex h-6 w-10 items-center justify-center rounded-2xl bg-white border border-[#D7E9FF]">
-              <TopUpIcon className="w-4 h-4 text-[#104F84]" />
-            </span>
-          </button>
+              <div>
+                <span className="text-xs text-sky-200 font-medium tracking-wide">Total Balance</span>
+                <div className="flex items-center gap-3 mt-1">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
+                    {showBalance ? "₦ 500,000" : "₦ ••••••••"}
+                  </h1>
+                  <button
+                    onClick={() => setShowBalance(!showBalance)}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                  >
+                    {showBalance ? <EyeOff className="w-5 h-5 text-sky-200" /> : <Eye className="w-5 h-5 text-sky-200" />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Desktop-only Top Up Button */}
+            <button
+              onClick={() => setIsWithdrawOpen(true)}
+              className="hidden whitespace-nowrap md:flex bg-[#E8F3FF] text-[#104F84] hover:bg-[#D7E9FF] px-5 py-3 rounded-full text-sm font-semibold  hover: transition-all duration-300 items-center justify-center gap-3 relative z-10 cursor-pointer active:scale-95"
+            >
+              <span>Top Up Wallet</span>
+              <span className="flex h-6 w-10 items-center justify-center rounded-2xl bg-white border border-[#D7E9FF]">
+                <TopUpIcon className="w-4 h-4 text-[#104F84]" />
+              </span>
+            </button>
+          </div>
         </div>
-      </div>
       </div>
 
       {/* Row of Metrics */}
@@ -145,9 +150,8 @@ const WalletSubpage = () => {
                       <td className="px-4 py-4 text-sm text-gray-500">{item.professional}</td>
                       <td className="px-4 py-4 text-sm font-bold text-gray-800">{formatCurrency(item.amount)}</td>
                       <td className="px-4 py-4">
-                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                          item.status === "In progress" ? "bg-orange-50 text-orange-600" : "bg-orange-50 text-orange-600"
-                        }`}>
+                        <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${item.status === "In progress" ? "bg-orange-50 text-orange-600" : "bg-orange-50 text-orange-600"
+                          }`}>
                           {item.status}
                         </span>
                       </td>
@@ -171,11 +175,11 @@ const WalletSubpage = () => {
         </div>
 
         {/* Recent Transaction Cards */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
+        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 ">
           <h3 className="text-base font-bold text-gray-900 mb-6">Recent Transaction</h3>
           <div className="space-y-4">
             {recentTransactions.map((tx, idx) => (
-              <div key={idx} className="flex items-center justify-between gap-4 rounded-3xl border border-gray-100 bg-gray-50/80 p-4 shadow-sm">
+              <div key={idx} className="flex items-center justify-between gap-4 rounded-3xl border border-gray-100 bg-gray-50/80 p-4 ">
                 <div className="flex items-center gap-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#016EA6] text-white">
                     <Wallet className="w-5 h-5" />
@@ -197,7 +201,7 @@ const WalletSubpage = () => {
       </div>
 
       {/* Upcoming Payments feed */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm max-w-xl">
+      <div className="bg-white p-6 rounded-3xl border border-gray-100/50  max-w-xl">
         <h3 className="text-base font-bold text-gray-900 mb-6">Upcoming payments</h3>
         <div className="space-y-4">
           {[1, 2, 3].map((item, idx) => (
@@ -216,10 +220,10 @@ const WalletSubpage = () => {
 
       {isWithdrawOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4 animate-fade-in text-gray-800">
-          <div className="bg-white rounded-[32px] max-w-4xl w-full p-6 sm:p-8 shadow-2xl relative animate-scale-up max-h-[90vh] overflow-y-auto">
-            <button 
+          <div className="bg-white rounded-[32px] max-w-4xl w-full p-6 sm:p-8  relative animate-scale-up max-h-[90vh] overflow-y-auto">
+            <button
               onClick={() => { setIsWithdrawOpen(false); setWithdrawStep(1); setPinDigits([]); setWithdrawAmount(""); }}
-              className="absolute right-6 top-6 p-2 text-gray-400 hover:text-gray-900 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+              className="absolute right-6 top-6 p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-50 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -256,7 +260,7 @@ const WalletSubpage = () => {
                       <label className="text-xs font-bold text-gray-500 uppercase tracking-wide">Transfer to</label>
                       <div className="flex items-center justify-between p-4 bg-gray-50/50 rounded-2xl border border-gray-100/60">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white text-[10px] font-extrabold shadow-sm shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center text-white text-[10px] font-extrabold  shrink-0">
                             GT
                           </div>
                           <div>
@@ -270,7 +274,7 @@ const WalletSubpage = () => {
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-[#013554] to-[#01507B] p-5 rounded-2xl text-white relative overflow-hidden shadow-md flex items-center justify-between">
+                    <div className="bg-gradient-to-r from-[#013554] to-[#01507B] p-5 rounded-2xl text-white relative overflow-hidden  flex items-center justify-between">
                       <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200 via-transparent to-transparent" />
                       <div className="relative z-10 space-y-1">
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white/10 rounded-lg text-[9px] font-semibold border border-white/5">
@@ -281,7 +285,7 @@ const WalletSubpage = () => {
                           <h3 className="text-lg font-bold tracking-tight">₦ 500,000</h3>
                         </div>
                       </div>
-                      <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center shrink-0 border border-white/10 relative z-10">
+                      <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0 border border-white/10 relative z-10">
                         <Eye className="w-5 h-5 text-sky-200" />
                       </div>
                     </div>
@@ -318,15 +322,15 @@ const WalletSubpage = () => {
                     </div>
 
                     <div className="flex flex-col gap-2 pt-6">
-                      <button 
+                      <button
                         onClick={() => setWithdrawStep(2)}
-                        className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer"
+                        className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-full text-xs font-bold transition-all  cursor-pointer"
                       >
                         Continue
                       </button>
-                      <button 
+                      <button
                         onClick={() => { setIsWithdrawOpen(false); setWithdrawAmount(""); }}
-                        className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-full text-xs font-bold transition-all cursor-pointer"
                       >
                         Cancel
                       </button>
@@ -355,21 +359,20 @@ const WalletSubpage = () => {
 
                   <div className="flex gap-4 justify-center py-2">
                     {[0, 1, 2, 3].map((idx) => (
-                      <div 
-                        key={idx} 
-                        className={`w-4 h-4 rounded-full border-2 transition-all ${
-                          pinDigits.length > idx 
-                            ? "bg-[#016EA6] border-[#016EA6]" 
+                      <div
+                        key={idx}
+                        className={`w-4 h-4 rounded-full border-2 transition-all ${pinDigits.length > idx
+                            ? "bg-[#016EA6] border-[#016EA6]"
                             : "border-[#016EA6]/30 bg-white"
-                        }`}
+                          }`}
                       />
                     ))}
                   </div>
 
                   <div className="grid grid-cols-3 gap-y-4 gap-x-8 w-full max-w-[280px] pt-4 justify-items-center">
                     {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-                      <button 
-                        key={num} 
+                      <button
+                        key={num}
                         onClick={() => {
                           if (pinDigits.length < 4) {
                             const newPin = [...pinDigits, num];
@@ -385,7 +388,7 @@ const WalletSubpage = () => {
                       </button>
                     ))}
                     <div />
-                    <button 
+                    <button
                       onClick={() => {
                         if (pinDigits.length < 4) {
                           const newPin = [...pinDigits, 0];
@@ -399,7 +402,7 @@ const WalletSubpage = () => {
                     >
                       0
                     </button>
-                    <button 
+                    <button
                       onClick={() => setPinDigits(pinDigits.slice(0, -1))}
                       className="w-12 h-12 rounded-full hover:bg-red-50 flex items-center justify-center text-red-500 cursor-pointer active:scale-95 transition-transform"
                     >
@@ -412,7 +415,7 @@ const WalletSubpage = () => {
 
             {withdrawStep === 3 && (
               <div className="max-w-md mx-auto text-center py-6 space-y-6">
-                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto shadow-sm">
+                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto ">
                   <Check className="w-10 h-10 stroke-[3px]" />
                 </div>
 
@@ -426,15 +429,15 @@ const WalletSubpage = () => {
                 </div>
 
                 <div className="flex flex-col gap-2 pt-4 w-full max-w-[240px] mx-auto">
-                  <button 
+                  <button
                     onClick={() => { setIsWithdrawOpen(false); setWithdrawStep(1); setPinDigits([]); setWithdrawAmount(""); }}
-                    className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-full text-xs font-bold transition-all cursor-pointer"
                   >
                     Go to wallet
                   </button>
-                  <button 
+                  <button
                     onClick={() => { setIsWithdrawOpen(false); setWithdrawStep(1); setPinDigits([]); setWithdrawAmount(""); setActiveTab("overview"); }}
-                    className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    className="w-full border border-gray-100 hover:bg-gray-50 text-gray-400 py-3 rounded-full text-xs font-bold transition-all cursor-pointer"
                   >
                     Go back home
                   </button>

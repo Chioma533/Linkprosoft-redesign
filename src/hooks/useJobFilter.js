@@ -5,8 +5,9 @@ export const useJobFilter = (jobs = []) => {
   const [dateFilter, setDateFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [budgetFilter, setBudgetFilter] = useState("");
+  const [ratingFilter, setRatingFilter] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState("");
 
   const filteredJobs = useMemo(() => {
     return jobs.filter((job) => {
@@ -21,10 +22,20 @@ export const useJobFilter = (jobs = []) => {
       const matchesLocation = locationFilter
         ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
         : true;
-      
-        const matchesStatus = statusFilter
+
+      const matchesStatus = statusFilter
         ? job.status.toLowerCase().includes(statusFilter.toLowerCase())
         : true;
+
+      const matchesRating = (() => {
+        if (!ratingFilter) return true;
+
+        const rating = Number(job.rating ?? 0);
+        if (ratingFilter === "5 Stars") return rating >= 5;
+        if (ratingFilter === "4+ Stars") return rating >= 4;
+        if (ratingFilter === "3+ Stars") return rating >= 3;
+        return true;
+      })();
 
       const matchesBudget = (() => {
         if (!budgetFilter) return true;
@@ -41,10 +52,15 @@ export const useJobFilter = (jobs = []) => {
 
       // We'll add the date filter later
       return (
-        matchesSearch && matchesCategory && matchesLocation && matchesBudget && matchesStatus
+        matchesSearch &&
+        matchesCategory &&
+        matchesLocation &&
+        matchesBudget &&
+        matchesStatus &&
+        matchesRating
       );
     });
-  }, [jobs, search, locationFilter, budgetFilter, categoryFilter, dateFilter]);
+  }, [jobs, search, locationFilter, budgetFilter, ratingFilter, categoryFilter, dateFilter, statusFilter]);
 
   return {
     search,
@@ -58,6 +74,9 @@ export const useJobFilter = (jobs = []) => {
 
     budgetFilter,
     setBudgetFilter,
+
+    ratingFilter,
+    setRatingFilter,
 
     categoryFilter,
     setCategoryFilter,

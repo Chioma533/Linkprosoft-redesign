@@ -1,120 +1,101 @@
-# Figma → Frontend Implementation Prompt
+# Page / Screen Component Recheck Prompt
 
 Purpose
-- Analyze a Figma design (file or selected frames) and extract a complete, production-ready design system: color tokens, typography, spacing, grid, component map, and assets.
-- Implement the design in a frontend codebase so the page(s) look visually identical to the Figma design.
-- Provide automated and manual cross-checks against the uploaded Figma design to verify fidelity.
+- Use the @sym:# component-architect.agent.md as the source of truth for page building.
+- Review the implementation produced by the component architect and extract the complete set of reusable components needed to create or validate a page/screen.
+- Recheck whether the page has been decomposed into the correct components, whether any sections are missing, and whether any components should be reused instead of recreated.
+- Focus on component extraction, composition validation, and gap analysis rather than Figma API or remote design ingestion.
 
 Inputs (required)
-- `figma_file_url` (or uploaded Figma .fig export): Figma file link or file upload.
-- `frame_ids` (optional): list of frame IDs to target; otherwise analyze the entire file and select top-level frames.
-- `output_dir` (optional): workspace directory to write tokens, components, and pages. Default: `src/design-system/figma-export`.
-- `component_naming` (optional): naming convention, e.g. `PascalCase` or `kebab-case`.
-- `platform` (optional): `react`, `react-native`, `html-css`, `tailwind` (default: `react`).
+- `page_or_screen_name`: the page or screen to review and build from components.
+- `target_path` (optional): the target folder or route where the page should live, such as `src/pages/...` or `src/components/...`.
+- `design_reference` (optional): a screenshot, mockup, or existing page implementation to compare against.
+- `existing_work` (optional): any page, component, or route files already created by the component-architect agent.
+
+Inputs (not required)
+- Figma file URL
+- Figma API tokens or project access
+- Frame IDs
+- External design extraction pipeline
 
 Primary Deliverables
-1. `tokens.json` — normalized design tokens for colors, typography, spacing, radii, shadows, z-index, breakpoints.
-2. `design-spec.md` — human-readable spec listing extracted values, token mapping, and example usage.
-3. `components/` — a folder of reusable components (JSX/TSX files) implemented according to the design.
-4. `styles/` — CSS variables or Tailwind config fragments mapping tokens to runtime styles.
-5. `pages/` — implemented page(s) that reproduce the Figma frame(s) structure and layout.
-6. `verification/` — scripts and checklists to cross-check Figma ↔ implemented output (visual diff thresholds, token diffs).
+1. `component-inventory.md` — complete list of all components required for the page/screen.
+2. `reuse-map.md` — map each page section to existing repo components, adapted components, or new components to create.
+3. `missing-components.md` — identify omitted, duplicated, or under-specified components.
+4. `page-composition.md` — explain how the final page should be assembled from the extracted components.
+5. `verification-checklist.md` — list the exact checks to confirm the implementation matches the target screen.
 
 High-level Workflow
-1. Analyze & Extract Tokens
-  - Use Figma API to fetch nodes for the provided `frame_ids` or top-level frames.
-  - Extract color swatches (fills), type styles (font family, weight, size, line-height, letter spacing), spacing tokens (margins/paddings/gaps based on 4/8px scale if present), radii, shadows, and any grid/column values.
-  - Normalize tokens: adopt a consistent naming scheme (`color.primary.500`, `font.body.16/24`, `space.x4`), include hex/rgba values and contrast notes.
-  - Produce `tokens.json` and a CSS variables file (`:root { --color-primary-500: #... }`).
-
-2. Create Component Map
-  - Traverse the frames and identify repeated patterns (buttons, inputs, cards, lists, headers, navbars, hero sections, badges, avatars).
-  - For each pattern, define a component interface (props) with clear responsibilities (appearance tokens, spacing, content slots).
-  - Prioritize small, composable components (Button, IconButton, Card, Avatar, Typography, Container, Grid).
-
-3. Implement Reusable Components & Token Wiring
-  - Implement components in the chosen platform (`react` default) using token variables for styles.
-  - Create shared style primitives: `colors.css` (or `tokens.css`), `typography.css`, `spacing.css`.
-  - Add color variables, font-face loading instructions (if custom fonts required), and base typography rules.
-
-4. Build Page Structure
-  - Implement page(s) by composing components to match frame hierarchy. Keep structure semantically accurate (header, nav, main, aside, footer).
-  - Use layout helpers (Flex, Grid, Container) to reproduce spacing and alignment.
-
-5. Style & Pixel-tune Using Tokens
-  - Apply extracted tokens across components; ensure margins, paddings, line-heights, and font-sizes precisely match the Figma values.
-  - Use exact color values; where Figma uses opacity/overlays, replicate with rgba/alpha tokens.
-
-6. Verify Fidelity vs Figma
-  - Programmatic checks:
-    - Token diff: compare `tokens.json` vs a new extraction from Figma; report mismatches.
-    - Node/bounding-box comparison: using Figma node positions and computed DOM element positions; compute pixel offsets and report max delta.
-  - Visual checks:
-    - Generate screenshots of Figma frames (via Figma images endpoint) and of implemented pages; run a pixel-diff (e.g., `pixelmatch`) with configurable tolerance.
-    - Produce a verification report with per-layer pass/fail and a suggested fix list.
-
-7. Deliver Documentation & Examples
-  - `README.md` describing how to run the verification, where tokens and components are located, and how to maintain parity with Figma.
-  - Example story/demo page that shows components with token variants (primary/secondary/disabled).
+1. Read and use the component-architect agent as the authoritative implementation model.
+2. Inspect the current codebase and identify existing components, layout primitives, utility patterns, and token/style conventions.
+3. Break the target page or screen into logical sections such as header, sidebar, hero, cards, form blocks, list items, buttons, badges, gallery, footer, and actions.
+4. Extract all reusable components required for the screen, including structure, props, variants, and composition rules.
+5. Recheck the current implementation against the target page and flag:
+   - reused components that were not actually reused,
+   - duplicated components that should be consolidated,
+   - missing sections that need additional components,
+   - misordered or incorrectly composed layout blocks.
+6. Produce a minimal, accurate component plan: what can be reused, what should be slightly adapted, and what must be created.
+7. Finalize with a short validation summary for the page and any recommended next implementation steps.
 
 Agent Behavior & Instructions
-- Be conservative with changes: do not rename or remove existing workspace files without confirmation.
-- When encountering ambiguous design artifacts (e.g., multiple fills, nested masks, or boolean operations), flag them in the `design-spec.md` and request clarification.
-- Prefer predictable token naming and include a `mapping.md` that links Figma style names → token names.
-- Include fallbacks for fonts and image assets; if fonts are proprietary, list the exact font family and provide a webfont or replacement suggestion.
+- Treat the component-architect agent as the default source of truth for page extraction and implementation planning.
+- Reuse existing repo components before creating anything new.
+- Prefer small, composable components over large monolithic screen components.
+- Keep naming conventions aligned with the existing codebase and the component-architect agent's decisions.
+- Be conservative with file creation: do not create duplicates when a similar component already exists.
+- When the target screen is ambiguous, ask only for the missing clarification required to complete the component extraction.
+- Do not perform any Figma API workflow, design token scraping, or remote Figma sync.
 
 Verification Goal (explicit)
-- The agent must reference the uploaded Figma design and automatically cross-check the implemented page(s). The final verification report must include:
-  - Token parity summary (colors, fonts, spacing): pass/fail per token with delta values.
-  - Layout parity summary: per-frame pixel diff (max, mean) and element-level mismatches where possible.
-  - Visual diff images and a checklist of remaining items to reach visual parity.
+- The prompt must verify whether the page/screen has been correctly decomposed into reusable components.
+- The final output must include:
+  - a complete component inventory,
+  - a reuse-vs-new breakdown,
+  - a list of likely omissions or duplicates,
+  - a final composition summary for the page.
 
 Output Formats (recommended)
-- `tokens.json` (machine-readable)
-- `design-spec.md` (markdown summary)
-- `components/` (JSX/TSX files)
-- `styles/` (CSS or Tailwind fragment)
-- `verification/report.json` and `verification/report.html` with visual diffs
+- `component-inventory.md`
+- `reuse-map.md`
+- `missing-components.md`
+- `page-composition.md`
+- `verification-checklist.md`
 
 Example Invocation
 
 ```json
 {
-  "figma_file_url": "https://www.figma.com/file/ABC123/example",
-  "frame_ids": ["123:45", "123:46"],
-  "output_dir": "src/design-system/figma-export",
-  "platform": "react",
-  "component_naming": "PascalCase"
+  "page_or_screen_name": "Pricing page",
+  "target_path": "src/pages/pricing",
+  "design_reference": "screenshot or mockup",
+  "existing_work": "component-architect generated route and nested components"
 }
 ```
 
 Clarifying Questions (prompt should ask these if missing)
-- Which frames are the primary pages to implement?
-- Are we allowed to add new files and modify project config (build, css, tailwind)?
-- Which breakpoints should be considered canonical for responsive behavior?
-- Are visual diffs allowed to be approximate (e.g., 2–4px tolerance) or require pixel-perfect?
+- Which page or screen is the target for rechecking?
+- Is the goal to review an existing implementation or to create the missing components from scratch?
+- What folder or route should the final page composition live in?
+- Do we have a reference mock or screenshot for validation?
 
 Edge Cases & Notes
-- If Figma uses complex vector effects or masks that cannot be replicated exactly in CSS, provide a raster fallback and document the deviation.
-- If multiple color names map to the same value, unify the tokens but keep an alias mapping to original names.
-- For components with content variability (e.g., dynamic length text), implement natural truncation/ellipsis rules matching Figma.
+- If a section is visually complex, break it into subcomponents before deciding whether it is reusable.
+- If there are repeated UI patterns, collapse them into shared components rather than creating page-specific copies.
+- If a component already exists but is not being reused, note the reason and recommend the correct reuse path.
+- Keep the output focused on the actual page-building workflow and not on unrelated design system generation.
 
 Suggested Next Steps After Running the Prompt
-- Run the verification suite and iterate on high-delta elements.
-- Extract responsive variants (mobile/tablet/desktop) and repeat verification per breakpoint.
-- Optionally commit token files and component stubs to a `design-system` branch for review.
+- Reuse the mapped components and fill in any missing blocks.
+- Review the final page composition for layout consistency and missing states.
+- Confirm that no duplicate or inconsistent component variants remain in the page.
 
-Customization Suggestions
-- Add a `--tailwind` flag to emit `tailwind.config.js` theme overrides from tokens.
-- Add a `--stories` flag to output Storybook stories for each extracted component.
-- Add a `--chromatic` or `--percy` integration to automate visual regression in CI.
-
-Human-readable Summary (to display back to the user)
-- This prompt analyzes Figma frames, extracts tokens and components, implements reusable components wired to tokens, constructs page(s) to match the frames, and runs automated cross-checks to report visual/token/layout parity against the source design.
+Human-readable Summary
+- This prompt uses the component-architect agent as the main source of truth, then rechecks the target page/screen to extract the exact reusable components, verify composition quality, and identify any missing or duplicated parts before implementation is finalized.
 
 ---
 
 If you want, I can now:
-- Save this prompt into `.prompts/figma-to-frontend.prompt.md` (done).
-- Run the prompt locally against a Figma file you provide.
-- Generate the initial token extraction and component stubs in the repo.
+- Save this revised prompt into the prompt file.
+- Tailor it to a specific page template such as landing page, dashboard, checkout, or marketplace screen.
+- Convert the output into a stricter checklist format for your team workflow.

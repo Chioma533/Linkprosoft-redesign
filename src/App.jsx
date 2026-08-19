@@ -1,6 +1,8 @@
 import LandingPage from './pages/LandingPage';
+import Waitlist from './pages/Waitlist';
 import DefaultBuyerScreen from './pages/buyer/DefaultBuyerScreen';
 import DefaultProfessionalScreen from './pages/professional/DefaultProfessionalScreen';
+import JobApplicationPage from './pages/professional/JobApplicationPage';
 import SignupPage from './pages/auth/SignupPage';
 import LoginPage from "./pages/auth/LoginPage";
 import ProfessionalDashboardPage from './pages/professionals/ProfessionalDashboardPage';
@@ -11,6 +13,7 @@ import { Toaster } from 'react-hot-toast';
 import EmployerDashboardPage from './pages/employer/EmployerDashboardPage';
 import AdminDahboardPage from './pages/admin/AdminDahboardPage';
 import GoogleCallbackPage from './pages/auth/GoogleCallbackPage';
+import TestPreloaderPage from './pages/TestPreloaderPage';
 
 const App = () => {
   return (
@@ -19,9 +22,11 @@ const App = () => {
         <div className="min-h-screen bg-white text-gray-900 font-sans">
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+            <Route path="/test-preloader" element={<TestPreloaderPage />} />
 
             <Route element={<PrivateRoutes allowedRoles={['employer']} />}>
               <Route path="/home" element={<DefaultBuyerScreen />} />
@@ -30,12 +35,13 @@ const App = () => {
 
             <Route element={<PrivateRoutes allowedRoles={['professional']} />}>
               <Route path="/professional/home" element={<DefaultProfessionalScreen />} />
+              <Route path="/professional/jobs/apply" element={<JobApplicationPage />} />
               <Route path="/professional/dashboard" element={<ProfessionalDashboardPage />} />
             </Route>
 
             <Route element={<PrivateRoutes allowedRoles={['admin']} />}>
               <Route path="/admin/dashboard" element={<AdminDahboardPage />} />
-            </Route> 
+            </Route>
           </Routes>
           <Toaster position="top-center" reverseOrder={false} />
         </div>

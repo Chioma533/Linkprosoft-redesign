@@ -73,12 +73,12 @@ const ProfessionalCard = ({
       className="bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border border-transparent hover:border-[#016EA6]"
     >
       {/* Card body */}
-      <div className="p-5 flex flex-col gap-3 flex-1">
+      <div className="p-4 sm:p-6 flex flex-col gap-4 flex-1">
         {/* Header row: avatar + name/role + bookmark */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
             {/* Avatar */}
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-100 shrink-0">
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-gray-100 shrink-0 shadow-sm">
               <img
                 src={avatarUrl}
                 alt={name}
@@ -91,10 +91,10 @@ const ProfessionalCard = ({
             </div>
             {/* Name + Role */}
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-gray-900 leading-tight truncate">
+              <h3 className="text-base font-semibold text-gray-900 leading-tight truncate">
                 {name}
               </h3>
-              <span className="text-xs font-semibold text-[#016EA6] mt-0.5 block truncate">
+              <span className="text-sm font-medium text-[#016EA6] mt-0.5 block truncate">
                 {role}
               </span>
             </div>
@@ -104,7 +104,7 @@ const ProfessionalCard = ({
           <button
             id={`bookmark-btn-${id}`}
             onClick={handleBookmark}
-            className="p-2 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer shrink-0 mt-0.5"
+            className="p-2 rounded-full border border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer shrink-0 mt-0.5"
             title={bookmarked ? "Remove bookmark" : "Bookmark"}
           >
             <FiBookmark
@@ -128,17 +128,15 @@ const ProfessionalCard = ({
         </div>
 
         {/* Bio */}
-        <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
+        <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 flex-1">
           {bio}
         </p>
       </div>
-
       {/* Footer: price + contact */}
-      <div className="px-5 pb-4 flex items-center justify-between border-t border-gray-100 pt-3">
-        <div className="flex items-center gap-1">
-          <span className="text-sm font-bold text-gray-900">
-            ₦ {pricePerDay.toLocaleString()}
-          </span>
+      <div className="px-4 sm:px-6 pb-4 sm:pb-5 flex items-center justify-between border-t border-gray-100 pt-4">
+        <div className="flex items-baseline gap-2">
+          <span className="text-lg text-gray-900 font-medium">₦</span>
+          <span className="text-xl font-bold text-gray-900">{pricePerDay.toLocaleString()}</span>
         </div>
         <button
           id={`contact-btn-${id}`}

@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { FiSearch, FiMessageSquare, FiBell, FiChevronDown, FiLogOut, FiUser, FiMenu, FiChevronLeft } from "react-icons/fi";
+import { FiSearch, FiMessageSquare, FiBell, FiChevronDown, FiLogOut, FiUser, FiMenu, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import MessageIcon from "../icons/Message02Icon";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 
-const DashboardNavbar = ({ title, onMenuClick }) => {
+const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   const { user, logout } = useAuthStore();
   const { messages, notifications, setActiveTab, selectedJob, previousTab } = useDashboardStore();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -48,7 +48,7 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
               className="p-2 text-gray-600 bg-[#e6f1f6] hover:bg-[#d8e6f1] rounded-xl transition-all cursor-pointer hidden md:flex items-center justify-center"
               title="Toggle Sidebar"
             >
-              <FiChevronLeft className="w-5 h-5" />
+              {isOpen ? <FiChevronLeft className="w-5 h-5" /> : <FiChevronRight className="w-5 h-5" />}
             </button>
           </>
         ) : title === "project-details" ? (
@@ -65,7 +65,14 @@ const DashboardNavbar = ({ title, onMenuClick }) => {
             className="p-2 text-gray-600 bg-[#e6f1f6] hover:bg-[#d8e6f1] rounded-xl transition-all cursor-pointer flex items-center justify-center"
             title="Toggle Sidebar"
           >
-            <FiChevronLeft className="w-5 h-5" />
+            {isOpen ? (
+              <FiChevronLeft className="w-5 h-5" />
+            ) : (
+              <>
+                <FiMenu className="w-5 h-5 md:hidden" />
+                <FiChevronRight className="w-5 h-5 hidden md:block" />
+              </>
+            )}
           </button>
         )}
         <h1 className="text-lg md:text-xl font-normal text-gray-900 capitalize truncate">

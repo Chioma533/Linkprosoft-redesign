@@ -6,9 +6,7 @@ const StatsCard = ({
   value,
   icon: Icon,
   iconColor = "text-[#016EA6]",
-  iconBg,
   BgColor = "bg-white",
-  iconBgStyle = {},
   trend = {
     direction: "up",
     percentage: 20,
@@ -25,25 +23,22 @@ const StatsCard = ({
     : "";
 
   return (
-    <div className={`${BgColor} p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-[#E9E8E7] flex flex-col justify-between transition-shadow duration-300`}>
-      <div className="flex items-start justify-between gap-1">
+    <div className={`${BgColor} p-5 rounded-[18px] border border-gray-100 flex flex-col justify-between`}>
+      <div className="flex items-start justify-between gap-2">
         <div>
           <span className="text-xs sm:text-sm font-medium text-gray-400">{title}</span>
-          <h3 className="text-sm xs:text-base sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2 truncate max-w-[100px] xs:max-w-none">{value}</h3>
+          <h3 className="text-lg sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{value}</h3>
         </div>
         {Icon && (
-          <div
-            className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl ${iconBg} ${iconColor} flex items-center justify-center shrink-0`}
-            style={iconBgStyle}
-          >
-            <Icon className="w-4 h-4 sm:w-5 h-5" />
+          <div className={`${iconColor} flex items-center justify-center shrink-0`}>
+            <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
         )}
       </div>
 
       {hasTrend && (
         <div
-          className={`flex items-center gap-1.5 text-xs font-semibold mt-4 ${trendColor}`}
+          className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold mt-4 ${trendColor}`}
         >
           {trend.direction === "up" ? (
             <FiTrendingUp className="w-3.5 h-3.5" />
@@ -59,3 +54,4 @@ const StatsCard = ({
 };
 
 export default StatsCard;
+

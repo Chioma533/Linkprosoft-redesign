@@ -26,23 +26,23 @@ const MobileJobCard = ({ job, onViewDetails }) => {
   };
 
   return (
-    <div className="bg-white p-5 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col gap-4 relative">
+    <div className="bg-white p-5 rounded-[18px] border border-gray-100 flex flex-col gap-4 relative">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Icon Container */}
-          <div className="w-12 h-12 bg-[#EBF3FA] text-[#016EA6] rounded-2xl flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 bg-[#EBF3FA] text-[#016EA6] rounded-lg flex items-center justify-center shrink-0">
             {getCategoryIcon(job.category)}
           </div>
           
           {/* Main Info */}
           <div className="space-y-0.5">
-            <h4 className="font-bold text-gray-900 text-sm leading-snug">{job.title}</h4>
-            <div className="text-[11px] text-gray-400 font-medium">
+            <h4 className="font-bold text-gray-900 text-base leading-snug">{job.title}</h4>
+            <div className="text-xs text-gray-400 font-medium">
               <span>{job.client || "Client"}</span>
               <span className="mx-1.5">•</span>
               <span>{job.category || "General"}</span>
             </div>
-            <div className="text-[10px] text-gray-400 flex items-center gap-1 font-medium">
+            <div className="text-xs text-gray-400 flex items-center gap-1 font-medium">
               <span>{job.datePosted || "July 10"}</span>
               <span>•</span>
               <span>9:00 am</span>

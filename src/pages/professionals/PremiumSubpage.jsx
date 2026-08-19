@@ -132,7 +132,7 @@ const PremiumSubpage = () => {
 
           <button
             onClick={handleContinue}
-            className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+            className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
           >
             Continue
           </button>

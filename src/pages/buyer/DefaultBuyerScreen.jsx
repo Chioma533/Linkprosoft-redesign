@@ -1,13 +1,16 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { FiAlertCircle, FiChevronRight, FiChevronLeft, FiX } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import BuyerNavbar from "../../layouts/buyer/BuyerNavbar";
 import ProfessionalSearchBar from "../../components/buyer/ProfessionalSearchBar";
 import ProfessionalCard from "../../components/buyer/ProfessionalCard";
+import BuyerBottomNav from "../../components/buyer/BuyerBottomNav";
+import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import { searchService } from "../../api/services/searchService";
 
 /* ─────────────────────────────────────────────────────────────
-   Pagination sub-component (unchanged)
+   Pagination sub-component (responsive format)
    ───────────────────────────────────────────────────────────── */
 const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPages = () => {
@@ -29,7 +32,12 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
   return (
     <div className="flex items-center justify-between pt-6 border-t border-gray-100">
       <span className="text-xs text-gray-500 font-medium">
-        Showing page {currentPage} of {totalPages} pages
+        <span className="sm:hidden text-gray-700 font-semibold">
+          Page {currentPage} of {totalPages}
+        </span>
+        <span className="hidden sm:inline">
+          Showing page {currentPage} of {totalPages} pages
+        </span>
       </span>
 
       <div className="flex items-center gap-1.5">
@@ -52,11 +60,10 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
               key={page}
               id={`pagination-page-${page}-btn`}
               onClick={() => onPageChange(page)}
-              className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                currentPage === page
-                  ? "bg-[#016EA6] text-white shadow-sm"
-                  : "border border-gray-100 text-gray-500 hover:bg-gray-50"
-              }`}
+              className={`w-8 h-8 rounded-full text-xs font-bold transition-all cursor-pointer ${currentPage === page
+                ? "bg-[#016EA6] text-white shadow-sm"
+                : "border border-gray-100 text-gray-500 hover:bg-gray-50"
+                }`}
             >
               {page}
             </button>
@@ -82,19 +89,26 @@ const BuyerPagination = ({ currentPage, totalPages, onPageChange }) => {
 const DefaultBuyerScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [verificationDismissed, setVerificationDismissed] = useState(false);
-  const [filters, setFilters] = useState({
-    searchQuery: "",
-    location: "",
-    rating: "",
-    budget: "",
+  const location = useLocation();
+  const [filters, setFilters] = useState(() => {
+    const q = new URLSearchParams(location.search).get('q') || "";
+    return {
+      searchQuery: q,
+      location: "",
+      rating: "",
+      budget: "",
+    };
   });
 
   // Data from API
   const [apiProfessionals, setApiProfessionals] = useState([]);
   const [total, setTotal] = useState(0);
   const [totalPagesAPI, setTotalPagesAPI] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
+  const [minTimePassed, setMinTimePassed] = useState(false);
   const [error, setError] = useState(null);
+  const isFirstMount = useRef(true);
 
   // Apply filters client-side on the fetched data
   const filteredProfessionals = useMemo(() => {
@@ -148,23 +162,64 @@ const DefaultBuyerScreen = () => {
     safeCurrentPage * ITEMS_PER_PAGE
   );
 
-  const fetchProfessionals = async () => {
-    setLoading(true);
+  const fetchProfessionals = async (activeFilters = filters, isInitial = false) => {
+    if (isInitial) {
+      setIsInitialLoading(true);
+    } else {
+      setIsSearching(true);
+    }
     setError(null);
+
+    // Parse filters into query params
+    let minRating;
+    if (activeFilters.rating && activeFilters.rating !== "Any Rating") {
+      const starsMatch = activeFilters.rating.match(/\d+/);
+      if (starsMatch) minRating = Number(starsMatch[0]);
+    }
+
+    let minRate, maxRate;
+    const normBudget = activeFilters.budget?.replace(/–/g, "-") || "";
+    if (normBudget === "Under ₦5,000") {
+      maxRate = 5000;
+    } else if (normBudget === "₦5,000 - ₦20,000") {
+      minRate = 5000;
+      maxRate = 20000;
+    } else if (normBudget === "₦20,000 - ₦50,000") {
+      minRate = 20000;
+      maxRate = 50000;
+    } else if (normBudget === "₦5,000+" || normBudget === "₦50,000+") {
+      minRate = 50000;
+    }
+
+    const searchParams = {
+      query: activeFilters.searchQuery?.trim() || undefined,
+      profession: activeFilters.searchQuery?.trim() || undefined,
+      location: activeFilters.location || undefined,
+      rating: activeFilters.rating || undefined,
+      budget: activeFilters.budget || undefined,
+      minRating,
+      minRate,
+      maxRate,
+      page: 1,
+      limit: 100,
+    };
     try {
-      // Fetch all professionals from database without filters initially
-      const response = await searchService.searchProfessionals({ page: 1, limit: 100 });
-      if (response && response.success && response.data) {
-        const items = Array.isArray(response.data.professionals)
-          ? response.data.professionals
-          : Array.isArray(response.data.items)
-          ? response.data.items
-          : Array.isArray(response.data)
-          ? response.data
-          : [];
+      const response = await searchService.smartSearchProfessionals(searchParams);
+
+      const isSuccess = response?.status === "success" || response?.success === true || Boolean(response?.data);
+      const dataObj = response?.data || response;
+
+      if (isSuccess && dataObj) {
+        const items = Array.isArray(dataObj.professionals)
+          ? dataObj.professionals
+          : Array.isArray(dataObj.items)
+            ? dataObj.items
+            : Array.isArray(dataObj)
+              ? dataObj
+              : [];
         setApiProfessionals(items);
-        setTotal(response.data.meta?.total || response.data.total || items.length);
-        setTotalPagesAPI(response.data.meta?.pages || response.data.totalPages || 1);
+        setTotal(dataObj.meta?.total || dataObj.total || items.length);
+        setTotalPagesAPI(dataObj.meta?.pages || dataObj.totalPages || 1);
       } else {
         throw new Error(response?.message || "Failed to fetch professionals");
       }
@@ -172,7 +227,11 @@ const DefaultBuyerScreen = () => {
       setError(err.message || "Something went wrong");
       toast.error(err.message || "Failed to load professionals");
     } finally {
-      setLoading(false);
+      if (isInitial) {
+        setIsInitialLoading(false);
+      } else {
+        setIsSearching(false);
+      }
     }
   };
 
@@ -190,16 +249,24 @@ const DefaultBuyerScreen = () => {
     setVerificationDismissed(true);
   };
 
+  // Initial page mount
   useEffect(() => {
-    fetchProfessionals();
-  }, []); // fetch on mount
+    const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
+    fetchProfessionals(filters, true);
+    return () => clearTimeout(minTimer);
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
+  // Subsequent filter updates
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    fetchProfessionals(filters, false);
+  }, [filters]);
+
+  if (isInitialLoading || !minTimePassed) {
+    return <LoadingScreen />;
   }
 
   if (error) {
@@ -218,7 +285,7 @@ const DefaultBuyerScreen = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
+    <div className="min-h-screen bg-gray-50 font-sans pb-24 md:pb-12">
       {/* ── Navbar ───────────────────────────────────────────── */}
       <BuyerNavbar activePage="browse" />
 
@@ -227,51 +294,99 @@ const DefaultBuyerScreen = () => {
         id="hero-section"
         className="bg-[#EEF5F9] relative overflow-hidden"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-          <div className="flex items-center justify-between gap-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-14">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
             {/* Left: Text + Verification banner */}
-            <div className="flex-1 max-w-xl">
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight tracking-tight">
+            <div className="flex-1 max-w-full sm:max-w-xl">
+              <h1 className="text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
                 Find The Right Professional
               </h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-3 font-normal">
+              <p className="mt-0.5 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">
                 Need help with a project? Browse verified professionals.
               </p>
 
-              {/* Verification Required Banner */}
+              {/* Mobile verification banner + illustration */}
               {!verificationDismissed && (
-                <div
-                  id="verification-banner"
-                  className="mt-6 flex items-center gap-3 bg-[#fff4ea] border border-[#ff8d28]/30 rounded-xl px-5 py-4 max-w-md"
-                >
-                  <FiAlertCircle className="w-5 h-5 text-orange-500 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[#59310e]">
-                      Verification Required
-                    </p>
-                    <p className="text-[11px] text-[#ff8d28] mt-0.5 leading-relaxed max-w-[26rem]">
-                      Complete your verification to apply for jobs and receive payments securely.
-                    </p>
+                <div className="-mt-6 flex items-end justify-between gap-2 sm:hidden z-10">
+                  <div
+                    id="verification-banner"
+                    className="w-[248px] shrink-0. rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
+                  >
+                    <div className="flex items-center justify-between gap-1.5">
+                      <div className="flex min-w-0 items-center gap-1.5">
+                        <FiAlertCircle className="h-3 w-3 shrink-0 translate-y-[0.5px] text-orange-500" />
+                        <p className="text-[7.14px] font-semibold leading-[1.1] tracking-[-0.01em] text-[#59310e]">
+                          Verification Required
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-0 ml-1.5 flex items-center justify-between gap-1.5">
+                      <p className="flex-1 min-w-0 ml-[12px] self-center text-[5.5px] leading-[1.1] tracking-[-0.01em] text-[#ff8d28]">
+                        Complete your verification to apply for jobs and receive
+                        payments securely.
+                      </p>
+
+                      <button
+                        id="complete-verification-btn"
+                        className="inline-flex -translate-y-1 h-[15px] min-w-[64px] shrink-0 items-center justify-center rounded-full bg-orange-500 px-1 text-[4.71px] font-bold leading-none text-white transition-all duration-200 hover:bg-orange-600"
+                      >
+                        Complete Verification
+                      </button>
+                    </div>
                   </div>
-                  <button
-                    id="complete-verification-btn"
-                    className="bg-orange-500 hover:bg-orange-600 text-white text-[10px] font-bold px-3.5 py-2 rounded-full transition-all duration-200 cursor-pointer whitespace-nowrap"
+
+                  <div
+                    className="w-[43%] z-0"
+                    style={{ mixBlendMode: "multiply" }}
                   >
-                    Complete Verification
-                  </button>
-                  <button
-                    id="dismiss-verification-btn"
-                    onClick={handleDismissVerification}
-                    className="p-1 rounded-full text-gray-400 hover:text-gray-700 transition-colors"
-                    aria-label="Dismiss verification banner"
+                    <img
+                      src="/tools_illustration.png"
+                      alt="Construction Tools"
+                      className="w-full object-contain translate-y-[38px] translate-x-[25px]"
+                    />
+                  </div>
+                </div>
+              )}
+
+
+              {/* Desktop verification banner */}
+              {!verificationDismissed && (
+                <div className="hidden sm:block">
+                  <div
+                    id="verification-banner"
+                    className="mt-6 flex max-w-md items-center gap-3 rounded-xl border border-[#ff8d28]/30 bg-[#fff4ea] p-3 px-5 py-4"
                   >
-                    <FiX className="w-4 h-4" />
-                  </button>
+                    <FiAlertCircle className="h-5 w-5 shrink-0 text-orange-500" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-[#59310e]">
+                        Verification Required
+                      </p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-[#ff8d28]">
+                        Complete your verification to apply for jobs and receive
+                        payments securely.
+                      </p>
+                    </div>
+                    <button
+                      id="complete-verification-btn"
+                      className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-orange-500 px-3.5 py-2 text-[10px] font-bold text-white transition-all duration-200 hover:bg-orange-600"
+                    >
+                      Complete Verification
+                    </button>
+                    <button
+                      id="dismiss-verification-btn"
+                      onClick={handleDismissVerification}
+                      className="rounded-full p-1 text-gray-400 transition-colors hover:text-gray-700"
+                      aria-label="Dismiss verification banner"
+                    >
+                      <FiX className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Right: Tools illustration */}
+            {/* Right: Desktop Tools illustration */}
             <div
               className="hidden sm:flex items-center justify-center flex-1 max-w-xs"
               style={{ mixBlendMode: "multiply" }}
@@ -291,8 +406,11 @@ const DefaultBuyerScreen = () => {
       </section>
 
       {/* ── Search & Filter Bar ───────────────────────────────── */}
-      <section id="search-filter-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <ProfessionalSearchBar onApply={handleApplyFilters} />
+      <section id="search-filter-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+        <ProfessionalSearchBar
+          onApply={handleApplyFilters}
+          initialQuery={filters.searchQuery}
+        />
       </section>
 
       {/* ── Results Grid ─────────────────────────────────────── */}
@@ -300,10 +418,10 @@ const DefaultBuyerScreen = () => {
         id="professionals-results-section"
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
       >
-        <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8">
+        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-8">
           {/* Section header */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="mb-4 sm:mb-6">
+            <h2 className="text-base sm:text-lg font-semibold text-gray-900">
               {filters.searchQuery ? (
                 <>
                   Related to <span className="text-gray-700">&ldquo;{filters.searchQuery}&rdquo;</span>
@@ -314,7 +432,7 @@ const DefaultBuyerScreen = () => {
                 "All Professionals"
               )}
             </h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
               {filteredProfessionals.length} professionals available
             </p>
           </div>
@@ -322,9 +440,16 @@ const DefaultBuyerScreen = () => {
           {/* 3-column professional grid */}
           <div
             id="professionals-grid"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 min-h-[240px]"
           >
-            {paginatedProfessionals.length > 0 ? (
+            {isSearching ? (
+              <div className="col-span-full py-16 flex flex-col items-center justify-center gap-3">
+                <div className="w-9 h-9 border-3 border-[#016EA6]/20 border-t-[#016EA6] rounded-full animate-spin" />
+                <p className="text-xs font-semibold text-gray-500 animate-pulse">
+                  Searching professionals...
+                </p>
+              </div>
+            ) : paginatedProfessionals.length > 0 ? (
               paginatedProfessionals.map((pro, idx) => {
                 const fullName = pro.name || `${pro.user?.firstName || ''} ${pro.user?.lastName || ''}`.trim() || "Unknown";
                 const roleName = pro.profession || pro.role || (pro.skills && pro.skills.length > 0 ? (typeof pro.skills[0] === 'string' ? pro.skills[0] : pro.skills[0].name || "Professional") : "Professional");
@@ -365,6 +490,9 @@ const DefaultBuyerScreen = () => {
           </div>
         </div>
       </section>
+
+      {/* ── Mobile Bottom Navigation ─────────────────────────────── */}
+      <BuyerBottomNav activeTab="browse" />
     </div>
   );
 };

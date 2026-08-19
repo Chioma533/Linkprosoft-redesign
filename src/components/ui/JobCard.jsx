@@ -1,65 +1,94 @@
 import React, { useState } from "react";
 import { FiBookmark } from "react-icons/fi";
 
-const JobCard = ({ job, onApply }) => {
-  const [isBookmarked, setIsBookmarked] = useState(job.isBookmarked || false);
+const JobCard = ({ job, onApply, onSave }) => {
+  const [saved, setSaved] = useState(job?.isBookmarked || false);
+  const [isApplying, setIsApplying] = useState(false);
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount).replace("NGN", "₦");
+  const employerName = job?.employerName || job?.client || "Client";
+  const employerAvatarUrl = job?.employerAvatarUrl || job?.avatarUrl || "/professional_avatar.png";
+  const title = job?.title || "Wardrobe Installation";
+  const description =
+    job?.description ||
+    "Hi, I'm looking for an experienced carpenter to build and install a custom wardrobe for my master bedroom.";
+  const postedAgo = job?.postedAgo || job?.postedAt || "Posted 2 min ago";
+  const budget = Number(job?.budget || 0);
+
+  const handleSave = () => {
+    const nextSaved = !saved;
+    setSaved(nextSaved);
+    onSave?.(nextSaved);
+  };
+
+  const handleApply = async () => {
+    setIsApplying(true);
+    await onApply?.(job);
+    setTimeout(() => setIsApplying(false), 700);
   };
 
   return (
-    <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-300 relative group">
-      {/* Top Header */}
-      <div>
-        <div className="flex items-start justify-between">
+    <article
+      id={`job-card-${job?.id ?? "card"}`}
+      className="bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border border-transparent hover:border-[#016EA6]"
+    >
+      <div className="p-5 flex flex-col gap-3 flex-1">
+        <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center font-bold text-gray-700 text-sm">
-              {job.client ? job.client.substring(0, 2) : "CL"}
+            <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-gray-100 shrink-0 bg-gray-100">
+              <img
+                src={employerAvatarUrl}
+                alt={employerName}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  if (e.target.parentElement) {
+                    e.target.parentElement.innerHTML = `<div class="w-full h-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] font-bold text-sm">${employerName.charAt(0)}</div>`;
+                  }
+                }}
+              />
             </div>
-            <div>
-              <h4 className="font-bold text-gray-900 leading-tight">{job.title}</h4>
-              <span className="text-xs text-blue-500 font-medium">{job.postedAt}</span>
+
+            <div className="min-w-0">
+              <h3 className="text-sm font-semibold text-gray-900 leading-tight truncate">
+                {title}
+              </h3>
+              <span className="text-xs font-medium text-[#016EA6] mt-0.5 block truncate">
+                {postedAgo}
+              </span>
             </div>
           </div>
+
           <button
-            onClick={() => setIsBookmarked(!isBookmarked)}
-            className={`p-2 rounded-xl transition-all border ${
-              isBookmarked
-                ? "bg-blue-50/50 text-[#016EA6] border-blue-100"
-                : "text-gray-400 hover:text-gray-600 hover:bg-gray-50 border-gray-100"
-            }`}
+            id={`save-job-btn-${job?.id ?? "card"}`}
+            onClick={handleSave}
+            className="p-2 rounded-full border border-gray-100 bg-white hover:bg-gray-50 transition-colors cursor-pointer shrink-0 mt-0.5"
+            title={saved ? "Unsave job" : "Save job"}
           >
-            <FiBookmark className="w-4 h-4 fill-current" />
+            <FiBookmark
+              className={`w-4 h-4 transition-colors ${
+                saved ? "fill-[#016EA6] text-[#016EA6]" : "text-gray-400 hover:text-gray-600"
+              }`}
+            />
           </button>
         </div>
 
-        {/* Job Description */}
-        <p className="text-xs text-gray-400 leading-relaxed mt-4 line-clamp-3">
-          {job.description}
+        <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
+          {description}
         </p>
       </div>
 
-      {/* Budget & Apply Action */}
-      <div className="border-t border-gray-50/80 pt-4 mt-6 flex items-center justify-between">
-        <div>
-          <span className="text-[10px] text-gray-400 font-medium block">Budget</span>
-          <span className="text-base font-bold text-gray-900">{formatCurrency(job.budget)}</span>
-        </div>
-
+      <div className="px-5 pb-4 flex items-center justify-between border-t border-gray-100 pt-3">
+        <span className="text-sm font-bold text-gray-900">₦ {budget.toLocaleString()}</span>
         <button
-          onClick={() => onApply(job)}
-          className="bg-sky-50 hover:bg-[#016EA6] text-[#016EA6] hover:text-white px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm shadow-sky-100/30 cursor-pointer active:scale-95"
+          id={`apply-job-btn-${job?.id ?? "card"}`}
+          onClick={handleApply}
+          disabled={isApplying}
+          className="px-4 py-2 bg-[#e6f1f6] hover:bg-[#d5e7ef] text-[#2683b3] text-xs font-semibold rounded-full border border-[#2683b3]/10 transition-all duration-200 cursor-pointer disabled:opacity-70"
         >
-          Apply
+          {isApplying ? "..." : "Apply"}
         </button>
       </div>
-    </div>
+    </article>
   );
 };
 

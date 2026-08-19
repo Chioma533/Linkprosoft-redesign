@@ -33,7 +33,7 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
       <div className="flex items-center gap-4">
         <button
           onClick={onBack}
-          className="p-2 border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 rounded-xl transition-all cursor-pointer"
+          className="p-2 border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 rounded-full transition-all cursor-pointer"
           title="Back to Project Details"
         >
           <FiArrowLeft className="w-5 h-5" />
@@ -56,7 +56,7 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
       <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Project display */}
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-100/30 flex items-center justify-between gap-4">
+          <div className="bg-slate-50 p-4 rounded-full border border-slate-100/30 flex items-center justify-between gap-4">
             <div>
               <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Dispute regarding project</span>
               <span className="text-xs font-bold text-gray-800">Wardrobe Installation (ID: {jobId || "ORD657783"})</span>
@@ -73,7 +73,7 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
             <select
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none cursor-pointer text-gray-700 font-semibold"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none cursor-pointer text-gray-700 font-semibold"
             >
               <option value="">Select a reason</option>
               <option value="delays">Significant delays in project delivery</option>
@@ -92,7 +92,7 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
               placeholder="Be as detailed as possible. Mention specific dates, quality issues, or parts of the contract that were breached..."
               value={explanation}
               onChange={(e) => setExplanation(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none focus:bg-white focus:border-rose-500 transition-all resize-none font-semibold text-gray-700"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none focus:bg-white focus:border-rose-500 transition-all resize-none font-semibold text-gray-700"
             />
           </div>
 
@@ -104,7 +104,7 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
               placeholder="Enter amount to claim back from escrow"
               value={refundAmount}
               onChange={(e) => setRefundAmount(e.target.value)}
-              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-xs outline-none focus:bg-white focus:border-rose-500 transition-all font-semibold text-gray-700"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none focus:bg-white focus:border-rose-500 transition-all font-semibold text-gray-700"
             />
             <span className="text-[9px] text-gray-400 mt-1 block">
               Note: You can request up to the maximum remaining escrow balance (₦350,000).
@@ -117,14 +117,14 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
               type="button"
               onClick={onBack}
               disabled={isSubmitting}
-              className="flex-1 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-xl text-xs font-bold transition-all text-center cursor-pointer"
+              className="flex-1 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-full text-xs font-bold transition-all text-center cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-rose-100"
+              className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-rose-100"
             >
               <FiAlertTriangle className="w-3.5 h-3.5" />
               <span>{isSubmitting ? "Submitting Dispute..." : "Submit Dispute Request"}</span>

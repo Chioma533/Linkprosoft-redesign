@@ -2,12 +2,23 @@ import React, { useEffect, useState } from "react";
 import DashboardSidebar from "../components/layout/DashboardSidebar";
 import DashboardNavbar from "../components/layout/DashboardNavbar";
 import { useDashboardStore } from "../store/dashboardStore";
+import { useAuthStore } from "../store/authStore";
 import { Home, Search, Briefcase, FileText, Wallet } from "lucide-react";
 import { debugLog } from "../utils/debugLogger";
+import { DashboardContentSkeleton } from "../components/common/preloader/DashboardLoadingScreen";
 
 const DashboardLayout = ({ children }) => {
-  const { activeTab, setActiveTab, fetchDashboardData } = useDashboardStore();
+  const { activeTab, setActiveTab, fetchDashboardData, isLoading } = useDashboardStore();
+  const { user } = useAuthStore();
+  const role = user?.role || "professional";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  /* ── Per-tab skeleton display ────────────────────────────────────────── *
+   * showSkeleton starts true (skeleton on first paint) and is reset to    *
+   * true every time the user switches tabs. A 2.5 s timer then clears it. *
+   * This guarantees every subpage — initial load AND every tab switch —   *
+   * shows its matching skeleton for at least 2.5 s before content.        */
+  const [showSkeleton, setShowSkeleton] = useState(true);
 
   useEffect(() => {
     // Persist token debug info so it survives redirects / page reloads
@@ -24,24 +35,29 @@ const DashboardLayout = ({ children }) => {
       .then(() => debugLog("fetchDashboardData_success", { timestamp: new Date().toISOString() }))
       .catch((err) => debugLog("fetchDashboardData_failure", { timestamp: new Date().toISOString(), error: (err && err.message) || String(err) }));
   }, [fetchDashboardData]);
-  
+
+  /* Fires on mount (initial tab) AND on every subsequent tab switch */
+  useEffect(() => {
+    setShowSkeleton(true);
+    const timer = setTimeout(() => setShowSkeleton(false), 2500);
+    return () => clearTimeout(timer);   // cancel if tab changes before 2.5 s
+  }, [activeTab]);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    // Automatically collapse sidebar after selecting a tab
-    setIsSidebarOpen(false);
   };
 
   return (
     <div className="flex bg-[#EBF3FA]/30 h-screen text-gray-800 font-sans relative overflow-hidden">
       {/* Backdrop overlay for mobile when sidebar is expanded */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/45 backdrop-blur-xs z-40 md:hidden transition-opacity duration-300"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      <div 
+        className={`fixed inset-0 bg-black/45 backdrop-blur-xs z-40 md:hidden transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
+        onClick={() => setIsSidebarOpen(false)}
+      />
 
-      {/* Sidebar Component */}
+      {/* Sidebar Component - stays mounted and intact across tab switches */}
       <DashboardSidebar 
         activeTab={activeTab} 
         onTabChange={handleTabChange} 
@@ -54,23 +70,37 @@ const DashboardLayout = ({ children }) => {
         {/* Navbar Component */}
         <DashboardNavbar 
           title={activeTab} 
+          isOpen={isSidebarOpen}
           onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)} 
         />
 
-        {/* Viewport Content */}
+        {/* Viewport Content - renders subpage skeleton or real content */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-w-7xl w-full mx-auto pb-24 md:pb-8">
-          {children}
+          {(showSkeleton || isLoading) ? (
+            <DashboardContentSkeleton subpage={activeTab} />
+          ) : (
+            children
+          )}
         </main>
 
         {/* Bottom Navigation for Mobile */}
         <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex items-center justify-around py-2 px-1 shadow-lg md:hidden">
-          {[
-            { id: "overview", name: "Overview", icon: Home },
-            { id: "browse-jobs", name: "Browse jobs", icon: Search },
-            { id: "my-jobs", name: "My Jobs", icon: Briefcase },
-            { id: "applications", name: "Applications", icon: FileText },
-            { id: "wallet", name: "Wallet", icon: Wallet },
-          ].map((item) => {
+          {(role === "employer"
+            ? [
+                { id: "overview",              name: "Overview",     icon: Home     },
+                { id: "browse-professionals",  name: "Browse jobs",  icon: Search   },
+                { id: "manage-jobs",            name: "My Jobs",      icon: Briefcase},
+                { id: "messages",              name: "Applications", icon: FileText },
+                { id: "wallet",                name: "Wallet",       icon: Wallet   },
+              ]
+            : [
+                { id: "overview",      name: "Overview",      icon: Home     },
+                { id: "browse-jobs",   name: "Browse jobs",   icon: Search   },
+                { id: "my-jobs",       name: "My Jobs",       icon: Briefcase},
+                { id: "applications",  name: "Applications",  icon: FileText },
+                { id: "wallet",        name: "Wallet",         icon: Wallet   },
+              ]
+          ).map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
             return (

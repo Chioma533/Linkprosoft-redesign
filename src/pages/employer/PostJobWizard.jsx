@@ -11,6 +11,7 @@ import DashboardNavbar from "../../components/layout/DashboardNavbar";
 const INITIAL_DATA = {
   title: "",
   category: "",
+  skill: "",
   description: "",
   budgetMin: "",
   budgetMax: "",
@@ -44,6 +45,8 @@ const PostJobWizard = ({ onClose, onSuccess }) => {
 
       const payload = {
         title: data.title,
+        category: data.category || undefined,
+        skill: data.skill || undefined,
         description: data.description,
         budget: data.budgetMax ? Number(data.budgetMax) : data.budgetMin ? Number(data.budgetMin) : undefined,
         currency: "NGN",

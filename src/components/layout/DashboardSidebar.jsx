@@ -16,7 +16,6 @@ import TieIcon from "../icons/TieIcon";
 import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
-import { Link } from "react-router-dom";
 
 const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
   const { user } = useAuthStore();

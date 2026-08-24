@@ -5,7 +5,7 @@ export const profileService = {
   getMyProfile: async () => {
     try {
       const response = await axiosInstance.get(API_PATHS.PROFILE.GET_MY_PROFILE);
-      return response.data?.data || response.data || null;
+      return response.data?.data?.profile || response.data?.data || response.data || null;
     } catch (error) {
       console.warn("Failed to fetch profile:", error.message);
       return null;
@@ -15,7 +15,7 @@ export const profileService = {
   updateMyProfile: async (payload) => {
     try {
       const response = await axiosInstance.put(API_PATHS.PROFILE.UPDATE_MY_PROFILE, payload);
-      return response.data?.data || response.data;
+      return response.data?.data?.profile || response.data?.data || response.data;
     } catch (error) {
       console.warn("Failed to update profile:", error.message);
       throw error;
@@ -28,7 +28,9 @@ export const profileService = {
       const response = await axiosInstance.get(API_PATHS.CERTIFICATIONS.GET_USER_CERTIFICATIONS(userId));
       const data = response.data;
       if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data?.certifications)) return data.data.certifications;
       if (Array.isArray(data?.certifications)) return data.certifications;
+      if (Array.isArray(data?.data)) return data.data;
       return [];
     } catch (error) {
       console.warn("Failed to fetch certifications:", error.message);
@@ -39,7 +41,7 @@ export const profileService = {
   addCertification: async (payload) => {
     try {
       const response = await axiosInstance.post(API_PATHS.CERTIFICATIONS.ADD_CERTIFICATION, payload);
-      return response.data?.certification || response.data;
+      return response.data?.certification || response.data?.data || response.data;
     } catch (error) {
       console.warn("Failed to add certification:", error.message);
       throw error;
@@ -52,7 +54,9 @@ export const profileService = {
       const response = await axiosInstance.get(API_PATHS.PORTFOLIO.GET_USER_PORTFOLIO(userId));
       const data = response.data;
       if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data?.portfolioItems)) return data.data.portfolioItems;
       if (Array.isArray(data?.portfolioItems)) return data.portfolioItems;
+      if (Array.isArray(data?.data)) return data.data;
       return [];
     } catch (error) {
       console.warn("Failed to fetch portfolio:", error.message);
@@ -63,7 +67,7 @@ export const profileService = {
   addPortfolioItem: async (payload) => {
     try {
       const response = await axiosInstance.post(API_PATHS.PORTFOLIO.ADD_PORTFOLIO_ITEM, payload);
-      return response.data?.portfolioItem || response.data;
+      return response.data?.portfolioItem || response.data?.data || response.data;
     } catch (error) {
       console.warn("Failed to add portfolio item:", error.message);
       throw error;
@@ -76,7 +80,9 @@ export const profileService = {
       const response = await axiosInstance.get(API_PATHS.SKILLS.GET_USER_SKILLS(userId));
       const data = response.data;
       if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data?.skills)) return data.data.skills;
       if (Array.isArray(data?.skills)) return data.skills;
+      if (Array.isArray(data?.data)) return data.data;
       return [];
     } catch (error) {
       console.warn("Failed to fetch user skills:", error.message);
@@ -100,8 +106,11 @@ export const profileService = {
       const response = await axiosInstance.get(API_PATHS.REVIEWS.GET_PROFESSIONAL_REVIEWS(professionalId));
       const data = response.data;
       if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data?.items)) return data.data.items;
+      if (Array.isArray(data?.data?.reviews)) return data.data.reviews;
       if (Array.isArray(data?.items)) return data.items;
       if (Array.isArray(data?.reviews)) return data.reviews;
+      if (Array.isArray(data?.data)) return data.data;
       return [];
     } catch (error) {
       console.warn("Failed to fetch reviews:", error.message);

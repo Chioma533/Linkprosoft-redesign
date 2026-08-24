@@ -6,12 +6,12 @@ import Step2 from "../../components/employer/PostJobWizard/Step2";
 import Step3 from "../../components/employer/PostJobWizard/Step3";
 import SuccessModal from "../../components/employer/PostJobWizard/SuccessModal";
 import { jobService } from "../../api/services/jobService";
-import DashboardNavbar from "../../components/layout/DashboardNavbar";
 
 const INITIAL_DATA = {
   title: "",
   category: "",
   skill: "",
+  skillId: "",
   description: "",
   budgetMin: "",
   budgetMax: "",
@@ -45,8 +45,7 @@ const PostJobWizard = ({ onClose, onSuccess }) => {
 
       const payload = {
         title: data.title,
-        category: data.category || undefined,
-        skill: data.skill || undefined,
+        skillId: data.skillId || undefined,
         description: data.description,
         budget: data.budgetMax ? Number(data.budgetMax) : data.budgetMin ? Number(data.budgetMin) : undefined,
         currency: "NGN",
@@ -83,7 +82,6 @@ const PostJobWizard = ({ onClose, onSuccess }) => {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-[#F3F4F6] overflow-y-auto flex flex-col">
-        <DashboardNavbar title="post a job" onMenuClick={onClose} />
 
         <div className="flex justify-end px-6 pt-5">
           <button
@@ -119,4 +117,3 @@ const PostJobWizard = ({ onClose, onSuccess }) => {
 };
 
 export default PostJobWizard;
-

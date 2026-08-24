@@ -8,7 +8,7 @@ export const jobService = {
    * @param {Object} jobData
    * @param {string} jobData.title - Job title (required)
    * @param {string} jobData.description - Job description (required)
-   * @param {number} [jobData.skillId] - Skill ID
+   * @param {string|number} [jobData.skillId] - Skill UUID / ID
    * @param {number} [jobData.budget] - Budget amount
    * @param {string} [jobData.currency="NGN"] - Currency
    * @param {number} [jobData.durationDays=7] - Duration in days
@@ -23,24 +23,8 @@ export const jobService = {
       );
       return response.data;
     } catch (error) {
-      console.warn("API createJob error, falling back to simulated response:", error.response?.data || error.message);
-      // Fallback response format matching backend spec
-      return {
-        success: true,
-        message: "Job created (simulated)",
-        data: {
-          id: Date.now(),
-          employerId: 1,
-          title: jobData.title,
-          description: jobData.description,
-          budget: jobData.budget,
-          currency: jobData.currency || "NGN",
-          location: jobData.location,
-          status: "draft",
-          createdAt: new Date().toISOString(),
-        },
-        timestamp: new Date().toISOString(),
-      };
+      console.warn("API createJob error:", error.response?.data || error.message);
+      throw error;
     }
   },
 
@@ -66,78 +50,13 @@ export const jobService = {
    */
   getMyEmployerJobs: async (params = {}) => {
     try {
-      const response = await axiosInstance.get(API_PATHS.JOBS.GET_MY_JOBS, {
+      const response = await axiosInstance.get(API_PATHS.JOBS.GET_POSTED_JOBS, {
         params,
       });
       return response.data;
     } catch (error) {
-      console.warn(
-        "API getMyEmployerJobs error, falling back to simulated data:",
-        error.response?.data || error.message
-      );
-      return {
-        success: true,
-        message: "Employer jobs retrieved (fallback)",
-        data: {
-          items: [
-            {
-              id: "ORD657783",
-              title: "Wardrobe Installation",
-              category: "Carpentry",
-              location: "Lekki Lagos",
-              budget: 500000,
-              currency: "NGN",
-              professional: "Johnathan David",
-              status: "In Progress",
-            },
-            {
-              id: "ORD657784",
-              title: "Kitchen Cabinet Repair",
-              category: "Carpentry",
-              location: "Ikeja Lagos",
-              budget: 350000,
-              currency: "NGN",
-              professional: "Johnathan David",
-              status: "Awaiting Escrow",
-            },
-            {
-              id: "ORD657785",
-              title: "Plumbing Refurbishment",
-              category: "Plumbing",
-              location: "Lekki Lagos",
-              budget: 120000,
-              currency: "NGN",
-              professional: "David Jonathan",
-              status: "Awaiting Offers",
-            },
-            {
-              id: "ORD657786",
-              title: "Modern Bedroom Closet",
-              category: "Carpentry",
-              location: "Ikoyi Lagos",
-              budget: 600000,
-              currency: "NGN",
-              professional: "Marvelous Samuel",
-              status: "Completed",
-            },
-            {
-              id: "ORD657787",
-              title: "Living Room Cabinet",
-              category: "Carpentry",
-              location: "Surulere Lagos",
-              budget: 200000,
-              currency: "NGN",
-              professional: "Johnathan David",
-              status: "Canceled",
-            },
-          ],
-          total: 5,
-          page: 1,
-          limit: 20,
-          totalPages: 1,
-        },
-        timestamp: new Date().toISOString(),
-      };
+      console.warn("API getMyEmployerJobs error:", error.response?.data || error.message);
+      throw error;
     }
   },
 
@@ -197,6 +116,43 @@ export const jobService = {
     } catch (error) {
       console.warn("API getJobMatches error:", error.response?.data || error.message);
       throw error;
+    }
+  },
+
+  /**
+   * Get applications submitted for one job
+   * GET /api/jobs/:id/applications?status=pending&page=1&limit=20
+   */
+  getJobApplications: async (id, params = {}) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.JOBS.GET_JOB_APPLICATIONS(id), {
+        params: { status: "pending", page: 1, limit: 20, ...params },
+      });
+      return response.data;
+    } catch (error) {
+      console.warn("API getJobApplications error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Get skills catalog
+   * GET /api/skills
+   */
+  getSkillsCatalog: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.SKILLS.GET_SKILLS, {
+        params: { limit: 100, ...params },
+      });
+      const data = response.data;
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.data?.skills)) return data.data.skills;
+      if (Array.isArray(data?.skills)) return data.skills;
+      if (Array.isArray(data?.data)) return data.data;
+      return [];
+    } catch (error) {
+      console.warn("API getSkillsCatalog error:", error.response?.data || error.message);
+      return [];
     }
   },
 };

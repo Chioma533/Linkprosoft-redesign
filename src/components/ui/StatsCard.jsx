@@ -4,6 +4,7 @@ import { FiTrendingUp, FiTrendingDown } from "react-icons/fi";
 const StatsCard = ({
   title,
   value,
+  subtitle,
   icon: Icon,
   iconColor = "text-[#016EA6]",
   BgColor = "bg-white",
@@ -36,7 +37,9 @@ const StatsCard = ({
         )}
       </div>
 
-      {hasTrend && (
+      {subtitle ? (
+        <p className="hidden sm:block text-xs text-gray-400 font-medium mt-4">{subtitle}</p>
+      ) : hasTrend && (
         <div
           className={`hidden sm:flex items-center gap-1.5 text-xs font-semibold mt-4 ${trendColor}`}
         >

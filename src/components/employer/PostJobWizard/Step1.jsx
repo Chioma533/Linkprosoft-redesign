@@ -5,14 +5,42 @@ import FieldLabel from "../../common/FieldLabel";
 import WizardInput from "../../common/WizardInput";
 import WizardTextarea from "../../common/WizardTextarea";
 import NavButtons from "../../common/NavButtons";
+import { jobService } from "../../../api/services/jobService";
 
 const CATEGORIES = ["Home Services", "Design", "Tech", "Events"];
-const SKILLS = ["Plumber", "Carpenter", "Electrician", "Painter", "Mason", "Welder"];
+const DEFAULT_SKILLS = [
+  { id: "25bf49c9-83d6-4869-ad83-a72753b1ecdc", name: "Carpentry" },
+  { id: "plumber-skill-id", name: "Plumbing" },
+  { id: "electrician-skill-id", name: "Electrical" },
+  { id: "painter-skill-id", name: "Painting" },
+  { id: "mason-skill-id", name: "Masonry" },
+  { id: "welder-skill-id", name: "Welding" },
+];
 
 const Step1 = ({ data, onChange, onBack, onNext }) => {
   const [isSkillOpen, setIsSkillOpen] = useState(false);
+  const [skillsCatalog, setSkillsCatalog] = useState(DEFAULT_SKILLS);
   const skillDropdownRef = useRef(null);
   const canContinue = data.title.trim().length > 0 && data.category;
+
+  // Load skills catalog from backend
+  useEffect(() => {
+    let isMounted = true;
+    const loadCatalog = async () => {
+      try {
+        const catalog = await jobService.getSkillsCatalog();
+        if (isMounted && Array.isArray(catalog) && catalog.length > 0) {
+          setSkillsCatalog(catalog);
+        }
+      } catch (err) {
+        console.warn("Using default skills catalog fallback:", err.message);
+      }
+    };
+    loadCatalog();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -57,7 +85,7 @@ const Step1 = ({ data, onChange, onBack, onNext }) => {
               onClick={() => setIsSkillOpen((open) => !open)}
               aria-haspopup="listbox"
               aria-expanded={isSkillOpen}
-              className={`flex min-w-[108px] items-center justify-between gap-3 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#016EA6]/10 ${
+              className={`flex min-w-[140px] items-center justify-between gap-3 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#016EA6]/10 ${
                 isSkillOpen
                   ? "border-[#016EA6] text-[#016EA6] shadow-sm"
                   : "border-gray-200 text-gray-600 hover:border-gray-400"
@@ -77,31 +105,36 @@ const Step1 = ({ data, onChange, onBack, onNext }) => {
             <div
               role="listbox"
               aria-label="Select skillset"
-              className={`absolute left-0 top-full z-20 mt-2 w-full min-w-[168px] origin-top rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg shadow-gray-200/60 transition-all duration-200 ${
+              className={`absolute left-0 top-full z-20 mt-2 w-full min-w-[190px] max-h-56 overflow-y-auto origin-top rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg shadow-gray-200/60 transition-all duration-200 ${
                 isSkillOpen
                   ? "translate-y-0 opacity-100"
                   : "pointer-events-none -translate-y-2 opacity-0"
               }`}
             >
-              {SKILLS.map((skill) => (
-                <button
-                  key={skill}
-                  type="button"
-                  role="option"
-                  aria-selected={data.skill === skill}
-                  onClick={() => {
-                    onChange("skill", skill);
-                    setIsSkillOpen(false);
-                  }}
-                  className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-colors cursor-pointer ${
-                    data.skill === skill
-                      ? "bg-[#EEF5F9] font-semibold text-[#016EA6]"
-                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                  }`}
-                >
-                  {skill}
-                </button>
-              ))}
+              {skillsCatalog.map((s) => {
+                const sName = s.name || s.title || s;
+                const sId = s.id || s.skillId || s;
+                return (
+                  <button
+                    key={sId}
+                    type="button"
+                    role="option"
+                    aria-selected={data.skill === sName}
+                    onClick={() => {
+                      onChange("skill", sName);
+                      onChange("skillId", sId);
+                      setIsSkillOpen(false);
+                    }}
+                    className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-colors cursor-pointer ${
+                      data.skill === sName
+                        ? "bg-[#EEF5F9] font-semibold text-[#016EA6]"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
+                  >
+                    {sName}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -116,7 +149,6 @@ const Step1 = ({ data, onChange, onBack, onNext }) => {
             />
           </div>
         </div>
-
       </div>
 
       <NavButtons onBack={onBack} onContinue={onNext} disableContinue={!canContinue} />

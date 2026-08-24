@@ -22,11 +22,15 @@ export const useDashboardStore = create((set, get) => ({
   setPreviousTab: (tab) => set({ previousTab: tab }),
   setGlobalSearchQuery: (query) => set({ globalSearchQuery: query }),
 
+  /**
+   * Fetch all dashboard sidebar data EXCEPT browse-jobs.
+   * Jobs for the professional feed are loaded separately by BrowseJobsSubpage
+   * with the correct skillId filter to prevent showing unmatched jobs.
+   */
   fetchDashboardData: async () => {
     set({ isLoading: true, error: null });
     try {
-      const [jobs, myJobs, applications, messages, notifications, metrics, schedules] = await Promise.all([
-        projectService.getJobs(),
+      const [myJobs, applications, messages, notifications, metrics, schedules] = await Promise.all([
         projectService.getMyJobs(),
         projectService.getApplications(),
         notificationService.getMessages(),
@@ -36,7 +40,6 @@ export const useDashboardStore = create((set, get) => ({
       ]);
 
       set({
-        jobs,
         myJobs,
         applications,
         messages,
@@ -53,39 +56,44 @@ export const useDashboardStore = create((set, get) => ({
     }
   },
 
-  fetchJobs: async () => {
+  fetchJobs: async (params = {}) => {
     try {
-      const jobs = await projectService.getJobs();
+      const jobs = await projectService.getJobs(params);
       set({ jobs });
+      return jobs;
     } catch (err) {
       console.error("Failed to fetch jobs", err);
+      return [];
     }
   },
 
-  fetchMyJobs: async () => {
+  fetchMyJobs: async (params = {}) => {
     try {
-      const myJobs = await projectService.getMyJobs();
+      const myJobs = await projectService.getMyJobs(params);
       set({ myJobs });
+      return myJobs;
     } catch (err) {
       console.error("Failed to fetch my jobs", err);
+      return [];
     }
   },
 
-  fetchApplications: async () => {
+  fetchApplications: async (params = {}) => {
     try {
-      const applications = await projectService.getApplications();
+      const applications = await projectService.getApplications(params);
       set({ applications });
+      return applications;
     } catch (err) {
       console.error("Failed to fetch applications", err);
+      return [];
     }
   },
 
-  applyForJob: async (jobId, bidAmount, coverLetter) => {
+  applyForJob: async (jobId, bidAmount, coverLetter, estimatedDeliveryDays = 7) => {
     set({ isLoading: true });
     try {
-      const response = await projectService.applyForJob(jobId, bidAmount, coverLetter);
+      const response = await projectService.applyForJob(jobId, bidAmount, coverLetter, estimatedDeliveryDays);
       if (response.success && response.application) {
-        // Add new application to state
         const updatedApplications = [response.application, ...get().applications];
         set({
           applications: updatedApplications,
@@ -93,7 +101,7 @@ export const useDashboardStore = create((set, get) => ({
         });
         return response;
       }
-      throw new Error(response.message || "Failed to apply");
+      return response;
     } catch (err) {
       set({ isLoading: false });
       throw err;

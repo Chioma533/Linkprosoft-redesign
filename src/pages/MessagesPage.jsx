@@ -9,7 +9,7 @@ import { SOCKET_EVENTS } from "../constants/messagingConstants";
 import { useMessaging } from "../hooks/useMessaging";
 import { socketManager } from "../utils/socketManager";
 
-const initials = (name = "Conversation") => name.split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+const initials = (name = "Conversation") => (name || "Conversation").split(" ").filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 const colorIndex = (id = "") => [...id].reduce((total, char) => total + char.charCodeAt(0), 0) % 5;
 const displayTime = (value) => value ? new Date(value).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
 

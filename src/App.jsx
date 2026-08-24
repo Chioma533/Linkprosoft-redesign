@@ -16,6 +16,8 @@ import TestPreloaderPage from './pages/TestPreloaderPage';
 import PublicBuyerScreen from './pages/buyer/PublicBuyerScreen';
 import PublicProfessionalScreen from './pages/professional/PublicProfessionalScreen';
 import CommunityPage from './pages/CommunityPage';
+import ManageJobsPage from './pages/buyer/ManageJobsPage';
+import PaymentScreen from './pages/buyer/PaymentScreen';
 
 const App = () => {
   return (
@@ -32,10 +34,12 @@ const App = () => {
             <Route path="/browse-professionals" element={<PublicBuyerScreen />} />
             <Route path="/professionals" element={<PublicProfessionalScreen />} />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/payment-screen" element={<PaymentScreen />} />
 
             <Route element={<PrivateRoutes allowedRoles={['employer']} />}>
               <Route path="/home" element={<DefaultBuyerScreen />} />
               <Route path="/employer/dashboard" element={<EmployerDashboardPage />} />
+              <Route path="/manage-jobs" element={<ManageJobsPage />} />
             </Route>
 
             <Route element={<PrivateRoutes allowedRoles={['professional']} />}>
@@ -47,7 +51,24 @@ const App = () => {
               <Route path="/admin/dashboard" element={<AdminDahboardPage />} />
             </Route>
           </Routes>
-          <Toaster position="top-center" reverseOrder={false} />
+          <Toaster position="top-center" reverseOrder={false}
+            toastOptions={{
+            // Apply to all toasts
+              className: 'my-global-toast',
+              style: {
+              background: '#fff',
+              color: '#646465',
+              borderRadius: '18px',
+              padding: '20px'
+            },
+            
+            success: {
+              duration: 5000,
+            }
+          
+          }}
+          
+          />
         </div>
       </Router>
     </AuthProvider>

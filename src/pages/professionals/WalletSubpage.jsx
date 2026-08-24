@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Eye, EyeOff, Download, Filter, Plus, ArrowUpRight, DollarSign, Wallet, ArrowDownLeft, Clock, X, Check } from "lucide-react";
 import TopUpIcon from "../../components/icons/TopUpIcon";
 import StatsCard from "../../components/ui/StatsCard";
 import { useDashboardStore } from "../../store/dashboardStore";
 import { useAuthStore } from "../../store/authStore";
 import { greeting } from "../../utils/greeting";
+import { walletService } from "../../api/services/walletService";
 
 const WalletSubpage = () => {
   const [showBalance, setShowBalance] = useState(true);
@@ -12,6 +13,7 @@ const WalletSubpage = () => {
   const [withdrawStep, setWithdrawStep] = useState(1); // 1: details, 2: PIN, 3: Success
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [pinDigits, setPinDigits] = useState([]);
+  const [employerWallet, setEmployerWallet] = useState(null);
 
   const { setActiveTab } = useDashboardStore();
 
@@ -41,6 +43,29 @@ const WalletSubpage = () => {
 
   const { user } = useAuthStore();
   const userName = user?.fullName || user?.full_name || user?.name || "Samuel";
+
+  useEffect(() => {
+    if (user?.role !== "employer") return;
+
+    let isMounted = true;
+    walletService.getWallet()
+      .then((wallet) => {
+        if (isMounted) setEmployerWallet(wallet);
+      })
+      .catch((error) => {
+        console.warn("Failed to load employer wallet:", error.message);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.role]);
+
+  const isEmployer = user?.role === "employer";
+  const walletBalance = isEmployer ? employerWallet?.balance : 500000;
+  const formattedWalletBalance = walletBalance == null
+    ? "Loading..."
+    : formatCurrency(walletBalance);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -91,7 +116,7 @@ const WalletSubpage = () => {
                 <span className="text-xs text-sky-200 font-medium tracking-wide">Total Balance</span>
                 <div className="flex items-center gap-3 mt-1">
                   <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
-                    {showBalance ? "₦ 500,000" : "₦ ••••••••"}
+                    {showBalance ? formattedWalletBalance : "₦ ••••••••"}
                   </h1>
                   <button
                     onClick={() => setShowBalance(!showBalance)}
@@ -119,7 +144,7 @@ const WalletSubpage = () => {
 
       {/* Row of Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-        <StatsCard title="Available Balance" value="₦500,000" icon={Wallet} iconColor="text-blue-500" />
+        <StatsCard title="Available Balance" value={formattedWalletBalance} icon={Wallet} iconColor="text-blue-500" />
         <StatsCard title="Pending Earnings" value="₦59,000" icon={Clock} iconColor="text-orange-500" />
         <StatsCard title="Total Earnings" value="₦1.8M" icon={DollarSign} iconColor="text-green-500" />
         <StatsCard title="Total Withdrawn" value="₦1.8M" icon={ArrowUpRight} iconColor="text-[#016EA6]" />
@@ -282,7 +307,7 @@ const WalletSubpage = () => {
                         </div>
                         <div className="pt-1">
                           <span className="text-[10px] text-sky-200/80 font-bold block">Total Balance</span>
-                          <h3 className="text-lg font-bold tracking-tight">₦ 500,000</h3>
+                          <h3 className="text-lg font-bold tracking-tight">{formattedWalletBalance}</h3>
                         </div>
                       </div>
                       <div className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center shrink-0 border border-white/10 relative z-10">

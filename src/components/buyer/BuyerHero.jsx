@@ -1,6 +1,6 @@
-import React from "react";
 import { FiAlertCircle, FiX } from "react-icons/fi";
 import ProfessionalIllustration from "../../assets/images/professional_illustration.png";
+import { Link } from "react-router-dom";
 
 const BuyerHero = ({ verificationDismissed, onDismissVerification }) => {
   return (
@@ -46,7 +46,7 @@ const BuyerHero = ({ verificationDismissed, onDismissVerification }) => {
                       id="complete-verification-btn"
                       className="inline-flex -translate-y-1 h-[15px] min-w-[64px] shrink-0 items-center justify-center rounded-full bg-orange-500 px-1 text-[4.71px] font-bold leading-none text-white transition-all duration-200 hover:bg-orange-600"
                     >
-                      Complete Verification
+                      <Link to="/verification">Complete Verification</Link>
                     </button>
                   </div>
                 </div>
@@ -84,12 +84,13 @@ const BuyerHero = ({ verificationDismissed, onDismissVerification }) => {
                     </p>
                   </div>
 
-                  <button
+                  <Link
                     id="complete-verification-btn"
+                    to="/verification"
                     className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-orange-500 px-3.5 py-2 text-[10px] font-bold text-white transition-all duration-200 hover:bg-orange-600"
                   >
                     Complete Verification
-                  </button>
+                  </Link>
 
                   <button
                     id="dismiss-verification-btn"

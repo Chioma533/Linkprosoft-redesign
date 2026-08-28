@@ -5,14 +5,17 @@ import { searchService } from "../api/services/searchService";
 const ITEMS_PER_PAGE = 9;
 
 const getProfessionalName = (pro) =>
-  pro.name || `${pro.user?.firstName || ""} ${pro.user?.lastName || ""}`.trim();
+  pro.name ||
+  `${pro.user?.firstName || ""} ${pro.user?.lastName || ""}`.trim();
 
 const getProfessionalLocation = (pro) =>
   pro.location || pro.user?.location || "";
 
-const getProfessionalRating = (pro) => pro.rating ?? pro.avgRating ?? 0;
+const getProfessionalRating = (pro) =>
+  pro.rating ?? pro.avgRating ?? 0;
 
-const getProfessionalPrice = (pro) => pro.pricePerDay ?? pro.hourlyRate ?? 0;
+const getProfessionalPrice = (pro) =>
+  pro.pricePerDay ?? pro.hourlyRate ?? 0;
 
 const getProfessionalRole = (pro) =>
   pro.profession ||
@@ -55,7 +58,9 @@ const matchesRating = (rating, selectedRating) => {
     return true;
   }
 
-  const minStars = Number(selectedRating.match(/\d+/)?.[0] || 0);
+  const minStars = Number(
+    selectedRating.match(/\d+/)?.[0] || 0
+  );
 
   return rating >= minStars;
 };
@@ -73,9 +78,16 @@ const useBuyerProfessionals = (initialFilters) => {
   const isFirstMount = useRef(true);
 
   const filteredProfessionals = useMemo(() => {
-    const { searchQuery, location, rating, budget } = filters;
+    const {
+      searchQuery,
+      location,
+      rating,
+      budget,
+    } = filters;
 
-    const list = Array.isArray(apiProfessionals) ? apiProfessionals : [];
+    const list = Array.isArray(apiProfessionals)
+      ? apiProfessionals
+      : [];
 
     return list.filter((pro) => {
       if (!pro) return false;
@@ -94,7 +106,10 @@ const useBuyerProfessionals = (initialFilters) => {
         (pro.bio || "").toLowerCase().includes(search);
 
       const matchesLocation =
-        !location || proLocation.toLowerCase().includes(location.toLowerCase());
+        !location ||
+        proLocation
+          .toLowerCase()
+          .includes(location.toLowerCase());
 
       return (
         matchesSearch &&
@@ -107,19 +122,19 @@ const useBuyerProfessionals = (initialFilters) => {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredProfessionals.length / ITEMS_PER_PAGE),
+    Math.ceil(filteredProfessionals.length / ITEMS_PER_PAGE)
   );
 
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const paginatedProfessionals = filteredProfessionals.slice(
     (safeCurrentPage - 1) * ITEMS_PER_PAGE,
-    safeCurrentPage * ITEMS_PER_PAGE,
+    safeCurrentPage * ITEMS_PER_PAGE
   );
 
   const fetchProfessionals = async (
     activeFilters = filters,
-    isInitial = false,
+    isInitial = false
   ) => {
     if (isInitial) {
       setIsInitialLoading(true);
@@ -131,7 +146,10 @@ const useBuyerProfessionals = (initialFilters) => {
 
     let minRating;
 
-    if (activeFilters.rating && activeFilters.rating !== "Any Rating") {
+    if (
+      activeFilters.rating &&
+      activeFilters.rating !== "Any Rating"
+    ) {
       const starsMatch = activeFilters.rating.match(/\d+/);
 
       if (starsMatch) {
@@ -142,7 +160,8 @@ const useBuyerProfessionals = (initialFilters) => {
     let minRate;
     let maxRate;
 
-    const normBudget = activeFilters.budget?.replace(/–/g, "-") || "";
+    const normBudget =
+      activeFilters.budget?.replace(/–/g, "-") || "";
 
     if (normBudget === "Under ₦5,000") {
       maxRate = 5000;
@@ -152,13 +171,17 @@ const useBuyerProfessionals = (initialFilters) => {
     } else if (normBudget === "₦20,000 - ₦50,000") {
       minRate = 20000;
       maxRate = 50000;
-    } else if (normBudget === "₦5,000+" || normBudget === "₦50,000+") {
+    } else if (
+      normBudget === "₦5,000+" ||
+      normBudget === "₦50,000+"
+    ) {
       minRate = 50000;
     }
 
     const searchParams = {
       query: activeFilters.searchQuery?.trim() || undefined,
-      profession: activeFilters.searchQuery?.trim() || undefined,
+      profession:
+        activeFilters.searchQuery?.trim() || undefined,
       location: activeFilters.location || undefined,
       rating: activeFilters.rating || undefined,
       budget: activeFilters.budget || undefined,
@@ -171,7 +194,9 @@ const useBuyerProfessionals = (initialFilters) => {
 
     try {
       const response =
-        await searchService.smartSearchProfessionals(searchParams);
+        await searchService.smartSearchProfessionals(
+          searchParams
+        );
 
       const isSuccess =
         response?.status === "success" ||
@@ -184,19 +209,24 @@ const useBuyerProfessionals = (initialFilters) => {
         const items = Array.isArray(dataObj.professionals)
           ? dataObj.professionals
           : Array.isArray(dataObj.items)
-            ? dataObj.items
-            : Array.isArray(dataObj)
-              ? dataObj
-              : [];
+          ? dataObj.items
+          : Array.isArray(dataObj)
+          ? dataObj
+          : [];
 
         setApiProfessionals(items);
       } else {
-        throw new Error(response?.message || "Failed to fetch professionals");
+        throw new Error(
+          response?.message ||
+            "Failed to fetch professionals"
+        );
       }
     } catch (err) {
       setError(err.message || "Something went wrong");
 
-      toast.error(err.message || "Failed to load professionals");
+      toast.error(
+        err.message || "Failed to load professionals"
+      );
     } finally {
       if (isInitial) {
         setIsInitialLoading(false);
@@ -221,7 +251,10 @@ const useBuyerProfessionals = (initialFilters) => {
   };
 
   useEffect(() => {
-    const minTimer = setTimeout(() => setMinTimePassed(true), 2500);
+    const minTimer = setTimeout(
+      () => setMinTimePassed(true),
+      2500
+    );
 
     fetchProfessionals(filters, true);
 

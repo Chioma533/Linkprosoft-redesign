@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
+import { Link } from "react-router-dom";
 import ProfessionalNavbar from "../../layouts/professional/ProfessionalNavbar";
 import JobSearchBar from "../../components/professional/JobSearchBar";
 import JobCard from "../../components/professional/JobCard";
@@ -229,12 +230,13 @@ const DefaultProfessionalScreen = () => {
                         payments securely.
                       </p>
 
-                      <button
+                      <Link
                         id="complete-verification-btn"
+                        to="/verification"
                         className="inline-flex -translate-y-1 h-[15px] min-w-[64px] shrink-0 items-center justify-center rounded-full bg-orange-500 px-1 text-[4.71px] font-bold leading-none text-white transition-all duration-200 hover:bg-orange-600"
                       >
                         Complete Verification
-                      </button>
+                      </Link>
                     </div>
                   </div>
 
@@ -268,12 +270,13 @@ const DefaultProfessionalScreen = () => {
                         payments securely.
                       </p>
                     </div>
-                    <button
+                    <Link
                       id="complete-verification-btn"
+                      to="/verification"
                       className="inline-flex items-center justify-center whitespace-nowrap rounded-full bg-orange-500 px-3.5 py-2 text-[10px] font-bold text-white transition-all duration-200 hover:bg-orange-600"
                     >
                       Complete Verification
-                    </button>
+                    </Link>
                     <button
                       id="dismiss-verification-btn"
                       onClick={handleDismissVerification}

@@ -1,5 +1,6 @@
 const JOB_STATUS_STYLES = {
   Active: "bg-sky-50 text-sky-500",
+  accepted: "bg-emerald-50 text-emerald-600",
   Pending: "bg-orange-50 text-orange-500",
   Completed: "bg-emerald-50 text-emerald-600",
   Cancelled: "bg-red-50 text-red-500",

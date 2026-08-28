@@ -17,6 +17,7 @@ const JobCard = ({
   budget = 10000,
   isSaved = false,
   isSelected = false,
+  showBorder = true,
   onApply,
   onSave,
 }) => {
@@ -37,10 +38,14 @@ const JobCard = ({
   return (
     <article
       id={`job-card-${id}`}
-      className={`bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border hover:border-[#016EA6] ${
-        isSelected
-          ? "border-[#016EA6] border-l-4"
-          : "border-transparent"
+      className={`bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative ${
+        showBorder
+          ? `border hover:border-[#016EA6] ${
+              isSelected
+                ? "border-[#016EA6] border-l-4"
+                : "border-transparent"
+            }`
+          : ""
       }`}
     >
       {/* Card body */}

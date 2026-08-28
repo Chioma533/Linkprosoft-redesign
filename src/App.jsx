@@ -16,6 +16,8 @@ import TestPreloaderPage from "./pages/TestPreloaderPage";
 import PublicBuyerScreen from "./pages/buyer/PublicBuyerScreen";
 import PublicProfessionalScreen from "./pages/professional/PublicProfessionalScreen";
 import CommunityPage from "./pages/CommunityPage";
+import ManageJobsPage from "./pages/buyer/ManageJobsPage";
+import PaymentScreen from "./pages/buyer/PaymentScreen";
 import VerificationPage from "./pages/verification/VerificationPage";
 
 const App = () => {
@@ -42,9 +44,9 @@ const App = () => {
               element={<PublicProfessionalScreen />}
             />
             <Route path="/community" element={<CommunityPage />} />
+            <Route path="/payment-screen" element={<PaymentScreen />} />
 
             <Route path="/verification" element={<VerificationPage />} />
-
 
             <Route element={<PrivateRoutes allowedRoles={["employer"]} />}>
               <Route path="/home" element={<DefaultBuyerScreen />} />
@@ -52,7 +54,11 @@ const App = () => {
                 path="/employer/dashboard"
                 element={<EmployerDashboardPage />}
               />
-              <Route path="/employer/verification" element={<VerificationPage />} />
+              <Route
+                path="/employer/verification"
+                element={<VerificationPage />}
+              />
+              <Route path="/manage-jobs" element={<ManageJobsPage />} />
             </Route>
 
             {/* professional routes */}
@@ -66,14 +72,34 @@ const App = () => {
                 path="/professional/dashboard"
                 element={<ProfessionalDashboardPage />}
               />
-              <Route path="/professional/verification" element={<VerificationPage />} />
+              <Route
+                path="/professional/verification"
+                element={<VerificationPage />}
+              />
             </Route>
 
             <Route element={<PrivateRoutes allowedRoles={["admin"]} />}>
               <Route path="/admin/dashboard" element={<AdminDahboardPage />} />
             </Route>
           </Routes>
-          <Toaster position="top-center" reverseOrder={false} />
+          <Toaster
+            position="top-center"
+            reverseOrder={false}
+            toastOptions={{
+              // Apply to all toasts
+              className: "my-global-toast",
+              style: {
+                background: "#fff",
+                color: "#646465",
+                borderRadius: "18px",
+                padding: "20px",
+              },
+
+              success: {
+                duration: 5000,
+              },
+            }}
+          />
         </div>
       </Router>
     </AuthProvider>

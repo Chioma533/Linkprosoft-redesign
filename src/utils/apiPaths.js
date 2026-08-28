@@ -1,5 +1,5 @@
-export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
-// export const API_BASE_URL = "http://localhost:5020";
+// export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
+export const API_BASE_URL = "http://localhost:5020";
 
 export const API_PATHS = {
   AUTH: {
@@ -73,6 +73,9 @@ export const API_PATHS = {
     UPDATE_JOB: (id) => `/api/jobs/${id}`,
     DELETE_JOB: (id) => `/api/jobs/${id}`,
     MATCH_JOB: (id) => `/api/jobs/${id}/matches`,
+    GET_JOB_APPLICATIONS: (id) => `/api/jobs/${id}/applications`,
+    ACCEPT_AND_FUND_APPLICATION: (jobId, applicationId) =>
+      `/api/jobs/${jobId}/applications/${applicationId}/accept-and-fund`,
   },
 
   ASSIGNMENTS: {
@@ -102,6 +105,12 @@ export const API_PATHS = {
     GET_PAYMENTS: "/api/payments",
     GET_PAYMENT_BY_ID: (id) => `/api/payments/${id}`,
     GET_PAYMENT_HISTORY: (userId) => `/api/payments/history/${userId}`,
+  },
+
+  WALLET: {
+    GET_WALLET: "/api/wallet",
+    INCREASE_BALANCE: "/api/wallet",
+    UPDATE_BALANCE: "/api/wallet",
   },
 
   ADMIN_PAYMENTS: {

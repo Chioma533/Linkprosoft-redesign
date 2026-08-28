@@ -26,6 +26,25 @@ const EmployerBrowseProfessionalsSubpage = () => {
   const { globalSearchQuery } = useDashboardStore();
   const userName = user?.fullName || user?.full_name || "Elvis Chimamanda";
 
+  const getProName = (pro) => {
+    return (
+      pro?.name ||
+      pro?.fullName ||
+      pro?.full_name ||
+      pro?.user?.name ||
+      pro?.user?.fullName ||
+      [pro?.firstName || pro?.first_name, pro?.lastName || pro?.last_name].filter(Boolean).join(" ") ||
+      "Professional"
+    );
+  };
+
+  const getInitials = (name) => {
+    if (!name || typeof name !== "string") return "P";
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    if (parts.length === 0) return "P";
+    return parts.slice(0, 2).map((part) => part[0]).join("").toUpperCase();
+  };
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -100,10 +119,10 @@ const EmployerBrowseProfessionalsSubpage = () => {
       const items = Array.isArray(payload?.professionals)
         ? payload.professionals
         : Array.isArray(payload?.items)
-        ? payload.items
-        : Array.isArray(payload)
-        ? payload
-        : [];
+          ? payload.items
+          : Array.isArray(payload)
+            ? payload
+            : [];
 
       setProfessionals(items);
       setTotal(payload?.meta?.total || payload?.total || items.length);
@@ -218,9 +237,9 @@ const EmployerBrowseProfessionalsSubpage = () => {
 
         {/* Stats Row (2x2) */}
         <div className="grid grid-cols-2 gap-4">
-          <StatsCard title="Active jobs" value={formatCurrency(500000)} icon={ToggleOffIcon} iconColor="text-blue-500"/>
+          <StatsCard title="Active jobs" value={formatCurrency(500000)} icon={ToggleOffIcon} iconColor="text-blue-500" />
           <StatsCard title="Upcoming jobs" value="172" icon={InformationCircleIcon} iconColor="text-orange-500" BgColor="bg-[#fff4ea]" />
-          <StatsCard title="Completed jobs" value="1292" icon={DatabaseLockedIcon} iconColor="text-green-500"/>
+          <StatsCard title="Completed jobs" value="1292" icon={DatabaseLockedIcon} iconColor="text-green-500" />
           <StatsCard title="Performance" value="80%" icon={BorderFullIcon} iconColor="text-emerald-500" />
         </div>
 
@@ -290,87 +309,84 @@ const EmployerBrowseProfessionalsSubpage = () => {
               </p>
             </div>
           ) : (
-            locationFiltered.map((pro) => (
-              <div
-                key={pro.id}
-                className="bg-white p-5 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col gap-4 relative"
-              >
-                {/* Header: Avatar, Info, Bookmark icon */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    {/* Round Avatar */}
-                    <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center font-extrabold text-sm relative shrink-0">
-                      {pro.avatarUrl ? (
-                        <img
-                          src={pro.avatarUrl}
-                          alt={`${pro.name} avatar`}
-                          className="w-full h-full object-cover rounded-full"
-                        />
-                      ) : (
-                        <>
-                          {pro.name
-                            .split(" ")
-                            .map((part) => part[0])
-                            .slice(0, 2)
-                            .join("")
-                            .toUpperCase()}
-                        </>
-                      )}
-                      <span
-                        className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
-                        title="Verified Pro"
-                      >
-                        <FiCheckCircle className="w-3 h-3 text-white fill-current" />
+            locationFiltered.map((pro) => {
+              const proName = getProName(pro);
+              const initials = getInitials(proName);
+              return (
+                <div
+                  key={pro.id}
+                  className="bg-white p-5 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col gap-4 relative"
+                >
+                  {/* Header: Avatar, Info, Bookmark icon */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      {/* Round Avatar */}
+                      <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center font-extrabold text-sm relative shrink-0">
+                        {pro.avatarUrl ? (
+                          <img
+                            src={pro.avatarUrl}
+                            alt={`${proName} avatar`}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <>{initials}</>
+                        )}
+                        <span
+                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
+                          title="Verified Pro"
+                        >
+                          <FiCheckCircle className="w-3 h-3 text-white fill-current" />
+                        </span>
+                      </div>
+
+                      {/* Name and Professional details */}
+                      <div className="space-y-0.5">
+                        <h4 className="font-bold text-gray-900 text-sm leading-snug">
+                          {proName}
+                        </h4>
+                        <div className="text-[11px] text-[#016EA6] font-semibold">
+                          {pro.profession || pro.role || "Professional"}
+                        </div>
+                        <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1.5">
+                          <span className="text-amber-500 flex items-center gap-0.5">
+                            <FiStar className="w-3 h-3 fill-current" />
+                            {pro.rating || "5.0"}
+                          </span>
+                          <span>•</span>
+                          <span>{pro.successRate || 95}% Success</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bookmark Button */}
+                    <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer shrink-0">
+                      <FiBookmark className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  {/* Bio Description */}
+                  <p className="text-xs text-gray-400 leading-relaxed font-medium line-clamp-3">
+                    {pro.bio || pro.description || "No bio provided"}
+                  </p>
+
+                  {/* Footer: Price and Invite button */}
+                  <div className="flex items-center justify-between border-t border-gray-50/80 pt-3 mt-1">
+                    <div>
+                      <span className="text-[10px] text-gray-400 block font-medium">Starting rate</span>
+                      <span className="text-sm font-extrabold text-gray-800">
+                        {formatCurrency(pro.hourlyRate || pro.rate || 10000)}/hr
                       </span>
                     </div>
-
-                    {/* Name and Professional details */}
-                    <div className="space-y-0.5">
-                      <h4 className="font-bold text-gray-900 text-sm leading-snug">
-                        {pro.name}
-                      </h4>
-                      <div className="text-[11px] text-[#016EA6] font-semibold">
-                        {pro.profession || pro.role || "Professional"}
-                      </div>
-                      <div className="text-[10px] text-gray-400 font-medium flex items-center gap-1.5">
-                        <span className="text-amber-500 flex items-center gap-0.5">
-                          <FiStar className="w-3 h-3 fill-current" />
-                          {pro.rating}
-                        </span>
-                        <span>•</span>
-                        <span>{pro.successRate}% Success</span>
-                      </div>
-                    </div>
+                    <button
+                      onClick={() => toast.success(`Invitation request sent to ${proName}!`)}
+                      className="px-5 py-2 bg-[#EBF3FA] hover:bg-[#016EA6]/10 text-[#016EA6] rounded-full text-xs font-bold transition-all cursor-pointer"
+                    >
+                      Invite
+                    </button>
                   </div>
-
-                  {/* Bookmark Button */}
-                  <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer shrink-0">
-                    <FiBookmark className="w-4 h-4" />
-                  </button>
                 </div>
-
-                {/* Bio Description */}
-                <p className="text-xs text-gray-400 leading-relaxed font-medium line-clamp-3">
-                  {pro.bio}
-                </p>
-
-                {/* Footer: Price and Invite button */}
-                <div className="flex items-center justify-between border-t border-gray-50/80 pt-3 mt-1">
-                  <div>
-                    <span className="text-[10px] text-gray-400 block font-medium">Starting rate</span>
-                    <span className="text-sm font-extrabold text-gray-800">
-                      {formatCurrency(pro.hourlyRate || pro.rate || 10000)}/hr
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => toast.success(`Invitation request sent to ${pro.name}!`)}
-                    className="px-5 py-2 bg-[#EBF3FA] hover:bg-[#016EA6]/10 text-[#016EA6] rounded-full text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Invite
-                  </button>
-                </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
 
@@ -381,18 +397,16 @@ const EmployerBrowseProfessionalsSubpage = () => {
             <button
               onClick={() => setPage(1)}
               disabled={page === 1}
-              className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center cursor-pointer transition-colors ${
-                page === 1 ? "bg-[#016EA6] text-white" : "border border-gray-100 text-gray-400"
-              }`}
+              className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center cursor-pointer transition-colors ${page === 1 ? "bg-[#016EA6] text-white" : "border border-gray-100 text-gray-400"
+                }`}
             >
               1
             </button>
             {totalPages > 2 && (
               <button
                 onClick={() => setPage(2)}
-                className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center cursor-pointer transition-colors ${
-                  page === 2 ? "bg-[#016EA6] text-white" : "border border-gray-100 text-gray-400"
-                }`}
+                className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center cursor-pointer transition-colors ${page === 2 ? "bg-[#016EA6] text-white" : "border border-gray-100 text-gray-400"
+                  }`}
               >
                 2
               </button>
@@ -400,9 +414,8 @@ const EmployerBrowseProfessionalsSubpage = () => {
             {totalPages > 3 && (
               <button
                 onClick={() => setPage(3)}
-                className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center cursor-pointer transition-colors ${
-                  page === 3 ? "bg-[#016EA6] text-white" : "border border-gray-100 text-gray-400"
-                }`}
+                className={`w-6 h-6 rounded-lg text-xs font-bold flex items-center justify-center cursor-pointer transition-colors ${page === 3 ? "bg-[#016EA6] text-white" : "border border-gray-100 text-gray-400"
+                  }`}
               >
                 3
               </button>
@@ -498,121 +511,130 @@ const EmployerBrowseProfessionalsSubpage = () => {
                 Searching professionals...
               </p>
             </div>
-          ) : (
-            locationFiltered.map((pro) => (
-              <div
-                key={pro.id}
-                className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-300"
-              >
-              {/* Header info */}
-              <div>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center font-extrabold text-sm relative">
-                    {pro.avatarUrl ? (
-                      <img
-                        src={pro.avatarUrl}
-                        alt={`${pro.name} avatar`}
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <>
-                        {pro.name
-                          .split(" ")
-                          .map((part) => part[0])
-                          .slice(0, 2)
-                          .join("")
-                          .toUpperCase()}
-                      </>
-                    )}
-                    <span
-                      className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
-                      title="Verified Pro"
-                    >
-                      <FiCheckCircle className="w-3 h-3 text-white fill-current" />
-                    </span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-gray-900 text-sm leading-tight">{pro.name}</h3>
-                    <span className="text-[10px] text-gray-400 font-bold">{pro.profession || pro.role || "Professional"}</span>
-                  </div>
-                </div>
-
-                {/* Stats badges */}
-                <div className="flex items-center gap-4 mt-4 text-[10px] font-bold text-gray-500">
-                  <span className="flex items-center gap-1 text-amber-500">
-                    <FiStar className="w-3.5 h-3.5 fill-current" />
-                    <span>{pro.rating} ({pro.reviewCount} reviews)</span>
-                  </span>
-                  <span>•</span>
-                  <span className="text-emerald-600 font-extrabold">{pro.successRate}% Success</span>
-                </div>
-
-                {/* Bio description */}
-                <p className="text-xs text-gray-400 mt-4 leading-relaxed line-clamp-3 font-medium">
-                  {pro.bio}
-                </p>
-
-                {/* Skills list */}
-                <div className="flex flex-wrap gap-1.5 mt-4">
-                  {pro.skills
-                    ?.map((skill) => (typeof skill === "string" ? skill : skill.name))
-                    .map((skillName, sIdx) => (
-                      <span
-                        key={sIdx}
-                        className="px-2.5 py-1 bg-slate-50 text-gray-500 rounded-lg text-[9px] font-bold"
-                      >
-                        {skillName}
-                      </span>
-                    ))}
-                </div>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-50">
-                <button
-                  className="flex-1 py-2.5 border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <FiMail className="w-3.5 h-3.5" />
-                  <span>Message</span>
-                </button>
-                <button
-                  onClick={() => toast.success(`Invitation request sent to ${pro.name}!`)}
-                  className="flex-1 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm text-center"
-                >
-                  Invite to Project
-                </button>
-              </div>
+          ) : locationFiltered.length === 0 ? (
+            <div className="col-span-full py-16 text-center text-gray-400">
+              <FiSearch className="w-10 h-10 mx-auto mb-2 opacity-30" />
+              <p className="text-sm font-semibold">No professionals found</p>
+              <p className="text-xs mt-1">
+                Try adjusting your search or location filter
+              </p>
             </div>
-          ))
-        )}
+          ) : (
+            locationFiltered.map((pro) => {
+              const proName = getProName(pro);
+              const initials = getInitials(proName);
+              return (
+                <div
+                  key={pro.id}
+                  className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow duration-300"
+                >
+                  {/* Header info */}
+                  <div>
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center font-extrabold text-sm relative shrink-0">
+                        {pro.avatarUrl ? (
+                          <img
+                            src={pro.avatarUrl}
+                            alt={`${proName} avatar`}
+                            className="w-full h-full object-cover rounded-full"
+                          />
+                        ) : (
+                          <>{initials}</>
+                        )}
+                        <span
+                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
+                          title="Verified Pro"
+                        >
+                          <FiCheckCircle className="w-3 h-3 text-white fill-current" />
+                        </span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-sm leading-tight">
+                          {proName}
+                        </h3>
+                        <span className="text-[10px] text-gray-400 font-bold">
+                          {pro.profession || pro.role || "Professional"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Stats badges */}
+                    <div className="flex items-center gap-4 mt-4 text-[10px] font-bold text-gray-500">
+                      <span className="flex items-center gap-1 text-amber-500">
+                        <FiStar className="w-3.5 h-3.5 fill-current" />
+                        <span>{pro.rating || "5.0"} ({pro.reviewCount || 0} reviews)</span>
+                      </span>
+                      <span>•</span>
+                      <span className="text-emerald-600 font-extrabold">{pro.successRate || 95}% Success</span>
+                    </div>
+
+                    {/* Bio description */}
+                    <p className="text-xs text-gray-400 mt-4 leading-relaxed line-clamp-3 font-medium">
+                      {pro.bio || pro.description || "No bio provided"}
+                    </p>
+
+                    {/* Skills list */}
+                    <div className="flex flex-wrap gap-1.5 mt-4">
+                      {pro.skills
+                        ?.map((skill) => (typeof skill === "string" ? skill : skill.name))
+                        .map((skillName, sIdx) => (
+                          <span
+                            key={sIdx}
+                            className="px-2.5 py-1 bg-slate-50 text-gray-500 rounded-lg text-[9px] font-bold"
+                          >
+                            {skillName}
+                          </span>
+                        ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-3 mt-6 pt-4 border-t border-gray-50">
+                    <button
+                      className="flex-1 py-2.5 border border-gray-100 hover:bg-gray-50 text-gray-500 hover:text-gray-900 rounded-full text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <FiMail className="w-3.5 h-3.5" />
+                      <span>Message</span>
+                    </button>
+                    <button
+                      onClick={() => toast.success(`Invitation request sent to ${proName}!`)}
+                      className="flex-1 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm text-center"
+                    >
+                      Invite to Project
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
-            <span>
-              Showing {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of {total} professionals
-            </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-                disabled={page === 1}
-                className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={page === totalPages}
-                className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
-              >
-                Next
-              </button>
-            </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex items-center justify-between text-sm text-gray-500">
+          <span>
+            Showing {(page - 1) * limit + 1} - {Math.min(page * limit, total)} of {total} professionals
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+              disabled={page === 1}
+              className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={page === totalPages}
+              className="px-3 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50"
+            >
+              Next
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
+    </div >
   );
 };
 

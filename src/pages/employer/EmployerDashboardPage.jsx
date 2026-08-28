@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import DashboardLayout from "../../layouts/DashboardLayout";
 import EmployerOverviewSubpage from "./EmployerOverviewSubpage";
 import EmployerManageJobsSubpage from "./EmployerManageJobsSubpage";
@@ -10,8 +11,19 @@ import WalletSubpage from "../professionals/WalletSubpage";
 import { useDashboardStore } from "../../store/dashboardStore";
 
 const EmployerDashboardPage = () => {
+  const location = useLocation();
   const { activeTab, setActiveTab } = useDashboardStore();
   const [selectedJobId, setSelectedJobId] = useState("ORD657783");
+
+  // Handle incoming navigation state (e.g. redirected from PaymentScreen with job-details)
+  useEffect(() => {
+    if (location.state?.tab) {
+      setActiveTab(location.state.tab);
+    }
+    if (location.state?.jobId) {
+      setSelectedJobId(location.state.jobId);
+    }
+  }, [location.state, setActiveTab]);
 
   const handleViewProject = (jobId) => {
     setSelectedJobId(jobId);

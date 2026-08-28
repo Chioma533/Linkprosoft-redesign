@@ -8,7 +8,7 @@ import { API_PATHS } from "../utils/apiPaths";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 
 /* ─── Design Tokens ────────────────────────────────────────── */
-const BG_IMAGE = "/temp_figma_mockups/Waitlsit-bg.jpg";
+const BG_IMAGE = "/temp_figma_mockups/Waitlsit-bg.png";
 
 /* Worker avatar stack – three x circular images in the badge */
 const WORKER_AVATARS = [

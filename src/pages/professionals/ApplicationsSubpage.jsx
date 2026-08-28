@@ -51,18 +51,18 @@ const ApplicationsSubpage = () => {
         app.appliedOn ||
         (app.createdAt
           ? new Date(app.createdAt).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "short",
-            })
+            day: "numeric",
+            month: "short",
+          })
           : "Recently"),
       status: app.status || "Under review",
       lastUpdate:
         app.lastUpdate ||
         (app.updatedAt
           ? new Date(app.updatedAt).toLocaleDateString("en-GB", {
-              day: "numeric",
-              month: "short",
-            })
+            day: "numeric",
+            month: "short",
+          })
           : "Recently"),
       budget: Number(app.bidAmount || app.proposedBudget || app.budget || 0),
       coverLetter: app.coverLetter || app.proposal || "No cover letter provided.",
@@ -292,11 +292,14 @@ const ApplicationsSubpage = () => {
                     job={{
                       ...app,
                       datePosted: app.appliedOn,
-                      status:
-                        app.status === "Under review"
-                          ? "Pending"
-                          : app.status === "Accepted"
-                          ? "Active"
+                      status: ["under review", "pending", "submitted"].includes(
+                        (app.status || "").toLowerCase()
+                      )
+                        ? "Pending"
+                        : ["accepted", "hired", "approved"].includes(
+                          (app.status || "").toLowerCase()
+                        )
+                          ? "accepted"
                           : "Cancelled",
                     }}
                     onViewDetails={() => setSelectedAppModal(app)}

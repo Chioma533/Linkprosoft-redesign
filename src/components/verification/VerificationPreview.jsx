@@ -1,4 +1,11 @@
-const VerificationPreview = ({ profile, compact = false, onClose }) => {
+import React from "react";
+
+const VerificationPreview = ({
+  profile = {},
+  compact = false,
+  onClose,
+  uploadedFile = null,
+}) => {
   return (
     <aside
       className={`rounded-2xl bg-[#fafafa] ${
@@ -22,25 +29,23 @@ const VerificationPreview = ({ profile, compact = false, onClose }) => {
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-6 pt-5 text-xs">
         {[
-          ["First Name", profile.firstName],
-          ["Last Name", profile.lastName],
-          ["Phone Number", profile.phone],
-          ["Date of birth", profile.dateOfBirth],
-          ["Residential Address", profile.address],
-          ["Nationality", profile.nationality],
+          ["First Name", profile.firstName || "Marvellous"],
+          ["Last Name", profile.lastName || "Oluwaseun"],
+          ["Phone Number", profile.phone || "+2349066760056"],
+          ["Date of birth", profile.dateOfBirth || "July 09 2002"],
+          ["Residential Address", profile.address || "No 2 Aremu olatunbosun"],
+          ["Nationality", profile.nationality || "Nigerian"],
         ].map(([label, value]) => (
           <div key={label} className="min-w-0">
             <p className="text-[#44484a]">{label}</p>
-            <p className="mt-1 truncate text-[#85898b]">
-              {value}
-            </p>
+            <p className="mt-1 truncate text-[#85898b]">{value}</p>
           </div>
         ))}
       </div>
 
       <div className="mt-6 flex gap-2 overflow-hidden">
         <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#dcecef] bg-[#e9f5ee] text-[9px] font-semibold text-[#43876a]">
-          NIGERIA ID
+          {uploadedFile ? "ID ATTACHED" : "NIGERIA ID"}
         </div>
 
         <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">

@@ -1,5 +1,6 @@
-// export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
-export const API_BASE_URL = "http://localhost:5020";
+export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
+// export const API_BASE_URL = "http://localhost:5020";
+
 
 export const API_PATHS = {
   AUTH: {
@@ -148,6 +149,25 @@ export const API_PATHS = {
     AI_SEARCH_PROFESSIONALS: "/api/search/professionals",
     FILTERS: "/api/search/filters",
     SKILLS_AUTOCOMPLETE: "/api/search/skills",
+  },
+
+  VERIFICATION: {
+    STATUS: "/api/verification/status",
+    GET_STATUS: "/api/verification/status",
+    SUBMIT_IDENTITY: "/api/verification/identity",
+    SUBMIT_PROFESSIONAL: "/api/verification/professional",
+    SUBMIT_FACE: "/api/verification/face",
+    BANKS: "/api/verification/banks",
+    RESOLVE_ACCOUNT: "/api/verification/resolve-account",
+    SUBMIT_PAYMENT: "/api/verification/payment",
+    SUBMIT_ALL: "/api/verification/submit",
+    PREVIEW: "/api/verification/preview",
+    ADMIN: {
+      LIST: "/api/admin/verifications",
+      DETAILS: (id) => `/api/admin/verifications/${id}`,
+      APPROVE: (id) => `/api/admin/verifications/${id}/approve`,
+      REJECT: (id) => `/api/admin/verifications/${id}/reject`,
+    },
   },
 
   WAITLIST: "/api/waitlist",

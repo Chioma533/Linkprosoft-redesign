@@ -1,37 +1,17 @@
-/**
- * GridPageSkeleton.jsx
- *
- * Ghost skeleton for Browse Jobs and Browse Professionals inside the dashboard.
- * These are the same card-grid pages as the full-page screens but rendered
- * inside the DashboardLayout (no hero section, no top navbar — already in shell).
- *
- * Layout (space-y-6):
- *  1. Page title + action button (right-aligned)
- *  2. Search + filter bar (same structure as full-page SearchSkeleton)
- *  3. Results white card (bg-white rounded-3xl p-6)
- *       – Section header: title bar + count bar
- *       – 3×2 card grid (6 cards — trimmed for dashboard viewport)
- *
- * Props:
- *  cardType  "professional" | "job"  (default "professional")
- */
-
-import { Bar, Circle, Pill } from "./DashboardShellSkeleton";
+import React from "react";
+import { Bar, Circle, Pill, useIsMobile } from "./DashboardShellSkeleton";
 
 const shBg   = "linear-gradient(90deg,#EAEFF3 25%,#F8FAFB 50%,#EAEFF3 75%)";
 const shSize = "1600px 100%";
 const shAnim = "sk-shimmer 1.8s ease-in-out infinite";
 
-/* ── Professional card skeleton ─────────────────────────────────────────── */
 const ProCardSk = ({ delay = "0s" }) => (
   <article style={{
     background: "#F9F9F9", borderRadius: 16,
     border: "1px solid #EAEEF1",
     display: "flex", flexDirection: "column", overflow: "hidden",
   }}>
-    {/* Body — p-5, gap-12 */}
     <div style={{ padding: 20, display:"flex", flexDirection:"column", gap:12, flex:1 }}>
-      {/* Header: avatar + name/role + bookmark */}
       <div style={{ display:"flex", alignItems:"flex-start",
         justifyContent:"space-between", gap:12 }}>
         <div style={{ display:"flex", alignItems:"center", gap:12, flex:1 }}>
@@ -44,7 +24,6 @@ const ProCardSk = ({ delay = "0s" }) => (
         <div style={{ width:32, height:32, borderRadius:10,
           border:"1px solid #E8ECF0", background:"#F0F4F6", flexShrink:0 }} />
       </div>
-      {/* Stars row */}
       <div style={{ display:"flex", alignItems:"center", gap:4 }}>
         {[0,1,2,3,4].map(i => (
           <div key={i} style={{ width:12, height:12, borderRadius:2,
@@ -53,14 +32,12 @@ const ProCardSk = ({ delay = "0s" }) => (
         ))}
         <Bar w={55} h={9} r={5} delay={delay} style={{ marginLeft:4 }} />
       </div>
-      {/* Bio — 3 lines */}
       <div style={{ display:"flex", flexDirection:"column", gap:6, flex:1 }}>
         <Bar w="100%" h={10} r={5} delay={delay} />
         <Bar w="88%"  h={10} r={5} delay={delay} />
         <Bar w="72%"  h={10} r={5} delay={delay} />
       </div>
     </div>
-    {/* Footer */}
     <div style={{ padding:"12px 20px 16px", borderTop:"1px solid #EAEEF1",
       display:"flex", alignItems:"center", justifyContent:"space-between" }}>
       <Bar w={80} h={13} r={6} delay={delay} />
@@ -69,7 +46,6 @@ const ProCardSk = ({ delay = "0s" }) => (
   </article>
 );
 
-/* ── Job card skeleton ──────────────────────────────────────────────────── */
 const JobCardSk = ({ delay = "0s" }) => (
   <article style={{
     background: "#F9F9F9", borderRadius: 16,
@@ -89,7 +65,6 @@ const JobCardSk = ({ delay = "0s" }) => (
         <div style={{ width:32, height:32, borderRadius:10,
           border:"1px solid #E8ECF0", background:"#F0F4F6", flexShrink:0 }} />
       </div>
-      {/* Description — 3 lines */}
       <div style={{ display:"flex", flexDirection:"column", gap:6, flex:1 }}>
         <Bar w="100%" h={10} r={5} delay={delay} />
         <Bar w="88%"  h={10} r={5} delay={delay} />
@@ -104,15 +79,48 @@ const JobCardSk = ({ delay = "0s" }) => (
   </article>
 );
 
-/* ── Main export ────────────────────────────────────────────────────────── */
+const GridPageSkeletonMobile = ({ cardType = "professional" }) => {
+  const CardSk = cardType === "job" ? JobCardSk : ProCardSk;
+  const delays = ["0s","0.06s","0.12s","0.06s"];
+
+  return (
+    <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
+      <div style={{ background:"#fff", borderRadius:18, border:"1px solid #F0F4F6", padding:14 }}>
+        <Bar w={148} h={18} r={7} />
+        <Bar w={90} h={9} r={5} mt={8} delay="0.04s" />
+      </div>
+
+      <div style={{ display:"flex", alignItems:"center", gap:8, overflowX:"auto", paddingBottom:4 }}>
+        <div style={{ minWidth: 160, height: 34, borderRadius: 999, background: "linear-gradient(90deg,#EAEFF3 25%,#F8FAFB 50%,#EAEFF3 75%)", backgroundSize: "1600px 100%", animation: "sk-shimmer 1.8s ease-in-out infinite" }} />
+        <Pill w={80} h={34} delay="0.05s" />
+        <Pill w={74} h={34} delay="0.09s" />
+        <Pill w={70} h={34} delay="0.13s" />
+      </div>
+
+      <div style={{ background:"#fff", borderRadius:18, border:"1px solid #F0F4F6", padding:14 }}>
+        <div style={{ marginBottom:14 }}>
+          <Bar w="38%" h={12} r={6} delay="0.04s" />
+          <Bar w="20%" h={9} r={5} mt={6} delay="0.07s" />
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr", gap:12 }}>
+          {delays.map((d, i) => (
+            <CardSk key={i} delay={d} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const GridPageSkeleton = ({ cardType = "professional" }) => {
+  const isMobile = useIsMobile();
+  if (isMobile) return <GridPageSkeletonMobile cardType={cardType} />;
+
   const CardSk = cardType === "job" ? JobCardSk : ProCardSk;
   const delays = ["0s","0.06s","0.12s","0.06s","0.12s","0.18s"];
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:24 }}>
-
-      {/* 1. Page title + action */}
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
         <div>
           <Bar w={180} h={22} r={9} />
@@ -121,7 +129,6 @@ const GridPageSkeleton = ({ cardType = "professional" }) => {
         <Pill w={110} h={36} delay="0.05s" />
       </div>
 
-      {/* 2. Search + filter bar */}
       <div style={{ display:"flex", alignItems:"center", gap:10, flexWrap:"wrap", padding:"4px 0" }}>
         <Pill w={280} h={40} delay="0.03s" />
         <Pill w={112} h={40} delay="0.07s" />
@@ -130,16 +137,12 @@ const GridPageSkeleton = ({ cardType = "professional" }) => {
         <Pill w={76}  h={40} delay="0.19s" />
       </div>
 
-      {/* 3. Results card */}
-      <div style={{ background:"#fff", borderRadius:20,
-        border:"1px solid #F0F4F6", padding:24 }}>
-        {/* Section header */}
+      <div style={{ background:"#fff", borderRadius:20, border:"1px solid #F0F4F6", padding:24 }}>
         <div style={{ marginBottom:24 }}>
           <Bar w="28%" h={16} r={7} delay="0.04s" />
           <Bar w="16%" h={11} r={6} mt={7} delay="0.07s" />
         </div>
 
-        {/* 3×2 grid */}
         <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:20 }}>
           {delays.map((d, i) => (
             <CardSk key={i} delay={d} />

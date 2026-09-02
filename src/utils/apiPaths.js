@@ -1,5 +1,5 @@
-export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
-// export const API_BASE_URL = "http://localhost:5020";
+//export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
+export const API_BASE_URL = "http://localhost:5020";
 
 
 export const API_PATHS = {
@@ -121,6 +121,73 @@ export const API_PATHS = {
     REJECT_PAYMENT: (paymentId) => `/api/admin/payments/${paymentId}/reject-payment`,
     GET_DISPUTE: (disputeId) => `/api/admin/payments/${disputeId}`,
     RESOLVE_DISPUTE: (disputeId) => `/api/admin/payments/disputes/${disputeId}/resolve`,
+  },
+
+  ADMIN: {
+    // Overview & Global
+    OVERVIEW_METRICS: "/api/admin/dashboard/overview-metrics",
+    REVENUE_ESCROW_CHART: "/api/admin/dashboard/revenue-escrow-chart",
+    CRITICAL_ALERTS: "/api/admin/dashboard/critical-alerts",
+    RECENT_ACTIVITY: "/api/admin/dashboard/recent-activity",
+    ANNOUNCEMENTS: "/api/admin/announcements",
+    SEARCH: "/api/admin/search",
+
+    // User Management
+    USERS_METRICS: "/api/admin/users/metrics",
+    USERS_LIST: "/api/admin/users",
+    USER_BY_ID: (id) => `/api/admin/users/${id}`,
+    UPDATE_USER_STATUS: (id) => `/api/admin/users/${id}/status`,
+    VERIFICATION_QUEUE: "/api/admin/users/verification-queue",
+    UPDATE_USER_VERIFICATION: (id) => `/api/admin/users/${id}/verification`,
+    IMPERSONATE_USER: (id) => `/api/admin/users/${id}/impersonate`,
+
+    // Jobs Management
+    JOBS_METRICS: "/api/admin/jobs/metrics",
+    JOBS_LIST: "/api/admin/jobs",
+    JOB_BY_ID: (id) => `/api/admin/jobs/${id}`,
+    UPDATE_JOB_STATUS: (id) => `/api/admin/jobs/${id}/status`,
+    FORCE_CANCEL_JOB: (id) => `/api/admin/jobs/${id}/force-cancel`,
+
+    // Disputes Management
+    DISPUTES_METRICS: "/api/admin/disputes/metrics",
+    DISPUTES_LIST: "/api/admin/disputes",
+    DISPUTE_BY_ID: (id) => `/api/admin/disputes/${id}`,
+    ASSIGN_DISPUTE: (id) => `/api/admin/disputes/${id}/assign`,
+    ARBITRATE_DISPUTE: (id) => `/api/admin/disputes/${id}/arbitrate`,
+    REVIEWS_LIST: "/api/admin/reviews",
+    DELETE_REVIEW: (id) => `/api/admin/reviews/${id}`,
+
+    // Finance Management
+    FINANCE_OVERVIEW_METRICS: "/api/admin/finance/overview-metrics",
+    FINANCE_REVENUE_ANALYTICS: "/api/admin/finance/revenue-analytics",
+    FINANCE_EARNINGS_BREAKDOWN: "/api/admin/finance/earnings-breakdown",
+    FINANCE_ESCROW_SUMMARY: "/api/admin/finance/escrow-summary",
+    FINANCE_PAYOUT_SUMMARY: "/api/admin/finance/payout-summary",
+    FINANCE_TRANSACTIONS: "/api/admin/finance/transactions",
+    FINANCE_TRANSACTION_BY_ID: (id) => `/api/admin/finance/transactions/${id}`,
+    RECONCILE_TRANSACTION: (id) => `/api/admin/finance/transactions/${id}/reconcile`,
+    FINANCE_EXPORT_TRANSACTIONS: "/api/admin/finance/transactions/export",
+    FINANCE_ESCROW_METRICS: "/api/admin/finance/escrow/metrics",
+    FINANCE_ESCROW_LIST: "/api/admin/finance/escrow",
+    FINANCE_ESCROW_BY_ID: (id) => `/api/admin/finance/escrow/${id}`,
+    MANUAL_RELEASE_ESCROW: (id) => `/api/admin/finance/escrow/${id}/manual-release`,
+    FREEZE_ESCROW: (id) => `/api/admin/finance/escrow/${id}/freeze`,
+    FINANCE_PAYOUTS_METRICS: "/api/admin/finance/payouts/metrics",
+    FINANCE_PAYOUTS_LIST: "/api/admin/finance/payouts",
+    FINANCE_PAYOUT_BY_ID: (id) => `/api/admin/finance/payouts/${id}`,
+    APPROVE_PAYOUT: (id) => `/api/admin/finance/payouts/${id}/approve`,
+    BATCH_APPROVE_PAYOUTS: "/api/admin/finance/payouts/batch-approve",
+    REJECT_PAYOUT: (id) => `/api/admin/finance/payouts/${id}/reject`,
+    RETRY_PAYOUT: (id) => `/api/admin/finance/payouts/${id}/retry`,
+    FINANCE_REFUNDS_METRICS: "/api/admin/finance/refunds/metrics",
+    FINANCE_REFUNDS_LIST: "/api/admin/finance/refunds",
+    FINANCE_REFUND_BY_ID: (id) => `/api/admin/finance/refunds/${id}`,
+    PROCESS_REFUND: (id) => `/api/admin/finance/refunds/${id}/process`,
+    MANUAL_INITIATE_REFUND: "/api/admin/finance/refunds/manual-initiate",
+    COMMISSION_METRICS: "/api/admin/finance/commission/metrics",
+    COMMISSION_SETTINGS: "/api/admin/finance/commission/settings",
+    COMMISSION_CATEGORIES: "/api/admin/finance/commission/categories",
+    COMMISSION_CATEGORY_BY_ID: (id) => `/api/admin/finance/commission/categories/${id}`,
   },
 
   PROFESSIONALS: {

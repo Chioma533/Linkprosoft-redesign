@@ -1,8 +1,9 @@
 import React from "react";
-import { User } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 
-const RecentActivityFeed = ({ onNavigate, onViewAllActivities }) => {
-  const activities = [
+const RecentActivityFeed = ({ onNavigate, onViewAllActivities, activitiesData, isLoading = false }) => {
+  /*
+  const defaultActivities = [
     {
       id: 1,
       name: "Marco Rossi",
@@ -28,6 +29,9 @@ const RecentActivityFeed = ({ onNavigate, onViewAllActivities }) => {
       statusText: "Awaiting verification",
     },
   ];
+  */
+
+  const activities = (activitiesData && activitiesData.length > 0) ? activitiesData : [];
 
   return (
     <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 flex flex-col justify-between h-full">
@@ -38,11 +42,21 @@ const RecentActivityFeed = ({ onNavigate, onViewAllActivities }) => {
 
       {/* Activities List */}
       <div className="space-y-3 flex-1">
-        {activities.map((item) => (
-          <div
-            key={item.id}
-            className="bg-gray-50/40 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors hover:bg-gray-50/80"
-          >
+        {isLoading ? (
+          <div className="flex items-center justify-center py-8 text-gray-400 gap-2">
+            <Loader2 className="w-4 h-4 animate-spin text-[#016EA6]" />
+            <span className="text-xs">Loading activity...</span>
+          </div>
+        ) : activities.length === 0 ? (
+          <div className="text-center py-8 text-gray-400 text-xs font-medium">
+            No recent platform activity.
+          </div>
+        ) : (
+          activities.map((item) => (
+            <div
+              key={item.id}
+              className="bg-gray-50/40 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors hover:bg-gray-50/80"
+            >
             {/* Left User avatar & action info */}
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#E6F4FA] text-[#016EA6] flex items-center justify-center shrink-0">
@@ -60,20 +74,21 @@ const RecentActivityFeed = ({ onNavigate, onViewAllActivities }) => {
               </div>
             </div>
 
-            {/* Right Status Badge & View Details link */}
-            <div className="shrink-0 text-right">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-amber-500 block">
-                {item.statusText}
-              </span>
-              <button
-                onClick={() => onNavigate && onNavigate("verifications")}
-                className="text-[10px] font-bold text-[#016EA6] hover:underline cursor-pointer block mt-0.5 ml-auto"
-              >
-                View details
-              </button>
+              {/* Right Status Badge & View Details link */}
+              <div className="shrink-0 text-right">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-amber-500 block">
+                  {item.statusText}
+                </span>
+                <button
+                  onClick={() => onNavigate && onNavigate("verifications")}
+                  className="text-[10px] font-bold text-[#016EA6] hover:underline cursor-pointer block mt-0.5 ml-auto"
+                >
+                  View details
+                </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* View All Activities Link */}

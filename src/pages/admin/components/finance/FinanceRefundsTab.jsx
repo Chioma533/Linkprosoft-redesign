@@ -1,26 +1,96 @@
-import React, { useState } from "react";
-import { Users, Search, ChevronDown, Eye, ArrowUpRight } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Users, Search, ChevronDown, Eye, ArrowUpRight, Loader2 } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { adminService } from "../../../../api/services/adminService";
 
 const FinanceRefundsTab = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [metrics, setMetrics] = useState(null);
+
+  /*
+  // Seed data fallback
+  const defaultRefunds = [
+    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+    { id: "#REF-9922", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+    { id: "#REF-9923", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+    { id: "#REF-9924", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+    { id: "#REF-9925", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+    { id: "#REF-9926", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+    { id: "#REF-9927", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+    { id: "#REF-9928", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
+  ];
+  */
+
+  const [refunds, setRefunds] = useState([]);
+
+  const fetchRefundsData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [metricsRes, listRes] = await Promise.allSettled([
+        adminService.getRefundsMetrics(),
+        adminService.getRefundsList({ page: 1, limit: 20 }),
+      ]);
+
+      if (metricsRes.status === "fulfilled" && metricsRes.value?.data) {
+        setMetrics(metricsRes.value.data);
+      }
+
+      if (listRes.status === "fulfilled" && listRes.value?.data) {
+        const items = listRes.value.data.items || listRes.value.data.refunds || listRes.value.data;
+        if (Array.isArray(items) && items.length > 0) {
+          const normalized = items.map((r) => {
+            const rawAmount = r.amount || 0;
+            const formattedAmount = typeof rawAmount === "number" ? `₦${rawAmount.toLocaleString()}` : rawAmount;
+            return {
+              id: r.id ? (r.id.startsWith("#") ? r.id : `#${r.id}`) : `#REF-${Math.floor(Math.random() * 10000)}`,
+              job: r.job?.title || (typeof r.job === "string" ? r.job : "Job Project"),
+              client: r.client?.name || (typeof r.client === "string" ? r.client : "Client"),
+              amount: formattedAmount,
+              reason: r.reason || "Service not delivered",
+              status: r.status === "successful" || r.status === "SUCCESS" ? "Successful" : r.status || "Pending",
+              date: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase() : "",
+            };
+          });
+          setRefunds(normalized);
+        } else {
+          setRefunds([]);
+        }
+      } else {
+        setRefunds([]);
+      }
+    } catch (err) {
+      console.warn("[FinanceRefundsTab] Error fetching refunds:", err);
+      setRefunds([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchRefundsData();
+  }, [fetchRefundsData]);
+
+  const formatCurrency = (val) => {
+    if (val === undefined || val === null) return null;
+    return typeof val === "number" ? `₦${val.toLocaleString()}` : val;
+  };
+
+  const formatTrend = (trend) => {
+    if (trend === undefined || trend === null) return /* "+20% this week" */ "";
+    if (typeof trend === "number") {
+      const sign = trend >= 0 ? "+" : "";
+      return `${sign}${trend}% this week`;
+    }
+    return trend;
+  };
 
   const statCards = [
-    { id: "total-refund", title: "Total Refund", value: "₦860,000", trend: "+20% this week", icon: Users, iconColor: "text-[#016EA6]" },
-    { id: "pending", title: "Pending", value: "₦120,000", trend: "+20% this week", icon: Users, iconColor: "text-[#016EA6]" },
-    { id: "completed", title: "Completed", value: "₦690,000", trend: "+20% this week", icon: Users, iconColor: "text-[#016EA6]" },
-    { id: "failed", title: "Failed", value: "₦50,000", trend: "+20% this week", icon: Users, iconColor: "text-rose-500", bgColor: "bg-[#FFF1F2]" },
-  ];
-
-  const refunds = [
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not...", status: "Successful", date: "24 jul 2026" },
+    { id: "total-refund", title: "Total Refund", value: formatCurrency(metrics?.totalRefund?.value ?? metrics?.totalRefund) || (isLoading ? "..." : /* "₦860,000" */ "₦0"), trend: formatTrend(metrics?.totalRefund?.growthPercentage ?? metrics?.totalRefundTrend), icon: Users, iconColor: "text-[#016EA6]" },
+    { id: "pending", title: "Pending", value: formatCurrency(metrics?.pending?.value ?? metrics?.pending) || (isLoading ? "..." : /* "₦120,000" */ "₦0"), trend: formatTrend(metrics?.pending?.growthPercentage ?? metrics?.pendingTrend), icon: Users, iconColor: "text-[#016EA6]" },
+    { id: "completed", title: "Completed", value: formatCurrency(metrics?.completed?.value ?? metrics?.completed) || (isLoading ? "..." : /* "₦690,000" */ "₦0"), trend: formatTrend(metrics?.completed?.growthPercentage ?? metrics?.completedTrend), icon: Users, iconColor: "text-[#016EA6]" },
+    { id: "failed", title: "Failed", value: formatCurrency(metrics?.failed?.value ?? metrics?.failed) || (isLoading ? "..." : /* "₦50,000" */ "₦0"), trend: formatTrend(metrics?.failed?.growthPercentage ?? metrics?.failedTrend), icon: Users, iconColor: "text-rose-500", bgColor: "bg-[#FFF1F2]" },
   ];
 
   return (
@@ -131,67 +201,91 @@ const FinanceRefundsTab = () => {
               </tr>
             </thead>
             <tbody className="border-none">
-              {refunds.map((item, idx) => (
-                <tr
-                  key={idx}
-                  className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer"
-                >
-                  <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">
-                    {item.id}
-                  </td>
-                  <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
-                    {item.job}
-                  </td>
-                  <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
-                    {item.client}
-                  </td>
-                  <td className="py-3.5 px-3 text-xs sm:text-sm font-extrabold text-gray-900">
-                    {item.amount}
-                  </td>
-                  <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
-                    {item.reason}
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#E6F9F0] text-[#00CC66]">
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">
-                    {item.date}
-                  </td>
-                  <td className="py-3.5 px-3 text-right">
-                    <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
-                      <Eye className="w-4 h-4" />
-                    </button>
+              {isLoading ? (
+                <tr>
+                  <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+                      <span>Loading refund records...</span>
+                    </div>
                   </td>
                 </tr>
-              ))}
+              ) : refunds.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
+                    No refund records found.
+                  </td>
+                </tr>
+              ) : (
+                refunds.map((item, idx) => (
+                  <tr
+                    key={idx}
+                    className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer"
+                  >
+                    <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">
+                      {item.id}
+                    </td>
+                    <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
+                      {item.job}
+                    </td>
+                    <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
+                      {item.client}
+                    </td>
+                    <td className="py-3.5 px-3 text-xs sm:text-sm font-extrabold text-gray-900">
+                      {item.amount}
+                    </td>
+                    <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
+                      {item.reason}
+                    </td>
+                    <td className="py-3.5 px-3">
+                      <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#E6F9F0] text-[#00CC66]">
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">
+                      {item.date}
+                    </td>
+                    <td className="py-3.5 px-3 text-right">
+                      <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Mobile View */}
         <div className="md:hidden space-y-3">
-          {refunds.map((item, idx) => (
-            <div key={idx} className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none">
-              <div className="flex items-center justify-between">
-                <h4 className="font-bold text-gray-800 text-sm">{item.id} - {item.job}</h4>
-                <button className="p-1 text-gray-500 hover:text-[#016EA6]">
-                  <Eye className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
-                <span>Client: {item.client}</span>
-                <span>Reason: {item.reason}</span>
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="font-extrabold text-gray-900 text-sm">{item.amount}</span>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E6F9F0] text-[#00CC66]">
-                  {item.status}
-                </span>
-              </div>
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+              <span>Loading refunds...</span>
             </div>
-          ))}
+          ) : (
+            refunds.map((item, idx) => (
+              <div key={idx} className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-gray-800 text-sm">{item.id} - {item.job}</h4>
+                  <button className="p-1 text-gray-500 hover:text-[#016EA6]">
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
+                  <span>Client: {item.client}</span>
+                  <span>Reason: {item.reason}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="font-extrabold text-gray-900 text-sm">{item.amount}</span>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E6F9F0] text-[#00CC66]">
+                    {item.status}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Pagination Footer */}

@@ -1,13 +1,48 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Users, ArrowUpRight, Lock, Wallet } from "lucide-react";
+import { adminService } from "../../../../api/services/adminService";
 import RevenueEscrowWaveChart from "../overview/RevenueEscrowWaveChart";
 
 const FinanceOverviewTab = () => {
+  const [metrics, setMetrics] = useState(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchMetrics = async () => {
+      try {
+        const res = await adminService.getFinanceOverviewMetrics();
+        if (isMounted && res?.data) {
+          setMetrics(res.data);
+        }
+      } catch (err) {
+        console.warn("[FinanceOverviewTab] Error fetching finance metrics:", err);
+      }
+    };
+    fetchMetrics();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formatCurrency = (val) => {
+    if (val === undefined || val === null) return null;
+    return typeof val === "number" ? `₦${val.toLocaleString()}` : val;
+  };
+
+  const formatTrend = (trend) => {
+    if (trend === undefined || trend === null) return /* "+20% this week" */ "";
+    if (typeof trend === "number") {
+      const sign = trend >= 0 ? "+" : "";
+      return `${sign}${trend}% this week`;
+    }
+    return trend;
+  };
+
   const statCards = [
-    { id: "volume", title: "Total Transaction Volume", value: "₦48.6M", trend: "+20% this week" },
-    { id: "revenue", title: "Platform Revenue", value: "₦4.8M", trend: "+20% this week" },
-    { id: "escrow", title: "Escrow Balance", value: "₦12.4M", trend: "+20% this week" },
-    { id: "payouts", title: "Pending Payouts", value: "₦3.2M", trend: "+20% this week" },
+    { id: "volume", title: "Total Transaction Volume", value: formatCurrency(metrics?.totalVolume?.value ?? metrics?.totalVolume ?? metrics?.volume) || /* "₦48.6M" */ "₦0", trend: formatTrend(metrics?.totalVolume?.growthPercentage ?? metrics?.totalVolumeTrend) },
+    { id: "revenue", title: "Platform Revenue", value: formatCurrency(metrics?.platformRevenue?.value ?? metrics?.platformRevenue ?? metrics?.revenue) || /* "₦4.8M" */ "₦0", trend: formatTrend(metrics?.platformRevenue?.growthPercentage ?? metrics?.platformRevenueTrend) },
+    { id: "escrow", title: "Escrow Balance", value: formatCurrency(metrics?.escrowBalance?.value ?? metrics?.escrowBalance ?? metrics?.escrow) || /* "₦12.4M" */ "₦0", trend: formatTrend(metrics?.escrowBalance?.growthPercentage ?? metrics?.escrowBalanceTrend) },
+    { id: "payouts", title: "Pending Payouts", value: formatCurrency(metrics?.pendingPayouts?.value ?? metrics?.pendingPayouts ?? metrics?.payouts) || /* "₦3.2M" */ "₦0", trend: formatTrend(metrics?.pendingPayouts?.growthPercentage ?? metrics?.pendingPayoutsTrend) },
   ];
 
   return (

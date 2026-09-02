@@ -1,11 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Users, 
   Search, 
   ChevronDown, 
   Eye, 
-  ArrowUpRight 
+  ArrowUpRight,
+  Loader2
 } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { adminService } from "../../api/services/adminService";
 
 // Sub-tab Components for Finance
 import FinanceOverviewTab from "./components/finance/FinanceOverviewTab";
@@ -18,6 +21,7 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(false);
 
   const financeTabs = [
     { id: "overview", label: "Overview" },
@@ -28,35 +32,126 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
     { id: "commission", label: "Commission" },
   ];
 
-  // Seed data for Transactions view matching screenshot
-  const transactions = [
+  /*
+  // Seed data for Transactions view matching screenshot as fallback
+  const defaultTransactions = [
     { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
+    { id: "#TX-92842", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
+    { id: "#TX-92843", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
+    { id: "#TX-92844", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
+    { id: "#TX-92845", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
+    { id: "#TX-92846", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
+    { id: "#TX-92847", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
+    { id: "#TX-92848", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
   ];
 
-  // Seed data for Escrow view matching screenshot
-  const escrowRecords = [
+  // Seed data for Escrow view matching screenshot as fallback
+  const defaultEscrowRecords = [
     { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
+    { id: "#ESC- 688", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
+    { id: "#ESC- 689", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
+    { id: "#ESC- 690", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
+    { id: "#ESC- 691", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
+    { id: "#ESC- 692", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
+    { id: "#ESC- 693", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
+    { id: "#ESC- 694", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
   ];
+  */
+
+  const [transactions, setTransactions] = useState([]);
+  const [escrowRecords, setEscrowRecords] = useState([]);
+  const [escrowMetrics, setEscrowMetrics] = useState(null);
+
+  const fetchTabData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      if (activeFinanceTab === "transactions") {
+        const res = await adminService.getFinanceTransactions({ page: 1, limit: 20 });
+        const items = res?.data?.items || res?.data?.transactions || res?.data;
+        if (Array.isArray(items) && items.length > 0) {
+          const normalized = items.map((t) => {
+            const rawAmount = t.amount || 0;
+            const formattedAmount = typeof rawAmount === "number" ? `₦${rawAmount.toLocaleString()}` : rawAmount;
+            return {
+              id: t.id || t.transactionReference || `#TX-${Math.floor(Math.random() * 100000)}`,
+              user: t.user?.name || (typeof t.user === "string" ? t.user : "User"),
+              job: t.job?.title || (typeof t.job === "string" ? t.job : "Job Project"),
+              type: t.type || "Escrow Deposit",
+              amount: formattedAmount,
+              status: t.status || "Succesful",
+              date: t.createdAt ? new Date(t.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase() : "",
+            };
+          });
+          setTransactions(normalized);
+        } else {
+          setTransactions([]);
+        }
+      } else if (activeFinanceTab === "escrow") {
+        const [metricsRes, listRes] = await Promise.allSettled([
+          adminService.getEscrowMetrics(),
+          adminService.getEscrowList({ page: 1, limit: 20 }),
+        ]);
+
+        if (metricsRes.status === "fulfilled" && metricsRes.value?.data) {
+          setEscrowMetrics(metricsRes.value.data);
+        }
+
+        if (listRes.status === "fulfilled" && listRes.value?.data) {
+          const items = listRes.value.data.items || listRes.value.data.escrows || listRes.value.data;
+          if (Array.isArray(items) && items.length > 0) {
+            const normalized = items.map((e) => {
+              const rawAmount = e.amount || 0;
+              const formattedAmount = typeof rawAmount === "number" ? `₦${rawAmount.toLocaleString()}` : rawAmount;
+              return {
+                id: e.id || `#ESC-${Math.floor(Math.random() * 1000)}`,
+                job: e.job?.title || (typeof e.job === "string" ? e.job : "Job Project"),
+                client: e.client?.name || (typeof e.client === "string" ? e.client : "Client"),
+                professional: e.professional?.name || (typeof e.professional === "string" ? e.professional : "Professional"),
+                amount: formattedAmount,
+                date: e.createdAt ? new Date(e.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase() : "",
+                status: e.status || "Held",
+              };
+            });
+            setEscrowRecords(normalized);
+          } else {
+            setEscrowRecords([]);
+          }
+        } else {
+          setEscrowRecords([]);
+        }
+      }
+    } catch (err) {
+      console.warn(`[AdminPaymentsSubpage] Error fetching data for ${activeFinanceTab}:`, err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [activeFinanceTab]);
+
+  useEffect(() => {
+    if (activeFinanceTab === "transactions" || activeFinanceTab === "escrow") {
+      fetchTabData();
+    }
+  }, [activeFinanceTab, fetchTabData]);
+
+  const formatCurrency = (val) => {
+    if (val === undefined || val === null) return null;
+    return typeof val === "number" ? `₦${val.toLocaleString()}` : val;
+  };
+
+  const formatTrend = (trend) => {
+    if (trend === undefined || trend === null) return /* "+20% this week" */ "";
+    if (typeof trend === "number") {
+      const sign = trend >= 0 ? "+" : "";
+      return `${sign}${trend}% this week`;
+    }
+    return trend;
+  };
 
   const escrowStats = [
-    { id: "total-held", title: "Total Held", value: "₦498.6M", trend: "+20% this week", icon: Users, iconColor: "text-[#016EA6]" },
-    { id: "awaiting-completion", title: "Awaiting Completion", value: "₦33.8M", trend: "+20% this week", icon: Users, iconColor: "text-[#016EA6]" },
-    { id: "ready-release", title: "Ready for Release", value: "₦12.4M", trend: "+20% this week", icon: Users, iconColor: "text-[#016EA6]" },
-    { id: "under-dispute", title: "Under Dispute", value: "₦3.2M", trend: "+20% this week", icon: Users, iconColor: "text-rose-500", bgColor: "bg-[#FFF1F2]" },
+    { id: "total-held", title: "Total Held", value: formatCurrency(escrowMetrics?.totalHeld?.value ?? escrowMetrics?.totalHeld) || (isLoading ? "..." : /* "₦498.6M" */ "₦0"), trend: formatTrend(escrowMetrics?.totalHeld?.growthPercentage ?? escrowMetrics?.totalHeldTrend), icon: Users, iconColor: "text-[#016EA6]" },
+    { id: "awaiting-completion", title: "Awaiting Completion", value: formatCurrency(escrowMetrics?.awaitingCompletion?.value ?? escrowMetrics?.awaitingCompletion) || (isLoading ? "..." : /* "₦33.8M" */ "₦0"), trend: formatTrend(escrowMetrics?.awaitingCompletion?.growthPercentage ?? escrowMetrics?.awaitingCompletionTrend), icon: Users, iconColor: "text-[#016EA6]" },
+    { id: "ready-release", title: "Ready for Release", value: formatCurrency(escrowMetrics?.readyForRelease?.value ?? escrowMetrics?.readyForRelease) || (isLoading ? "..." : /* "₦12.4M" */ "₦0"), trend: formatTrend(escrowMetrics?.readyForRelease?.growthPercentage ?? escrowMetrics?.readyForReleaseTrend), icon: Users, iconColor: "text-[#016EA6]" },
+    { id: "under-dispute", title: "Under Dispute", value: formatCurrency(escrowMetrics?.underDispute?.value ?? escrowMetrics?.underDispute) || (isLoading ? "..." : /* "₦3.2M" */ "₦0"), trend: formatTrend(escrowMetrics?.underDispute?.growthPercentage ?? escrowMetrics?.underDisputeTrend), icon: Users, iconColor: "text-rose-500", bgColor: "bg-[#FFF1F2]" },
   ];
 
   const renderActiveFinanceContent = () => {
@@ -148,26 +243,43 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
                     </tr>
                   </thead>
                   <tbody className="border-none">
-                    {escrowRecords.map((item, idx) => (
-                      <tr key={idx} className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
-                        <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">{item.id}</td>
-                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.job}</td>
-                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.client}</td>
-                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.professional}</td>
-                        <td className="py-3.5 px-3 text-xs sm:text-sm font-extrabold text-gray-900">{item.amount}</td>
-                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">{item.date}</td>
-                        <td className="py-3.5 px-3">
-                          <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#FFF4E5] text-[#FF9800]">
-                            {item.status}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-3 text-right">
-                          <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
-                            <Eye className="w-4 h-4" />
-                          </button>
+                    {isLoading ? (
+                      <tr>
+                        <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+                            <span>Loading escrow transactions...</span>
+                          </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : escrowRecords.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
+                          No escrow records found.
+                        </td>
+                      </tr>
+                    ) : (
+                      escrowRecords.map((item, idx) => (
+                        <tr key={idx} className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
+                          <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">{item.id}</td>
+                          <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.job}</td>
+                          <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.client}</td>
+                          <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.professional}</td>
+                          <td className="py-3.5 px-3 text-xs sm:text-sm font-extrabold text-gray-900">{item.amount}</td>
+                          <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">{item.date}</td>
+                          <td className="py-3.5 px-3">
+                            <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#FFF4E5] text-[#FF9800]">
+                              {item.status}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-3 text-right">
+                            <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
+                              <Eye className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -262,52 +374,76 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
                   </tr>
                 </thead>
                 <tbody className="border-none">
-                  {transactions.map((item, idx) => (
-                    <tr key={idx} className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
-                      <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">{item.id}</td>
-                      <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.user}</td>
-                      <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.job}</td>
-                      <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.type}</td>
-                      <td className="py-3.5 px-3 text-xs sm:text-sm font-extrabold text-gray-900">{item.amount}</td>
-                      <td className="py-3.5 px-3">
-                        <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#E6F9F0] text-[#00CC66]">
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">{item.date}</td>
-                      <td className="py-3.5 px-3 text-right">
-                        <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
-                          <Eye className="w-4 h-4" />
-                        </button>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
+                        <div className="flex items-center justify-center gap-2">
+                          <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+                          <span>Loading platform transactions...</span>
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                  ) : transactions.length === 0 ? (
+                    <tr>
+                      <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
+                        No transactions found.
+                      </td>
+                    </tr>
+                  ) : (
+                    transactions.map((item, idx) => (
+                      <tr key={idx} className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
+                        <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">{item.id}</td>
+                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.user}</td>
+                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.job}</td>
+                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.type}</td>
+                        <td className="py-3.5 px-3 text-xs sm:text-sm font-extrabold text-gray-900">{item.amount}</td>
+                        <td className="py-3.5 px-3">
+                          <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#E6F9F0] text-[#00CC66]">
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">{item.date}</td>
+                        <td className="py-3.5 px-3 text-right">
+                          <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
 
             {/* Mobile View */}
             <div className="md:hidden space-y-3">
-              {transactions.map((item, idx) => (
-                <div key={idx} className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-gray-800 text-sm">{item.id} - {item.job}</h4>
-                    <button className="p-1 text-gray-500 hover:text-[#016EA6]">
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
-                    <span>User: {item.user}</span>
-                    <span>Type: {item.type}</span>
-                  </div>
-                  <div className="flex items-center justify-between pt-1">
-                    <span className="font-extrabold text-gray-900 text-sm">{item.amount}</span>
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E6F9F0] text-[#00CC66]">
-                      {item.status}
-                    </span>
-                  </div>
+              {isLoading ? (
+                <div className="text-center py-8 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
+                  <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+                  <span>Loading transactions...</span>
                 </div>
-              ))}
+              ) : (
+                transactions.map((item, idx) => (
+                  <div key={idx} className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-gray-800 text-sm">{item.id} - {item.job}</h4>
+                      <button className="p-1 text-gray-500 hover:text-[#016EA6]">
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
+                      <span>User: {item.user}</span>
+                      <span>Type: {item.type}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="font-extrabold text-gray-900 text-sm">{item.amount}</span>
+                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E6F9F0] text-[#00CC66]">
+                        {item.status}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Pagination Footer */}

@@ -1,7 +1,7 @@
 import React from "react";
-import { X, Wallet, AlertTriangle } from "lucide-react";
+import { X, Wallet, AlertTriangle, Loader2 } from "lucide-react";
 
-const ApprovePayoutModal = ({ payout, onClose, onConfirm }) => {
+const ApprovePayoutModal = ({ payout, onClose, onConfirm, isApproving = false }) => {
   if (!payout) return null;
 
   return (
@@ -85,13 +85,16 @@ const ApprovePayoutModal = ({ payout, onClose, onConfirm }) => {
         <div className="space-y-2.5">
           <button
             onClick={onConfirm}
-            className="w-full py-3.5 bg-[#016EA6] hover:bg-[#015582] text-white font-bold text-sm rounded-full shadow-md transition-all cursor-pointer border-none"
+            disabled={isApproving}
+            className="w-full py-3.5 bg-[#016EA6] hover:bg-[#015582] text-white font-bold text-sm rounded-full shadow-md transition-all cursor-pointer border-none flex items-center justify-center gap-2 disabled:opacity-60"
           >
-            Confirm Approval
+            {isApproving && <Loader2 className="w-4 h-4 animate-spin text-white" />}
+            <span>{isApproving ? "Processing Approval..." : "Confirm Approval"}</span>
           </button>
           <button
             onClick={onClose}
-            className="w-full py-3.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold text-sm rounded-full transition-all cursor-pointer border-none"
+            disabled={isApproving}
+            className="w-full py-3.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold text-sm rounded-full transition-all cursor-pointer border-none disabled:opacity-60"
           >
             Cancel and Return
           </button>

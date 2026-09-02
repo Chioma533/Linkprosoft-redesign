@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Users, 
   Briefcase, 
@@ -7,8 +7,13 @@ import {
   Search, 
   ChevronDown, 
   Eye, 
-  ArrowUpRight 
+  ArrowUpRight,
+  Loader2,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { adminService } from "../../api/services/adminService";
 import JobDetailModal from "./components/JobDetailModal";
 
 const AdminJobsSubpage = ({ onNavigate }) => {
@@ -16,9 +21,14 @@ const AdminJobsSubpage = ({ onNavigate }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
+  const [metrics, setMetrics] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
 
-  // Seed jobs data matching the UI mockup
-  const [jobs, setJobs] = useState([
+  /*
+  // Seed jobs data matching the UI mockup as fallback
+  const defaultJobs = [
     {
       id: "JOB-701",
       title: "Wardrobe Installation",
@@ -107,38 +117,111 @@ const AdminJobsSubpage = ({ onNavigate }) => {
       statusText: "In Progress",
       date: "24 jul 2026",
     },
-  ]);
+  ];
+  */
+
+  const [jobs, setJobs] = useState([]);
+
+  const fetchJobsData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [metricsRes, jobsRes] = await Promise.allSettled([
+        adminService.getJobsMetrics(),
+        adminService.getJobs({ page: 1, limit: 20 }),
+      ]);
+
+      if (metricsRes.status === "fulfilled" && metricsRes.value?.data) {
+        setMetrics(metricsRes.value.data);
+      }
+
+      if (jobsRes.status === "fulfilled" && jobsRes.value?.data) {
+        const items = jobsRes.value.data.items || jobsRes.value.data.jobs || jobsRes.value.data;
+        if (Array.isArray(items) && items.length > 0) {
+          const normalized = items.map((j) => {
+            const rawStatus = (j.status || "in_progress").toLowerCase();
+            let statusText = "In Progress";
+            if (rawStatus === "completed") statusText = "Completed";
+            else if (rawStatus === "cancelled") statusText = "Cancelled";
+            else if (rawStatus === "disputed") statusText = "Disputed";
+
+            const rawAmount = j.amount || j.budget || j.price || 0;
+            const formattedAmount = typeof rawAmount === "number" ? `₦${rawAmount.toLocaleString()}` : rawAmount;
+
+            return {
+              id: j.id || j._id || `JOB-${Math.floor(Math.random() * 1000)}`,
+              title: j.title || "Job Project",
+              client: j.client?.name || (typeof j.client === "string" ? j.client : "Samuel O"),
+              professional: j.professional?.name || (typeof j.professional === "string" ? j.professional : "Elvis Chioma"),
+              category: j.category || "Carpentry",
+              amount: formattedAmount,
+              status: rawStatus,
+              statusText,
+              date: j.createdAt ? new Date(j.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase() : "",
+            };
+          });
+          setJobs(normalized);
+        } else {
+          setJobs([]);
+        }
+      } else {
+        setJobs([]);
+      }
+    } catch (err) {
+      console.warn("[AdminJobsSubpage] Error fetching jobs:", err);
+      setJobs([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchJobsData();
+  }, [fetchJobsData]);
+
+  const formatNumber = (val) => {
+    if (val === undefined || val === null) return null;
+    return typeof val === "number" ? val.toLocaleString() : val;
+  };
+
+  const formatTrend = (trend) => {
+    if (trend === undefined || trend === null) return /* "+20% this week" */ "";
+    if (typeof trend === "number") {
+      const sign = trend >= 0 ? "+" : "";
+      return `${sign}${trend}% this week`;
+    }
+    return trend;
+  };
 
   const statCards = [
     {
       id: "total-jobs",
       title: "Total Jobs",
-      value: "1,284",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.totalJobs?.value ?? metrics?.totalJobs) || (isLoading ? "..." : /* "1,284" */ "0"),
+      trend: formatTrend(metrics?.totalJobs?.growthPercentage ?? metrics?.totalJobsTrend),
       icon: Users,
       iconColor: "text-[#016EA6]",
     },
     {
       id: "active-jobs",
       title: "Active Jobs",
-      value: "156",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.activeJobs?.value ?? metrics?.activeJobs ?? metrics?.inProgress) || (isLoading ? "..." : /* "156" */ "0"),
+      trend: formatTrend(metrics?.activeJobs?.growthPercentage ?? metrics?.activeJobsTrend),
       icon: Briefcase,
       iconColor: "text-[#016EA6]",
     },
     {
       id: "completed-jobs",
       title: "Completed Jobs",
-      value: "42",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.completedJobs?.value ?? metrics?.completedJobs ?? metrics?.completed) || (isLoading ? "..." : /* "42" */ "0"),
+      trend: formatTrend(metrics?.completedJobs?.growthPercentage ?? metrics?.completedJobsTrend),
       icon: CheckCircle2,
       iconColor: "text-[#016EA6]",
     },
     {
       id: "disputed-jobs",
       title: "Disputed",
-      value: "76",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.disputedJobs?.value ?? metrics?.disputedJobs ?? metrics?.disputed) || (isLoading ? "..." : /* "76" */ "0"),
+      trend: formatTrend(metrics?.disputedJobs?.growthPercentage ?? metrics?.disputedJobsTrend),
       icon: PauseCircle,
       iconColor: "text-rose-500",
       iconBg: "bg-rose-50",
@@ -162,6 +245,38 @@ const AdminJobsSubpage = ({ onNavigate }) => {
 
     return matchesSearch && matchesCategory && matchesStatus;
   });
+
+  // Reset to page 1 whenever filters or search change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategory, selectedStatus]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / pageSize));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * pageSize;
+  const paginatedJobs = filteredJobs.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (validCurrentPage <= 3) {
+        pages.push(1, 2, 3, "...", totalPages);
+      } else if (validCurrentPage >= totalPages - 2) {
+        pages.push(1, "...", totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", validCurrentPage, "...", totalPages);
+      }
+    }
+    return pages;
+  };
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto pb-12">
@@ -281,14 +396,23 @@ const AdminJobsSubpage = ({ onNavigate }) => {
               </tr>
             </thead>
             <tbody className="border-none">
-              {filteredJobs.length === 0 ? (
+              {isLoading ? (
+                <tr>
+                  <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+                      <span>Loading marketplace jobs...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedJobs.length === 0 ? (
                 <tr>
                   <td colSpan="8" className="text-center py-12 text-gray-400 text-xs font-medium">
                     No jobs match the specified criteria.
                   </td>
                 </tr>
               ) : (
-                filteredJobs.map((job) => (
+                paginatedJobs.map((job) => (
                   <tr
                     key={job.id}
                     className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer"
@@ -342,12 +466,17 @@ const AdminJobsSubpage = ({ onNavigate }) => {
 
         {/* Mobile View */}
         <div className="md:hidden space-y-3">
-          {filteredJobs.length === 0 ? (
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+              <span>Loading jobs...</span>
+            </div>
+          ) : paginatedJobs.length === 0 ? (
             <div className="text-center py-8 text-gray-400 text-xs font-medium">
               No jobs found.
             </div>
           ) : (
-            filteredJobs.map((job) => (
+            paginatedJobs.map((job) => (
               <div
                 key={job.id}
                 className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none"
@@ -387,22 +516,53 @@ const AdminJobsSubpage = ({ onNavigate }) => {
         {/* Pagination Footer */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-2 border-none">
           <span className="text-xs font-medium text-gray-500">
-            Showing page 1 of 5 pages
+            Showing page {validCurrentPage} of {totalPages} pages ({filteredJobs.length} jobs)
           </span>
 
           <div className="flex items-center gap-1.5">
-            <button className="w-6 h-6 rounded bg-[#1E1B4B] text-white font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs border-none">
-              1
+            {/* Previous Page */}
+            <button
+              onClick={() => handlePageChange(validCurrentPage - 1)}
+              disabled={validCurrentPage <= 1}
+              className="w-7 h-7 rounded hover:bg-gray-100 text-gray-500 flex items-center justify-center cursor-pointer border-none disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              title="Previous page"
+            >
+              <ChevronLeft className="w-4 h-4" />
             </button>
-            <button className="w-6 h-6 rounded hover:bg-gray-100 text-gray-500 font-semibold text-xs flex items-center justify-center cursor-pointer border-none">
-              2
-            </button>
-            <button className="w-6 h-6 rounded hover:bg-gray-100 text-gray-500 font-semibold text-xs flex items-center justify-center cursor-pointer border-none">
-              3
-            </button>
-            <span className="text-xs text-gray-400 px-1">...</span>
-            <button className="w-6 h-6 rounded hover:bg-gray-100 text-gray-500 font-semibold text-xs flex items-center justify-center cursor-pointer border-none">
-              5
+
+            {/* Page Numbers */}
+            {getPageNumbers().map((p, idx) => {
+              if (p === "...") {
+                return (
+                  <span key={`ellipsis-${idx}`} className="text-xs text-gray-400 px-1 select-none">
+                    ...
+                  </span>
+                );
+              }
+              const isActive = p === validCurrentPage;
+              return (
+                <button
+                  key={p}
+                  onClick={() => handlePageChange(p)}
+                  className={`w-7 h-7 rounded font-bold text-xs flex items-center justify-center cursor-pointer transition-all border-none ${
+                    isActive
+                      ? "bg-[#1E1B4B] text-white shadow-xs"
+                      : "hover:bg-gray-100 text-gray-600 font-semibold"
+                  }`}
+                >
+                  {p}
+                </button>
+              );
+            })}
+
+            {/* Next Page */}
+            <button
+              onClick={() => handlePageChange(validCurrentPage + 1)}
+              disabled={validCurrentPage >= totalPages}
+              className="w-7 h-7 rounded hover:bg-gray-100 text-gray-500 flex items-center justify-center cursor-pointer border-none disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              title="Next page"
+            >
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </div>

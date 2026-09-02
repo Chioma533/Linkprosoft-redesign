@@ -8,11 +8,14 @@ const FinanceCommissionTab = () => {
   const [autoPayouts, setAutoPayouts] = useState(true);
   const [tieredCommission, setTieredCommission] = useState(true);
 
+  /*
   const categories = [
     { id: 1, name: "Plumbing", rate: "10%" },
     { id: 2, name: "Plumbing", rate: "10%" },
     { id: 3, name: "Plumbing", rate: "10%" },
   ];
+  */
+  const categories = [];
 
   const handleSaveRate = () => {
     setIsEditingRate(false);
@@ -30,11 +33,12 @@ const FinanceCommissionTab = () => {
               Total Commission Earned
             </span>
             <span className="text-2xl sm:text-[28px] font-bold text-gray-900 tracking-tight block mt-2 mb-1">
-              ₦42.8M
+              {/* "₦42.8M" */}
+              ₦0
             </span>
             <div className="flex items-center gap-1 text-xs font-semibold text-emerald-500">
               <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>+20% this week</span>
+              <span>{/* "+20% this week" */ ""}</span>
             </div>
           </div>
           <div className="p-3 bg-gray-50 rounded-2xl text-gray-300 shrink-0">
@@ -49,11 +53,12 @@ const FinanceCommissionTab = () => {
               Total Refund
             </span>
             <span className="text-2xl sm:text-[28px] font-bold text-gray-900 tracking-tight block mt-2 mb-1">
-              ₦860,000
+              {/* "₦860,000" */}
+              ₦0
             </span>
             <div className="flex items-center gap-1 text-xs font-semibold text-emerald-500">
               <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>+20% this week</span>
+              <span>{/* "+20% this week" */ ""}</span>
             </div>
           </div>
           <div className="p-3 bg-gray-50 rounded-2xl text-gray-300 shrink-0">
@@ -68,11 +73,12 @@ const FinanceCommissionTab = () => {
               Average Commission
             </span>
             <span className="text-2xl sm:text-[28px] font-bold text-gray-900 tracking-tight block mt-2 mb-1">
-              ₦860,000
+              {/* "₦860,000" */}
+              ₦0
             </span>
             <div className="flex items-center gap-1 text-xs font-semibold text-emerald-500">
               <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>+20% this week</span>
+              <span>{/* "+20% this week" */ ""}</span>
             </div>
           </div>
           <div className="p-3 bg-gray-50 rounded-2xl text-gray-300 shrink-0">
@@ -184,28 +190,36 @@ const FinanceCommissionTab = () => {
                 </tr>
               </thead>
               <tbody className="border-none">
-                {categories.map((cat) => (
-                  <tr key={cat.id} className="border-none hover:bg-gray-50/50 transition-colors">
-                    <td className="py-4 px-4 text-xs font-bold text-gray-800">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-1.5 bg-blue-50 text-[#016EA6] rounded-lg">
-                          <Wrench className="w-3.5 h-3.5" />
-                        </div>
-                        <span>{cat.name}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#E6F9F0] text-[#00CC66]">
-                        {cat.rate}
-                      </span>
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
-                        <Pencil className="w-4 h-4" />
-                      </button>
+                {categories.length === 0 ? (
+                  <tr>
+                    <td colSpan="3" className="text-center py-8 text-gray-400 text-xs font-medium">
+                      No custom category percentage overrides configured.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  categories.map((cat) => (
+                    <tr key={cat.id} className="border-none hover:bg-gray-50/50 transition-colors">
+                      <td className="py-4 px-4 text-xs font-bold text-gray-800">
+                        <div className="flex items-center gap-2.5">
+                          <div className="p-1.5 bg-blue-50 text-[#016EA6] rounded-lg">
+                            <Wrench className="w-3.5 h-3.5" />
+                          </div>
+                          <span>{cat.name}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#E6F9F0] text-[#00CC66]">
+                          {cat.rate}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <button className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none">
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

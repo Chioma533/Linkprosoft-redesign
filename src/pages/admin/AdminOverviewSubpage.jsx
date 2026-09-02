@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Users, 
   BadgeCheck, 
@@ -7,8 +7,10 @@ import {
   Receipt, 
   Scale, 
   Info, 
-  CreditCard 
+  CreditCard,
+  Loader2
 } from "lucide-react";
+import { adminService } from "../../api/services/adminService";
 
 // Componentized Sections
 import OverviewStatCard from "./components/overview/OverviewStatCard";
@@ -28,13 +30,75 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
   const [isCriticalAlertsOpen, setIsCriticalAlertsOpen] = useState(false);
   const [isAllActivitiesOpen, setIsAllActivitiesOpen] = useState(false);
 
-  // Top 8 Stat Cards Configuration matching exact UI specs
+  // Live Data states
+  const [metrics, setMetrics] = useState(null);
+  const [alerts, setAlerts] = useState(null);
+  const [activities, setActivities] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchDashboardData = async () => {
+      try {
+        const [metricsRes, alertsRes, activityRes] = await Promise.allSettled([
+          adminService.getOverviewMetrics(),
+          adminService.getCriticalAlerts(),
+          adminService.getRecentActivity({ page: 1, limit: 5 }),
+        ]);
+
+        if (isMounted) {
+          if (metricsRes.status === "fulfilled" && metricsRes.value?.data) {
+            setMetrics(metricsRes.value.data);
+          }
+          if (alertsRes.status === "fulfilled" && alertsRes.value?.data) {
+            setAlerts(alertsRes.value.data);
+          }
+          if (activityRes.status === "fulfilled" && activityRes.value?.data) {
+            const items = activityRes.value.data.items || activityRes.value.data;
+            if (Array.isArray(items)) {
+              setActivities(items);
+            }
+          }
+        }
+      } catch (err) {
+        console.warn("[AdminOverviewSubpage] Dashboard fetch error:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const formatNumber = (val) => {
+    if (val === undefined || val === null) return null;
+    return typeof val === "number" ? val.toLocaleString() : val;
+  };
+
+  const formatCurrency = (val) => {
+    if (val === undefined || val === null) return null;
+    return typeof val === "number" ? `₦${val.toLocaleString()}` : val;
+  };
+
+  const formatTrend = (trend) => {
+    if (trend === undefined || trend === null) return /* "+20% this week" */ "";
+    if (typeof trend === "number") {
+      const sign = trend >= 0 ? "+" : "";
+      return `${sign}${trend}% this week`;
+    }
+    return trend;
+  };
+
+  // Top 8 Stat Cards Configuration with live data integration
   const statCards = [
     {
       id: "total-users",
       title: "Total Users",
-      value: "18,524",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.totalUsers?.value ?? metrics?.totalUsers) || (isLoading ? "..." : /* "18,524" */ "0"),
+      trend: formatTrend(metrics?.totalUsers?.growthPercentage ?? metrics?.totalUsersTrend),
       icon: Users,
       iconColor: "text-[#016EA6]",
       onClick: () => onNavigate && onNavigate("users"),
@@ -42,8 +106,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
     {
       id: "verified-users",
       title: "Verified users",
-      value: "1,930",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.verifiedUsers?.value ?? metrics?.verifiedUsers) || (isLoading ? "..." : /* "1,930" */ "0"),
+      trend: formatTrend(metrics?.verifiedUsers?.growthPercentage ?? metrics?.verifiedUsersTrend),
       icon: BadgeCheck,
       iconColor: "text-[#016EA6]",
       onClick: () => onNavigate && onNavigate("verifications"),
@@ -51,8 +115,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
     {
       id: "active-jobs",
       title: "Active Jobs",
-      value: "1,086",
-      subtitle: "Across 4 jobs",
+      value: formatNumber(metrics?.activeJobs?.value ?? metrics?.activeJobs) || (isLoading ? "..." : /* "1,086" */ "0"),
+      subtitle: metrics?.activeJobsSubtitle || /* "Across 4 jobs" */ "",
       icon: Briefcase,
       iconColor: "text-[#016EA6]",
       onClick: () => onNavigate && onNavigate("jobs"),
@@ -60,8 +124,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
     {
       id: "escrow-balance",
       title: "Escrow Balance",
-      value: "$248,500",
-      trend: "+20% this week",
+      value: formatCurrency(metrics?.escrowBalance?.value ?? metrics?.escrowBalance) || (isLoading ? "..." : /* "₦248,500" */ "₦0"),
+      trend: formatTrend(metrics?.escrowBalance?.growthPercentage ?? metrics?.escrowBalanceTrend),
       icon: Receipt,
       iconColor: "text-[#016EA6]",
       onClick: () => onNavigate && onNavigate("payments"),
@@ -69,8 +133,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
     {
       id: "monthly-revenue",
       title: "Monthly Revenue",
-      value: "$31,240",
-      trend: "+20% this week",
+      value: formatCurrency(metrics?.monthlyRevenue?.value ?? metrics?.monthlyRevenue) || (isLoading ? "..." : /* "₦31,240" */ "₦0"),
+      trend: formatTrend(metrics?.monthlyRevenue?.growthPercentage ?? metrics?.monthlyRevenueTrend),
       icon: CreditCard,
       iconColor: "text-[#016EA6]",
       onClick: () => onNavigate && onNavigate("payments"),
@@ -78,8 +142,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
     {
       id: "open-disputes",
       title: "Open Disputes",
-      value: "18",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.openDisputes?.value ?? metrics?.openDisputes) || (isLoading ? "..." : /* "18" */ "0"),
+      trend: formatTrend(metrics?.openDisputes?.growthPercentage ?? metrics?.openDisputesTrend),
       icon: Scale,
       iconColor: "text-amber-500",
       bgColor: "bg-[#FFF9F4]",
@@ -89,8 +153,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
     {
       id: "pending-verification",
       title: "Pending Verification",
-      value: "54",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.pendingVerification?.value ?? metrics?.pendingVerification) || (isLoading ? "..." : /* "54" */ "0"),
+      trend: formatTrend(metrics?.pendingVerification?.growthPercentage ?? metrics?.pendingVerificationTrend),
       icon: Info,
       iconColor: "text-amber-500",
       onClick: () => onNavigate && onNavigate("verifications"),
@@ -98,8 +162,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
     {
       id: "pending-payouts",
       title: "Pending Payouts",
-      value: "27",
-      trend: "+20% this week",
+      value: formatNumber(metrics?.pendingPayouts?.value ?? metrics?.pendingPayouts) || (isLoading ? "..." : /* "27" */ "0"),
+      trend: formatTrend(metrics?.pendingPayouts?.growthPercentage ?? metrics?.pendingPayoutsTrend),
       icon: Wallet,
       iconColor: "text-[#016EA6]",
       onClick: () => onNavigate && onNavigate("payments"),
@@ -145,6 +209,7 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
         <div className="lg:col-span-4">
           <NeedsAttentionCard
             onNavigate={onNavigate}
+            alertsData={alerts}
             onViewAllAlerts={() => setIsCriticalAlertsOpen(true)}
           />
         </div>
@@ -155,6 +220,8 @@ const AdminOverviewSubpage = ({ onNavigate }) => {
         <div className="lg:col-span-7">
           <RecentActivityFeed
             onNavigate={onNavigate}
+            activitiesData={activities}
+            isLoading={isLoading}
             onViewAllActivities={() => setIsAllActivitiesOpen(true)}
           />
         </div>

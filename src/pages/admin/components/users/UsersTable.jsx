@@ -1,21 +1,22 @@
-import React, { useState } from "react";
-import { Search, ChevronDown, Eye, UserCheck, UserX } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ChevronDown, Eye, UserCheck, UserX, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
-const UsersTable = ({ users, onSelectUser, onToggleStatus }) => {
+const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = false }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 8;
 
   // Filter users
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
-      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (u.id && u.id.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesRole =
-      selectedRole === "all" ? true : u.role.toLowerCase() === selectedRole.toLowerCase();
+      selectedRole === "all" ? true : (u.role && u.role.toLowerCase() === selectedRole.toLowerCase());
 
     const matchesStatus =
       selectedStatus === "all"
@@ -28,6 +29,39 @@ const UsersTable = ({ users, onSelectUser, onToggleStatus }) => {
 
     return matchesSearch && matchesRole && matchesStatus;
   });
+
+  // Reset to page 1 whenever filters or search query change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedRole, selectedStatus]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * pageSize;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  // Generate pagination buttons array with ellipsis if many pages
+  const getPageNumbers = () => {
+    const pages = [];
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (validCurrentPage <= 3) {
+        pages.push(1, 2, 3, "...", totalPages);
+      } else if (validCurrentPage >= totalPages - 2) {
+        pages.push(1, "...", totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", validCurrentPage, "...", totalPages);
+      }
+    }
+    return pages;
+  };
 
   return (
     <div className="bg-white rounded-3xl p-5 sm:p-7 mt-6 shadow-xs border-none">
@@ -101,14 +135,23 @@ const UsersTable = ({ users, onSelectUser, onToggleStatus }) => {
             </tr>
           </thead>
           <tbody className="border-none">
-            {filteredUsers.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan="7" className="text-center py-12 text-gray-400 text-xs font-medium">
+                  <div className="flex items-center justify-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+                    <span>Loading users...</span>
+                  </div>
+                </td>
+              </tr>
+            ) : paginatedUsers.length === 0 ? (
               <tr>
                 <td colSpan="7" className="text-center py-12 text-gray-400 text-xs font-medium">
                   No user records match the criteria.
                 </td>
               </tr>
             ) : (
-              filteredUsers.map((user) => {
+              paginatedUsers.map((user) => {
                 const initials = user.name
                   ? user.name
                       .split(" ")
@@ -196,12 +239,12 @@ const UsersTable = ({ users, onSelectUser, onToggleStatus }) => {
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-3">
-        {filteredUsers.length === 0 ? (
+        {paginatedUsers.length === 0 ? (
           <div className="text-center py-8 text-gray-400 text-xs font-medium">
             No user records found.
           </div>
         ) : (
-          filteredUsers.map((user) => {
+          paginatedUsers.map((user) => {
             const initials = user.name
               ? user.name
                   .split(" ")
@@ -262,22 +305,53 @@ const UsersTable = ({ users, onSelectUser, onToggleStatus }) => {
       {/* Pagination Footer */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 mt-6 pt-2 border-none">
         <span className="text-xs font-medium text-gray-500">
-          Showing page 1 of 5 pages
+          Showing page {validCurrentPage} of {totalPages} pages ({filteredUsers.length} users)
         </span>
 
         <div className="flex items-center gap-1.5">
-          <button className="w-6 h-6 rounded bg-[#1E1B4B] text-white font-bold text-xs flex items-center justify-center cursor-pointer shadow-xs border-none">
-            1
+          {/* Previous Page */}
+          <button
+            onClick={() => handlePageChange(validCurrentPage - 1)}
+            disabled={validCurrentPage <= 1}
+            className="w-7 h-7 rounded hover:bg-gray-100 text-gray-500 flex items-center justify-center cursor-pointer border-none disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            title="Previous page"
+          >
+            <ChevronLeft className="w-4 h-4" />
           </button>
-          <button className="w-6 h-6 rounded hover:bg-gray-100 text-gray-500 font-semibold text-xs flex items-center justify-center cursor-pointer border-none">
-            2
-          </button>
-          <button className="w-6 h-6 rounded hover:bg-gray-100 text-gray-500 font-semibold text-xs flex items-center justify-center cursor-pointer border-none">
-            3
-          </button>
-          <span className="text-xs text-gray-400 px-1">...</span>
-          <button className="w-6 h-6 rounded hover:bg-gray-100 text-gray-500 font-semibold text-xs flex items-center justify-center cursor-pointer border-none">
-            5
+
+          {/* Page Number Buttons */}
+          {getPageNumbers().map((p, idx) => {
+            if (p === "...") {
+              return (
+                <span key={`ellipsis-${idx}`} className="text-xs text-gray-400 px-1 select-none">
+                  ...
+                </span>
+              );
+            }
+            const isActive = p === validCurrentPage;
+            return (
+              <button
+                key={p}
+                onClick={() => handlePageChange(p)}
+                className={`w-7 h-7 rounded font-bold text-xs flex items-center justify-center cursor-pointer transition-all border-none ${
+                  isActive
+                    ? "bg-[#1E1B4B] text-white shadow-xs"
+                    : "hover:bg-gray-100 text-gray-600 font-semibold"
+                }`}
+              >
+                {p}
+              </button>
+            );
+          })}
+
+          {/* Next Page */}
+          <button
+            onClick={() => handlePageChange(validCurrentPage + 1)}
+            disabled={validCurrentPage >= totalPages}
+            className="w-7 h-7 rounded hover:bg-gray-100 text-gray-500 flex items-center justify-center cursor-pointer border-none disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            title="Next page"
+          >
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>

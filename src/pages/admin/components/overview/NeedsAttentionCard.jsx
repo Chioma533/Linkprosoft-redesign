@@ -1,12 +1,16 @@
 import React from "react";
 import { UserCheck, Scale, Wallet } from "lucide-react";
 
-const NeedsAttentionCard = ({ onNavigate, onViewAllAlerts }) => {
+const NeedsAttentionCard = ({ onNavigate, onViewAllAlerts, alertsData }) => {
+  const pendingVerificationsCount = alertsData?.pendingVerifications?.count ?? alertsData?.pendingVerificationsCount ?? alertsData?.pendingVerification ?? /* 156 */ 0;
+  const openDisputesCount = alertsData?.openDisputes?.count ?? alertsData?.openDisputesCount ?? alertsData?.openDisputes ?? /* 55 */ 0;
+  const pendingPayoutsCount = alertsData?.pendingPayouts?.count ?? alertsData?.pendingPayoutsCount ?? alertsData?.pendingPayouts ?? /* 29 */ 0;
+
   const alerts = [
     {
       id: "verifications",
       title: "Pending Verifications",
-      count: 156,
+      count: pendingVerificationsCount,
       icon: UserCheck,
       bgColor: "bg-[#FFF6ED]",
       borderColor: "border-[#FED7AA]/80",
@@ -17,7 +21,7 @@ const NeedsAttentionCard = ({ onNavigate, onViewAllAlerts }) => {
     {
       id: "disputes",
       title: "Open Dispute",
-      count: 55,
+      count: openDisputesCount,
       icon: Scale,
       bgColor: "bg-[#FFF1F2]",
       borderColor: "border-[#FECDD3]/80",
@@ -28,7 +32,7 @@ const NeedsAttentionCard = ({ onNavigate, onViewAllAlerts }) => {
     {
       id: "payouts",
       title: "Pending payouts",
-      count: 29,
+      count: pendingPayoutsCount,
       icon: Wallet,
       bgColor: "bg-[#F0F9FF]",
       borderColor: "border-[#BAE6FD]/80",

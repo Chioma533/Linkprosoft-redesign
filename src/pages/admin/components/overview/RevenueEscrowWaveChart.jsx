@@ -1,12 +1,40 @@
-import React, { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ChevronDown, Loader2 } from "lucide-react";
+import { adminService } from "../../../../api/services/adminService";
 
 const RevenueEscrowWaveChart = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("This year");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [chartData, setChartData] = useState(null);
 
   const periods = ["This year", "Last 6 months", "This quarter", "All time"];
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+
+  const periodToParam = {
+    "This year": "1y",
+    "Last 6 months": "90d",
+    "This quarter": "30d",
+    "All time": "all",
+  };
+
+  useEffect(() => {
+    const fetchChartData = async () => {
+      setIsLoading(true);
+      try {
+        const param = periodToParam[selectedPeriod] || "30d";
+        const response = await adminService.getRevenueEscrowChart(param);
+        if (response?.data) {
+          setChartData(response.data);
+        }
+      } catch (err) {
+        console.warn("[RevenueEscrowWaveChart] Fetch error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchChartData();
+  }, [selectedPeriod]);
 
   return (
     <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 flex flex-col justify-between h-full relative">

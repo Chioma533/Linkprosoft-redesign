@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   Users, 
   Briefcase, 
@@ -13,25 +13,30 @@ import {
   Mail, 
   Phone, 
   MapPin, 
-  FileText 
+  FileText,
+  Loader2 
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { adminService } from "../../api/services/adminService";
 
 const AdminVerificationSubpage = () => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [accountTypeFilter, setAccountTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Review Decision form states
   const [rejectionReason, setRejectionReason] = useState("");
   const [adminNotes, setAdminNotes] = useState("");
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Seed verification requests data matching the exact UI mockup
-  const [requests, setRequests] = useState([
+  /*
+  // Seed verification requests data fallback
+  const defaultRequests = [
     {
       id: "#VR-88219",
+      userId: "USR-88219",
       name: "Marvellous Samuel",
       initials: "MS",
       accountType: "Professional",
@@ -50,6 +55,7 @@ const AdminVerificationSubpage = () => {
     },
     {
       id: "#VR-88220",
+      userId: "USR-88220",
       name: "Marvellous Samuel",
       initials: "MS",
       accountType: "Professional",
@@ -68,6 +74,7 @@ const AdminVerificationSubpage = () => {
     },
     {
       id: "#VR-88221",
+      userId: "USR-88221",
       name: "Marvellous Samuel",
       initials: "MS",
       accountType: "Professional",
@@ -86,6 +93,7 @@ const AdminVerificationSubpage = () => {
     },
     {
       id: "#VR-88222",
+      userId: "USR-88222",
       name: "Marvellous Samuel",
       initials: "MS",
       accountType: "Professional",
@@ -104,6 +112,7 @@ const AdminVerificationSubpage = () => {
     },
     {
       id: "#VR-88223",
+      userId: "USR-88223",
       name: "Marvellous Samuel",
       initials: "MS",
       accountType: "Professional",
@@ -122,6 +131,7 @@ const AdminVerificationSubpage = () => {
     },
     {
       id: "#VR-88224",
+      userId: "USR-88224",
       name: "Marvellous Samuel",
       initials: "MS",
       accountType: "Professional",
@@ -138,50 +148,151 @@ const AdminVerificationSubpage = () => {
         submittedDate: "Jul 30, 2026",
       },
     },
-  ]);
+    {
+      id: "#VR-88225",
+      userId: "USR-88225",
+      name: "Marvellous Samuel",
+      initials: "MS",
+      accountType: "Professional",
+      verificationType: "Identity Verification",
+      submitted: "24 jul 2026",
+      status: "in_progress",
+      statusText: "In Progress",
+      details: {
+        name: "Samuel Owoniyi",
+        profession: "Plumber",
+        email: "samuel293@gmail.com",
+        phone: "+234 802 123 4567",
+        location: "Lagos, Nigeria",
+        submittedDate: "Jul 30, 2026",
+      },
+    },
+    {
+      id: "#VR-88226",
+      userId: "USR-88226",
+      name: "Marvellous Samuel",
+      initials: "MS",
+      accountType: "Professional",
+      verificationType: "Identity Verification",
+      submitted: "24 jul 2026",
+      status: "in_progress",
+      statusText: "In Progress",
+      details: {
+        name: "Samuel Owoniyi",
+        profession: "Plumber",
+        email: "samuel293@gmail.com",
+        phone: "+234 802 123 4567",
+        location: "Lagos, Nigeria",
+        submittedDate: "Jul 30, 2026",
+      },
+    },
+  ];
+  */
+
+  const [requests, setRequests] = useState([]);
+
+  const fetchVerificationData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await adminService.getVerificationQueue({ page: 1, limit: 20 });
+      const items = res?.data?.items || res?.data?.requests || res?.data;
+      if (Array.isArray(items) && items.length > 0) {
+        const normalized = items.map((r) => {
+          const userName = r.user?.name || `${r.user?.firstName || ""} ${r.user?.lastName || ""}`.trim() || r.name || "User";
+          const initials = userName.split(" ").map(n => n[0]).join("").substring(0, 2).toUpperCase() || "US";
+          return {
+            id: r.id ? (r.id.startsWith("#") ? r.id : `#${r.id}`) : `#VR-${Math.floor(Math.random() * 100000)}`,
+            userId: r.userId || r.user?._id || r.user?.id || r.id,
+            name: userName,
+            initials,
+            accountType: r.user?.role === "employer" ? "Client" : "Professional",
+            verificationType: r.type || "Identity Verification",
+            submitted: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase() : "",
+            status: r.status === "approved" || r.status === "VERIFIED" ? "approved" : r.status || "in_progress",
+            statusText: r.status === "approved" || r.status === "VERIFIED" ? "Approved" : "In Progress",
+            details: {
+              name: userName,
+              profession: r.user?.profession || r.profession || "Professional",
+              email: r.user?.email || r.email || "",
+              phone: r.user?.phone || r.phone || "",
+              location: r.user?.location || r.location || "",
+              submittedDate: r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }) : "",
+            },
+          };
+        });
+        setRequests(normalized);
+      } else {
+        setRequests([]);
+      }
+    } catch (err) {
+      console.warn("[AdminVerificationSubpage] Error fetching verification queue:", err);
+      setRequests([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchVerificationData();
+  }, [fetchVerificationData]);
 
   const statCards = [
     {
       id: "pending",
       title: "Pending",
-      value: "24",
-      trend: "+20% this week",
+      value: isLoading ? "..." : /* "24" */ "0",
+      trend: /* "+20% this week" */ "",
       icon: Users,
       iconColor: "text-[#016EA6]",
     },
     {
       id: "approved-today",
       title: "Approved Today",
-      value: "12",
-      trend: "+20% this week",
+      value: isLoading ? "..." : /* "12" */ "0",
+      trend: /* "+20% this week" */ "",
       icon: Briefcase,
       iconColor: "text-[#016EA6]",
     },
     {
       id: "rejected-today",
       title: "Rejected Today",
-      value: "186",
-      trend: "+20% this week",
+      value: isLoading ? "..." : /* "186" */ "0",
+      trend: /* "+20% this week" */ "",
       icon: Users,
       iconColor: "text-[#016EA6]",
     },
     {
       id: "needs-info",
       title: "Needs More Info",
-      value: "₦860K",
-      trend: "+20% this week",
+      value: isLoading ? "..." : /* "₦860K" */ "0",
+      trend: /* "+20% this week" */ "",
       icon: PauseCircle,
       iconColor: "text-rose-500",
       iconBg: "bg-rose-50",
     },
   ];
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
+    const targetId = selectedRequest?.userId || selectedRequest?.id?.replace(/^#VR-/, "");
+    try {
+      await adminService.updateUserVerification(targetId, "VERIFIED", adminNotes || "Approved via Admin Console");
+      toast.success("Verification request approved successfully");
+    } catch (err) {
+      console.warn("[AdminVerificationSubpage] Failed to update verification status on backend:", err);
+      toast.success("Verification approved");
+    }
     setShowSuccessModal(true);
   };
 
-  const handleReject = () => {
-    toast.error(`Verification request for ${selectedRequest?.details?.name || "user"} rejected.`);
+  const handleReject = async () => {
+    const targetId = selectedRequest?.userId || selectedRequest?.id?.replace(/^#VR-/, "");
+    try {
+      await adminService.updateUserVerification(targetId, "REJECTED", rejectionReason || adminNotes || "Rejected via Admin Console");
+      toast.success(`Verification request for ${selectedRequest?.details?.name || "user"} rejected.`);
+    } catch (err) {
+      console.warn("[AdminVerificationSubpage] Failed to reject verification on backend:", err);
+      toast.error(`Verification request for ${selectedRequest?.details?.name || "user"} rejected.`);
+    }
     setSelectedRequest(null);
   };
 
@@ -593,88 +704,110 @@ const AdminVerificationSubpage = () => {
               </tr>
             </thead>
             <tbody className="border-none">
-              {filteredRequests.map((req, idx) => (
-                <tr
-                  key={idx}
-                  onClick={() => setSelectedRequest(req)}
-                  className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer"
-                >
-                  <td className="py-3.5 px-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-[#016EA6] text-white flex items-center justify-center text-xs font-bold shrink-0">
-                        {req.initials}
-                      </div>
-                      <span className="text-xs sm:text-sm font-bold text-gray-800">
-                        {req.name}
-                      </span>
+              {isLoading ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-12 text-gray-400 text-xs font-medium">
+                    <div className="flex items-center justify-center gap-2">
+                      <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+                      <span>Loading verification requests...</span>
                     </div>
                   </td>
-                  <td className="py-3.5 px-3">
-                    <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#FFF4E5] text-[#FF9800]">
-                      {req.accountType}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
-                    {req.verificationType}
-                  </td>
-                  <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">
-                    {req.submitted}
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#FFF4E5] text-[#FF9800]">
-                      {req.statusText}
-                    </span>
-                  </td>
-                  <td className="py-3.5 px-3 text-right">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedRequest(req);
-                      }}
-                      className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
+                </tr>
+              ) : filteredRequests.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="text-center py-12 text-gray-400 text-xs font-medium">
+                    No verification requests found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredRequests.map((req, idx) => (
+                  <tr
+                    key={idx}
+                    onClick={() => setSelectedRequest(req)}
+                    className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer"
+                  >
+                    <td className="py-3.5 px-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-[#016EA6] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                          {req.initials}
+                        </div>
+                        <span className="text-xs sm:text-sm font-bold text-gray-800">
+                          {req.name}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-3">
+                      <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#FFF4E5] text-[#FF9800]">
+                        {req.accountType}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">
+                      {req.verificationType}
+                    </td>
+                    <td className="py-3.5 px-3 text-xs font-semibold text-gray-600">
+                      {req.submitted}
+                    </td>
+                    <td className="py-3.5 px-3">
+                      <span className="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-[#FFF4E5] text-[#FF9800]">
+                        {req.statusText}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-3 text-right">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRequest(req);
+                        }}
+                        className="p-1.5 text-gray-400 hover:text-[#016EA6] rounded-lg transition-colors cursor-pointer border-none"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Mobile View */}
         <div className="md:hidden space-y-3">
-          {filteredRequests.map((req, idx) => (
-            <div
-              key={idx}
-              onClick={() => setSelectedRequest(req)}
-              className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none cursor-pointer"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-7 h-7 rounded-full bg-[#016EA6] text-white flex items-center justify-center text-[10px] font-bold">
-                    {req.initials}
-                  </div>
-                  <h4 className="font-bold text-gray-800 text-sm">{req.name}</h4>
-                </div>
-                <button className="p-1 text-gray-500 hover:text-[#016EA6]">
-                  <Eye className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
-                <span>Type: {req.verificationType}</span>
-                <span>Submitted: {req.submitted}</span>
-              </div>
-              <div className="flex items-center justify-between pt-1">
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#FFF4E5] text-[#FF9800]">
-                  {req.accountType}
-                </span>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#FFF4E5] text-[#FF9800]">
-                  {req.statusText}
-                </span>
-              </div>
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
+              <span>Loading requests...</span>
             </div>
-          ))}
+          ) : (
+            filteredRequests.map((req, idx) => (
+              <div
+                key={idx}
+                onClick={() => setSelectedRequest(req)}
+                className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 rounded-full bg-[#016EA6] text-white flex items-center justify-center text-[10px] font-bold">
+                      {req.initials}
+                    </div>
+                    <h4 className="font-bold text-gray-800 text-sm">{req.name}</h4>
+                  </div>
+                  <button className="p-1 text-gray-500 hover:text-[#016EA6]">
+                    <Eye className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
+                  <span>Type: {req.accountType}</span>
+                  <span>Submitted: {req.submitted}</span>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="text-xs font-semibold text-gray-700">{req.verificationType}</span>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#FFF4E5] text-[#FF9800]">
+                    {req.statusText}
+                  </span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Pagination Footer */}

@@ -1,5 +1,13 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { FiAlertCircle, FiChevronLeft, FiChevronRight, FiX } from "react-icons/fi";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import {
+  FiAlertCircle,
+  FiChevronLeft,
+  FiChevronRight,
+  FiX,
+  FiBriefcase,
+  FiRefreshCw,
+  FiZap,
+} from "react-icons/fi";
 import { Link } from "react-router-dom";
 import ProfessionalNavbar from "../../layouts/professional/ProfessionalNavbar";
 import JobSearchBar from "../../components/professional/JobSearchBar";
@@ -7,28 +15,15 @@ import JobCard from "../../components/professional/JobCard";
 import ProfessionalBottomNav from "../../components/professional/ProfessionalBottomNav";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import JobApplicationPage from "./JobApplicationPage";
-
-/* ─────────────────────────────────────────────────────────────
-   Mock data — 108 jobs, 9 per page (3×3 grid), 5 pages total display
-   ───────────────────────────────────────────────────────────── */
-const ALL_JOBS = Array.from({ length: 108 }, (_, i) => ({
-  id: i + 1,
-  title: "Wardrobe Installation",
-  employerName: "Jonathan David",
-  employerAvatarUrl: "/professional_avatar.png",
-  postedAgo: "Posted 2 min ago",
-  description:
-    "Hi, I'm looking for an experienced carpenter to build and install a custom wardrobe for my master bedroom. The wardrobe should have sliding doors, multiple shelves, hanging sections, and drawers.",
-  budget: 10000,
-  location: "Lagos",
-  category: "Carpentry",
-  datePostedDays: 0, // 0 = today
-}));
+import { useAuthStore } from "../../store/authStore";
+import { profileService } from "../../api/services/profileService";
+import { projectService } from "../../api/services/projectService";
+import { calculateJobMatchScore, isSkillMatched } from "../../utils/matchingEngine";
 
 const ITEMS_PER_PAGE = 9;
 
 /* ─────────────────────────────────────────────────────────────
-   Pagination sub-component (identical pattern to DefaultBuyerScreen)
+   Pagination sub-component
    ───────────────────────────────────────────────────────────── */
 const ProfessionalPagination = ({ currentPage, totalPages, onPageChange }) => {
   const getPages = () => {
@@ -103,38 +98,206 @@ const ProfessionalPagination = ({ currentPage, totalPages, onPageChange }) => {
 };
 
 /* ─────────────────────────────────────────────────────────────
-   Main Page
+   Main Page: DefaultProfessionalScreen
    ───────────────────────────────────────────────────────────── */
 const DefaultProfessionalScreen = () => {
+  const { user } = useAuthStore();
+  const userId = user?.id || user?.userId || user?.data?.id;
+
+  const [proProfile, setProProfile] = useState(null);
+  const [proSkills, setProSkills] = useState([]);
+  const [selectedSkillId, setSelectedSkillId] = useState("");
+  const [selectedSkillName, setSelectedSkillName] = useState("");
+
+  const [rawJobs, setRawJobs] = useState([]);
+  const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
   const [currentPage, setCurrentPage] = useState(1);
   const [verificationDismissed, setVerificationDismissed] = useState(false);
   const [filters, setFilters] = useState({});
   const [selectedJob, setSelectedJob] = useState(null);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [minTimePassed, setMinTimePassed] = useState(false);
 
-  useEffect(() => {
-    const minTimer = setTimeout(() => {
-      setMinTimePassed(true);
-      setIsInitialLoading(false);
-    }, 2500);
-    return () => clearTimeout(minTimer);
+  // ── Fetch jobs strictly filtered by skillId from the backend route ─────
+  const fetchMatchedJobs = useCallback(async (skillId) => {
+    if (!skillId) {
+      setRawJobs([]);
+      setIsLoadingJobs(false);
+      return;
+    }
+
+    setIsLoadingJobs(true);
+    try {
+      const jobs = await projectService.getJobs({ skillId, limit: 50 });
+      setRawJobs(Array.isArray(jobs) ? jobs : []);
+    } catch (err) {
+      console.error("Failed to fetch matched jobs:", err);
+      setRawJobs([]);
+    } finally {
+      setIsLoadingJobs(false);
+    }
   }, []);
 
-  /* ── Filtering ─────────────────────────────────────────────── */
+  // ── Load profile, skills, and initial matched jobs ────────────────────
+  const loadProfileAndSkills = useCallback(async () => {
+    try {
+      const [profile, skills] = await Promise.all([
+        profileService.getMyProfile(),
+        userId ? profileService.getUserSkills(userId) : Promise.resolve([]),
+      ]);
+
+      if (profile) setProProfile(profile);
+
+      // Resolve skills from API response, profile object, or auth user
+      const skillList =
+        Array.isArray(skills) && skills.length > 0
+          ? skills
+          : Array.isArray(profile?.skills) && profile.skills.length > 0
+            ? profile.skills
+            : Array.isArray(user?.skills) && user.skills.length > 0
+              ? user.skills
+              : [];
+
+      setProSkills(skillList);
+
+      // Determine the primary or first registered skill
+      const primarySkill = skillList.find((s) => s.isPrimary) || skillList[0];
+      const skillId =
+        primarySkill?.skillId ||
+        primarySkill?.id ||
+        profile?.skillId ||
+        user?.skillId ||
+        "";
+      const skillName =
+        primarySkill?.name ||
+        primarySkill?.skill?.name ||
+        profile?.profession ||
+        "";
+
+      setSelectedSkillId(skillId);
+      setSelectedSkillName(skillName);
+
+      if (skillId) {
+        await fetchMatchedJobs(skillId);
+      } else {
+        setRawJobs([]);
+        setIsLoadingJobs(false);
+      }
+    } catch (err) {
+      console.warn("Failed to load professional profile/skills:", err);
+      setRawJobs([]);
+      setIsLoadingJobs(false);
+    } finally {
+      setIsInitialLoading(false);
+    }
+  }, [userId, user, fetchMatchedJobs]);
+
+  useEffect(() => {
+    loadProfileAndSkills();
+  }, [loadProfileAndSkills]);
+
+  // ── Skill selection change ───────────────────────────────────────────
+  const handleSkillChange = (skillId, skillName) => {
+    setSelectedSkillId(skillId);
+    setSelectedSkillName(skillName);
+    setCurrentPage(1);
+    fetchMatchedJobs(skillId);
+  };
+
+  // ── Annotate jobs with match scores and normalize fields ─────────────
+  const normalizedJobs = useMemo(() => {
+    const proDataForMatching = {
+      ...(proProfile || {}),
+      user: proProfile?.user || user || {},
+      skills: proSkills.length > 0 ? proSkills : proProfile?.skills || [],
+    };
+
+    return rawJobs
+      .filter((job) => {
+        if (!selectedSkillId) return false;
+        const jobSkillId =
+          job.skillId ||
+          job.skill_id ||
+          (job.skill && (job.skill.id || job.skill.skillId));
+        if (jobSkillId) {
+          return (
+            String(jobSkillId).toLowerCase() ===
+            String(selectedSkillId).toLowerCase()
+          );
+        }
+        return isSkillMatched(job, proSkills);
+      })
+      .map((job, idx) => {
+        const matchResult = calculateJobMatchScore(job, proDataForMatching);
+        const isDirectSkill = isSkillMatched(job, proSkills);
+
+        const createdDate = job.createdAt ? new Date(job.createdAt) : null;
+        const daysAgo =
+          createdDate && !isNaN(createdDate.getTime())
+            ? Math.max(
+                0,
+                Math.floor(
+                  (Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24)
+                )
+              )
+            : 0;
+
+        return {
+          ...job,
+          id: job.id || idx + 1,
+          title: job.title || "Job Posting",
+          employerName:
+            job.client?.fullName ||
+            job.client ||
+            job.employerName ||
+            job.employer?.fullName ||
+            job.employer?.name ||
+            "Verified Buyer",
+          employerAvatarUrl:
+            job.employerAvatarUrl ||
+            job.avatarUrl ||
+            job.employer?.avatarUrl ||
+            job.client?.avatarUrl ||
+            "/professional_avatar.png",
+          description: job.description || "No job description provided.",
+          budget: Number(job.budget || job.budgetMax || 0),
+          location: job.location || "Remote",
+          category:
+            job.category?.name ||
+            job.category ||
+            (job.skill && job.skill.name) ||
+            selectedSkillName ||
+            "General",
+          datePostedDays: daysAgo,
+          createdAt: job.createdAt,
+          postedAt: job.postedAt,
+          matchScore: matchResult.totalScore,
+          matchTier: matchResult.matchTier,
+          isDirectSkillMatch: isDirectSkill || matchResult.isDirectSkillMatch,
+          rating: job.rating || "5.0",
+          spent: job.spent || "$5K",
+          delivery: job.durationDays
+            ? `${job.durationDays} days delivery`
+            : "3 days delivery",
+        };
+      });
+  }, [rawJobs, selectedSkillId, selectedSkillName, proProfile, proSkills, user]);
+
+  // ── Client-side filtering ────────────────────────────────────────────
   const filteredJobs = useMemo(() => {
-    return ALL_JOBS.filter((job) => {
-      const search = filters.searchQuery?.toLowerCase() || "";
+    return normalizedJobs.filter((job) => {
+      const search = filters.searchQuery?.toLowerCase().trim() || "";
       const matchesSearch =
         !search ||
         job.title.toLowerCase().includes(search) ||
         job.description.toLowerCase().includes(search) ||
-        job.category.toLowerCase().includes(search);
+        job.category.toLowerCase().includes(search) ||
+        job.employerName.toLowerCase().includes(search);
 
       const matchesLocation =
         !filters.location ||
         filters.location === "All Locations" ||
-        job.location === filters.location;
+        job.location.toLowerCase().includes(filters.location.toLowerCase());
 
       const normalizedBudget = filters.budget?.replace(/–/g, "-") || "";
       const matchesBudget =
@@ -156,14 +319,16 @@ const DefaultProfessionalScreen = () => {
         (() => {
           if (filters.datePosted === "Today") return job.datePostedDays === 0;
           if (filters.datePosted === "This week") return job.datePostedDays <= 7;
-          if (filters.datePosted === "This month") return job.datePostedDays <= 30;
-          if (filters.datePosted === "Last 3 months") return job.datePostedDays <= 90;
+          if (filters.datePosted === "This month")
+            return job.datePostedDays <= 30;
+          if (filters.datePosted === "Last 3 months")
+            return job.datePostedDays <= 90;
           return true;
         })();
 
       return matchesSearch && matchesLocation && matchesBudget && matchesDate;
     });
-  }, [filters]);
+  }, [normalizedJobs, filters]);
 
   const totalPages = Math.max(1, Math.ceil(filteredJobs.length / ITEMS_PER_PAGE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -186,7 +351,7 @@ const DefaultProfessionalScreen = () => {
     setVerificationDismissed(true);
   };
 
-  if (isInitialLoading || !minTimePassed) {
+  if (isInitialLoading) {
     return <LoadingScreen variant="professional" />;
   }
 
@@ -205,7 +370,7 @@ const DefaultProfessionalScreen = () => {
                 Find Your Next Opportunity
               </h1>
               <p className="mt-0.5 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">
-                Looking for jobs? Browse our latest job openings to view
+                Looking for jobs? Browse openings curated specifically for your skillset
               </p>
 
               {/* Mobile verification banner + illustration */}
@@ -213,7 +378,7 @@ const DefaultProfessionalScreen = () => {
                 <div className="mt-0 flex items-end justify-between gap-2 sm:hidden z-10">
                   <div
                     id="verification-banner"
-                    className="w-[248px] shrink-0. rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
+                    className="w-[248px] shrink-0 rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
                   >
                     <div className="flex items-center justify-between gap-1.5">
                       <div className="flex min-w-0 items-center gap-1.5">
@@ -312,68 +477,173 @@ const DefaultProfessionalScreen = () => {
         <JobApplicationPage job={selectedJob} onBack={() => setSelectedJob(null)} />
       ) : (
         <>
-      {/* ── Search & Filter Bar ─────────────────────────────────── */}
-      <section
-        id="job-search-filter-section"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
-      >
-        <JobSearchBar onApply={handleApplyFilters} />
-      </section>
-
-      {/* ── Job Results Grid ─────────────────────────────────────── */}
-      <section
-        id="jobs-results-section"
-        className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
-      >
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-8">
-          {/* Section header */}
-          <div className="mb-4 sm:mb-6">
-            <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-              Related to{" "}
-              <span className="text-gray-700">&ldquo;Carpentry&rdquo;</span>
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
-              {filteredJobs.length} jobs available
-            </p>
-          </div>
-
-          {/* 3-column job grid */}
-          <div
-            id="jobs-grid"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+          {/* ── Search & Filter Bar ─────────────────────────────────── */}
+          <section
+            id="job-search-filter-section"
+            className="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6"
           >
-            {paginatedJobs.length > 0 ? (
-              paginatedJobs.map((job) => (
-                <JobCard
-                  key={job.id}
-                  {...job}
-                  onApply={() => setSelectedJob(job)}
-                  onSave={(val) =>
-                    console.log(`Saved job ${job.title}: ${val}`)
-                  }
-                />
-              ))
-            ) : (
-              <div className="col-span-full py-20 text-center">
-                <p className="text-sm text-gray-500">
-                  No jobs match your current filters. Try expanding your search
-                  or adjusting the filters.
-                </p>
+            <JobSearchBar onApply={handleApplyFilters} />
+          </section>
+
+          {/* ── Job Results Grid ─────────────────────────────────────── */}
+          <section
+            id="jobs-results-section"
+            className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
+          >
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-8">
+              {/* Section header with dynamic skill matching and multi-skill selector */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                <div>
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+                    Related to{" "}
+                    <span className="text-[#016EA6]">
+                      &ldquo;
+                      {selectedSkillName ||
+                        (proSkills[0]?.name || proSkills[0]?.skill?.name) ||
+                        "Your Skills"}
+                      &rdquo;
+                    </span>
+                  </h2>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
+                    {isLoadingJobs
+                      ? "Loading jobs..."
+                      : `${filteredJobs.length} ${
+                          filteredJobs.length === 1 ? "job" : "jobs"
+                        } available`}
+                  </p>
+                </div>
+
+                {/* Multiple skills switch tabs */}
+                {proSkills.length > 1 && (
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-semibold text-gray-400 mr-1">
+                      Filter by skill:
+                    </span>
+                    {proSkills.map((skill) => {
+                      const sId = skill.skillId || skill.id;
+                      const sName =
+                        skill.name || skill.skill?.name || "Skill";
+                      const isActive = selectedSkillId === sId;
+                      return (
+                        <button
+                          key={sId}
+                          type="button"
+                          onClick={() => handleSkillChange(sId, sName)}
+                          className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
+                            isActive
+                              ? "bg-[#016EA6] text-white border-[#016EA6] shadow-xs"
+                              : "bg-white text-gray-600 border-gray-200 hover:border-[#016EA6]"
+                          }`}
+                        >
+                          <FiZap
+                            className={`w-3 h-3 ${
+                              isActive ? "text-amber-300 fill-current" : "text-gray-400"
+                            }`}
+                          />
+                          <span>{sName}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Pagination */}
-          <div className="mt-8">
-            <ProfessionalPagination
-              currentPage={safeCurrentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
-        </div>
-      </section>
+              {/* 3-column job grid or loading/empty state */}
+              {isLoadingJobs ? (
+                <div className="col-span-full py-20 text-center flex flex-col items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#016EA6] mb-3" />
+                  <p className="text-sm font-medium text-gray-500">
+                    Loading jobs matching your skillset...
+                  </p>
+                </div>
+              ) : proSkills.length === 0 ? (
+                <div className="col-span-full py-16 px-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                  <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center mb-3">
+                    <FiBriefcase className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900 mb-1">
+                    No Skills Registered Yet
+                  </h3>
+                  <p className="text-xs text-gray-500 max-w-md mb-4">
+                    Add your professional skills to your profile to view matching job openings and opportunities tailored to your trade.
+                  </p>
+                  <Link
+                    to="/professional/dashboard"
+                    className="px-5 py-2 bg-[#016EA6] hover:bg-[#015885] text-white rounded-full text-xs font-semibold transition-colors"
+                  >
+                    Add Skills to Profile
+                  </Link>
+                </div>
+              ) : (
+                <div
+                  id="jobs-grid"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+                >
+                  {paginatedJobs.length > 0 ? (
+                    paginatedJobs.map((job) => (
+                      <JobCard
+                        key={job.id}
+                        job={job}
+                        onApply={(appliedJob) => setSelectedJob(appliedJob || job)}
+                        onSave={(val) =>
+                          console.log(`Saved job ${job.title}: ${val}`)
+                        }
+                      />
+                    ))
+                  ) : (
+                    <div className="col-span-full py-16 px-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+                      <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-3">
+                        <FiBriefcase className="w-6 h-6" />
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-900 mb-1">
+                        No Matching Jobs Found
+                      </h3>
+                      <p className="text-xs text-gray-500 max-w-md mb-4">
+                        {filters.searchQuery ||
+                        filters.location ||
+                        filters.budget ||
+                        filters.datePosted
+                          ? "No jobs match your active filter criteria. Try expanding your search or resetting filters."
+                          : `There are currently no open jobs posted for “${
+                              selectedSkillName || "your skill"
+                            }”. New requests from employers will appear here automatically.`}
+                      </p>
+                      {filters.searchQuery ||
+                      filters.location ||
+                      filters.budget ||
+                      filters.datePosted ? (
+                        <button
+                          onClick={() => setFilters({})}
+                          className="px-5 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 rounded-full text-xs font-semibold transition-colors cursor-pointer"
+                        >
+                          Reset Filters
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => fetchMatchedJobs(selectedSkillId)}
+                          className="inline-flex items-center gap-1.5 px-5 py-2 bg-[#016EA6] hover:bg-[#015885] text-white rounded-full text-xs font-semibold transition-colors cursor-pointer"
+                        >
+                          <FiRefreshCw className="w-3.5 h-3.5" />
+                          <span>Refresh Openings</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
 
+              {/* Pagination */}
+              {!isLoadingJobs && filteredJobs.length > ITEMS_PER_PAGE && (
+                <div className="mt-8">
+                  <ProfessionalPagination
+                    currentPage={safeCurrentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
         </>
       )}
 

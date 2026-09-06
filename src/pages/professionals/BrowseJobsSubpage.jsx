@@ -351,7 +351,7 @@ const BrowseJobsSubpage = () => {
       )*/}
 
       {/* Filter Row */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="relative z-20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="flex-1 w-full">
           <ProfessionalSearchBar
             onApply={handleFilterApply}

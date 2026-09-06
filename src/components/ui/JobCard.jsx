@@ -1,19 +1,54 @@
 import React, { useState } from "react";
 import { FiBookmark, FiCheckCircle, FiZap } from "react-icons/fi";
 
-const JobCard = ({ job, onApply, onSave }) => {
-  const [saved, setSaved] = useState(job?.isBookmarked || false);
+const JobCard = ({ job, onApply, onSave, ...rest }) => {
+  const currentJob = job || rest;
+  const [saved, setSaved] = useState(currentJob?.isBookmarked || false);
   const [isApplying, setIsApplying] = useState(false);
 
-  const employerName = job?.employerName || job?.client || "Client";
-  const employerAvatarUrl = job?.employerAvatarUrl || job?.avatarUrl || "/professional_avatar.png";
-  const title = job?.title || "Job Posting";
-  const description = job?.description || "No job description provided.";
-  const postedAgo = job?.postedAgo || job?.postedAt || (job?.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Recently");
-  const budget = Number(job?.budget || 0);
+  const employerName =
+    currentJob?.employerName ||
+    currentJob?.client?.fullName ||
+    currentJob?.client ||
+    currentJob?.employer?.fullName ||
+    currentJob?.employer?.name ||
+    "Client";
 
-  const matchScore = job?.matchScore;
-  const isDirectSkillMatch = job?.isDirectSkillMatch;
+  const employerAvatarUrl =
+    currentJob?.employerAvatarUrl ||
+    currentJob?.avatarUrl ||
+    currentJob?.employer?.avatarUrl ||
+    currentJob?.client?.avatarUrl ||
+    "/professional_avatar.png";
+
+  const title = currentJob?.title || "Job Posting";
+  const description = currentJob?.description || "No job description provided.";
+
+  // Format posted ago if not already pre-formatted
+  const postedAgo = (() => {
+    if (currentJob?.postedAgo) return currentJob.postedAgo;
+    if (currentJob?.postedAt) return currentJob.postedAt;
+    if (currentJob?.createdAt) {
+      const date = new Date(currentJob.createdAt);
+      if (!isNaN(date.getTime())) {
+        const diffMs = Date.now() - date.getTime();
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        if (diffMins < 1) return "Posted just now";
+        if (diffMins < 60) return `Posted ${diffMins} min${diffMins > 1 ? "s" : ""} ago`;
+        const diffHours = Math.floor(diffMins / 60);
+        if (diffHours < 24) return `Posted ${diffHours} hr${diffHours > 1 ? "s" : ""} ago`;
+        const diffDays = Math.floor(diffHours / 24);
+        if (diffDays === 1) return "Posted yesterday";
+        if (diffDays < 7) return `Posted ${diffDays} days ago`;
+        return `Posted on ${date.toLocaleDateString()}`;
+      }
+    }
+    return "Recently";
+  })();
+
+  const budget = Number(currentJob?.budget || currentJob?.budgetMax || 0);
+  const matchScore = currentJob?.matchScore;
+  const isDirectSkillMatch = currentJob?.isDirectSkillMatch;
 
   const handleSave = () => {
     const nextSaved = !saved;
@@ -23,7 +58,7 @@ const JobCard = ({ job, onApply, onSave }) => {
 
   const handleApply = async () => {
     setIsApplying(true);
-    await onApply?.(job);
+    await onApply?.(currentJob);
     setTimeout(() => setIsApplying(false), 700);
   };
 

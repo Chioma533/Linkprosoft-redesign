@@ -64,7 +64,7 @@ const JobSearchBar = ({ onApply }) => {
     name,
     onSelect,
   }) => (
-    <div className="relative shrink-0">
+    <div className={`relative shrink-0 ${openDropdown === name ? "z-40" : "z-10"}`}>
       <button
         id={id}
         onClick={() => toggle(name)}
@@ -79,7 +79,7 @@ const JobSearchBar = ({ onApply }) => {
         />
       </button>
       {openDropdown === name && (
-        <div className="absolute top-full left-0 mt-1.5 min-w-[160px] bg-white border border-gray-100 rounded-full shadow-lg py-1 z-40">
+        <div className="absolute top-full left-0 mt-1.5 min-w-[170px] bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-50 overflow-hidden">
           {options.map((opt) => (
             <button
               key={opt}
@@ -87,7 +87,7 @@ const JobSearchBar = ({ onApply }) => {
                 onSelect(opt === options[0] ? "" : opt);
                 setOpenDropdown(null);
               }}
-              className={`w-full px-4 py-2 text-sm text-left transition-colors ${
+              className={`w-full px-4 py-2 text-xs sm:text-sm text-left transition-colors ${
                 (value || options[0]) === opt
                   ? "bg-[#016EA6]/5 text-[#016EA6] font-semibold"
                   : "text-gray-700 hover:bg-gray-50"
@@ -104,7 +104,7 @@ const JobSearchBar = ({ onApply }) => {
   return (
     <div
       ref={barRef}
-      className="flex items-center gap-2 overflow-x-auto flex-nowrap w-full py-1 sm:py-2 hide-scrollbar"
+      className="relative z-30 flex items-center gap-2 overflow-x-auto sm:overflow-visible flex-nowrap w-full py-1 sm:py-2 hide-scrollbar"
     >
       {/* Search input — pill shaped in single row */}
       <div className="relative flex-1 min-w-[140px] sm:min-w-[200px] shrink-0 sm:shrink">

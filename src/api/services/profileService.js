@@ -74,6 +74,78 @@ export const profileService = {
     }
   },
 
+  // Catalog of standard system skills with fallback UUIDs
+  DEFAULT_SKILLS: [
+    {
+      id: "25bf49c9-83d6-4869-ad83-a72753b1ecdc",
+      name: "Carpentry",
+      category: "Trades",
+      description: "Furniture building, wardrobe and cabinet installation"
+    },
+    {
+      id: "0d90705d-3e76-40bc-a6e3-f1597bacd955",
+      name: "Content Writing",
+      category: "Digital",
+      description: "Copywriting, blog and marketing content"
+    },
+    {
+      id: "614c5981-6c4c-4027-949a-8590d2e02c36",
+      name: "Electrical Installation",
+      category: "Trades",
+      description: "Wiring, diagnostics and appliance installation"
+    },
+    {
+      id: "1fe9bc00-9280-4745-98e8-9edfdaa5a0fe",
+      name: "Graphic Design",
+      category: "Digital",
+      description: "Branding, print and digital design work"
+    },
+    {
+      id: "e701e6cd-529f-4c05-b71e-e6c4cc3c6008",
+      name: "Home Cleaning",
+      category: "Trades",
+      description: "Deep cleaning and routine housekeeping"
+    },
+    {
+      id: "42ec6987-83d7-4138-ba13-37a20af7d33d",
+      name: "House Painting",
+      category: "Trades",
+      description: "Interior and exterior painting services"
+    },
+    {
+      id: "33f2e7d6-6b29-4267-9222-b78aa2913432",
+      name: "Plumbing",
+      category: "Trades",
+      description: "Pipe repair, installation and fixture fitting"
+    },
+    {
+      id: "7a67cb09-5a72-4b3f-a64c-fbee17aa9cc6",
+      name: "Web Development",
+      category: "Digital",
+      description: "Frontend and backend web application development"
+    }
+  ],
+
+  getSkillsCatalog: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.SKILLS.GET_SKILLS, {
+        params: { limit: 100, ...params }
+      });
+      const data = response.data;
+      let skillsList = [];
+      if (Array.isArray(data)) skillsList = data;
+      else if (Array.isArray(data?.data?.skills)) skillsList = data.data.skills;
+      else if (Array.isArray(data?.skills)) skillsList = data.skills;
+      else if (Array.isArray(data?.data)) skillsList = data.data;
+
+      if (skillsList.length > 0) return skillsList;
+      return profileService.DEFAULT_SKILLS;
+    } catch (error) {
+      console.warn("Failed to fetch skills catalog from API, using fallback:", error.message);
+      return profileService.DEFAULT_SKILLS;
+    }
+  },
+
   getUserSkills: async (userId) => {
     try {
       if (!userId) return [];
@@ -95,7 +167,17 @@ export const profileService = {
       const response = await axiosInstance.post(API_PATHS.SKILLS.ADD_MY_SKILL, payload);
       return response.data;
     } catch (error) {
-      console.warn("Failed to add skill:", error.message);
+      console.warn("Failed to add skill:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  deleteMySkill: async (skillId) => {
+    try {
+      const response = await axiosInstance.delete(API_PATHS.SKILLS.DELETE_MY_SKILL(skillId));
+      return response.data;
+    } catch (error) {
+      console.warn("Failed to delete skill:", error.response?.data || error.message);
       throw error;
     }
   },

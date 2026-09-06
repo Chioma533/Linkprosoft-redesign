@@ -48,7 +48,7 @@ const ProfessionalSearchBar = ({ onApply, initialQuery = "" }) => {
   };
 
   const FilterDropdown = ({ id, icon: Icon, label, value, options, name, setter }) => (
-    <div className="relative shrink-0">
+    <div className={`relative shrink-0 ${openDropdown === name ? "z-40" : "z-10"}`}>
       <button
         type="button"
         id={id}
@@ -62,13 +62,13 @@ const ProfessionalSearchBar = ({ onApply, initialQuery = "" }) => {
         />
       </button>
       {openDropdown === name && (
-        <div className="absolute top-full left-0 mt-1.5 min-w-[160px] bg-white border border-gray-100 rounded-full shadow-lg py-1 z-40">
+        <div className="absolute top-full left-0 mt-1.5 min-w-[170px] bg-white border border-gray-100 rounded-xl shadow-xl py-1.5 z-50 overflow-hidden">
           {options.map((opt) => (
             <button
               type="button"
               key={opt}
               onClick={() => handleFilterSelect(name, opt, setter)}
-              className={`w-full px-4 py-2 text-sm text-left transition-colors ${(value || options[0]) === opt
+              className={`w-full px-4 py-2 text-xs sm:text-sm text-left transition-colors ${(value || options[0]) === opt
                 ? "bg-[#016EA6]/5 text-[#016EA6] font-semibold"
                 : "text-gray-700 hover:bg-gray-50"
                 }`}
@@ -98,7 +98,7 @@ const ProfessionalSearchBar = ({ onApply, initialQuery = "" }) => {
     <form
       ref={barRef}
       onSubmit={handleSubmit}
-      className="flex items-center gap-2 overflow-x-auto flex-nowrap w-full py-1 sm:py-2 hide-scrollbar scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="relative z-30 flex items-center gap-2 overflow-x-auto sm:overflow-visible flex-nowrap w-full py-1 sm:py-2 hide-scrollbar scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {/* Search input — pill shaped in single horizontal row */}
       <div className="relative flex-1 min-w-[140px] sm:min-w-[200px] shrink-0 sm:shrink">

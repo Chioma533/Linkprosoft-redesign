@@ -12,6 +12,16 @@ export const profileService = {
     }
   },
 
+  createMyProfile: async (payload) => {
+    try {
+      const response = await axiosInstance.post(API_PATHS.PROFILE.CREATE_PROFILE, payload);
+      return response.data?.data?.profile || response.data?.data || response.data;
+    } catch (error) {
+      console.warn("Failed to create profile:", error.message);
+      throw error;
+    }
+  },
+
   updateMyProfile: async (payload) => {
     try {
       const response = await axiosInstance.put(API_PATHS.PROFILE.UPDATE_MY_PROFILE, payload);

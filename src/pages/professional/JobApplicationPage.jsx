@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { FiBookmark, FiArrowLeft, FiUploadCloud } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 import wardrobeImg from "../../assets/images/progress_wardrobe.png";
 import tvStandImg from "../../assets/images/progress_tv_stand.png";
+import { useDashboardStore } from "../../store/dashboardStore";
 
 const jobApplication = {
   id: 1,
@@ -19,6 +21,43 @@ const jobApplication = {
 
 const JobApplicationPage = ({ job = jobApplication, onBack }) => {
   const application = { ...jobApplication, ...job };
+  const applyForJob = useDashboardStore((state) => state.applyForJob);
+  const [form, setForm] = useState({
+    coverLetter: "",
+    bidAmount: application.budget ? String(application.budget) : "",
+    estimatedDays: "6",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!form.bidAmount || Number(form.bidAmount) <= 0) {
+      toast.error("Please enter a valid price.");
+      return;
+    }
+
+    if (!form.coverLetter.trim()) {
+      toast.error("Please include a cover message.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await applyForJob(
+        application.id,
+        Number(form.bidAmount),
+        form.coverLetter,
+        Number(form.estimatedDays) || 1
+      );
+      toast.success("Application submitted successfully.");
+      onBack?.();
+    } catch (error) {
+      toast.error(error.message || "Failed to submit application.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -103,11 +142,15 @@ const JobApplicationPage = ({ job = jobApplication, onBack }) => {
               </p>
             </div>
 
-            <div className="space-y-5">
+            <form className="space-y-5" onSubmit={handleSubmit}>
               <label className="block">
                 <span className="mb-2 block text-sm font-medium text-gray-700">Cover message</span>
                 <textarea
                   rows={4}
+                  value={form.coverLetter}
+                  onChange={(event) =>
+                    setForm({ ...form, coverLetter: event.target.value })
+                  }
                   className="w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none transition focus:border-[#016EA6] focus:bg-white"
                   placeholder="Tell the client why you're the best fit."
                 />
@@ -120,7 +163,12 @@ const JobApplicationPage = ({ job = jobApplication, onBack }) => {
                     ₦
                   </span>
                   <input
-                    type="text"
+                    type="number"
+                    min="1"
+                    value={form.bidAmount}
+                    onChange={(event) =>
+                      setForm({ ...form, bidAmount: event.target.value })
+                    }
                     placeholder="Enter a price"
                     className="w-full bg-transparent px-3.5 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none"
                   />
@@ -132,8 +180,12 @@ const JobApplicationPage = ({ job = jobApplication, onBack }) => {
                   How long will you take to complete this?
                 </span>
                 <input
-                  type="text"
-                  defaultValue="6 days"
+                  type="number"
+                  min="1"
+                  value={form.estimatedDays}
+                  onChange={(event) =>
+                    setForm({ ...form, estimatedDays: event.target.value })
+                  }
                   className="w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
                 />
               </label>
@@ -191,13 +243,14 @@ const JobApplicationPage = ({ job = jobApplication, onBack }) => {
                 </button>
 
                 <button
-                  type="button"
+                  type="submit"
+                  disabled={isSubmitting}
                   className="rounded-full bg-[#016EA6] px-8 py-3 text-sm font-medium text-white transition hover:bg-[#015f92]"
                 >
-                  Submit Application
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
                 </button>
               </div>
-            </div>
+            </form>
           </section>
         </div>
     </main>

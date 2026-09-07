@@ -88,14 +88,18 @@ const ProfileSubpage = () => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await profileService.updateMyProfile({
+      const payload = {
         bio: editForm.bio,
         profession: editForm.profession,
         hourlyRate: editForm.hourlyRate ? Number(editForm.hourlyRate) : undefined,
         availabilityStatus: editForm.availabilityStatus,
-      });
+      };
+      const savedProfile = profileData
+        ? await profileService.updateMyProfile(payload)
+        : await profileService.createMyProfile(payload);
+
       setProfileData((prev) => ({
-        ...prev,
+        ...(savedProfile || {}),
         bio: editForm.bio,
         profession: editForm.profession,
         hourlyRate: editForm.hourlyRate,

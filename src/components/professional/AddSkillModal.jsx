@@ -1,27 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { X, Search, Check, Sparkles, Star, Award, Clock, Layers } from "lucide-react";
+import { X, Check, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { profileService } from "../../api/services/profileService";
 import { toast } from "react-hot-toast";
 
 const PROFICIENCY_OPTIONS = [
-  {
-    id: "beginner",
-    label: "Beginner",
-    description: "Basic knowledge & assisted work",
-  },
-  {
-    id: "intermediate",
-    label: "Intermediate",
-    description: "Independent execution & solid experience",
-  },
-  {
-    id: "expert",
-    label: "Expert",
-    description: "Mastery & complex problem solving",
-  },
+  { id: "beginner", label: "Beginner" },
+  { id: "intermediate", label: "Intermediate" },
+  { id: "expert", label: "Expert" },
 ];
 
-const EXPERIENCE_PRESETS = [1, 2, 3, 5, 7, 10];
+const EXPERIENCE_PRESETS = [1, 3, 5, 7];
 
 const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) => {
   const [catalog, setCatalog] = useState([]);
@@ -31,8 +20,8 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
 
   // Form State
   const [selectedSkillId, setSelectedSkillId] = useState("");
-  const [proficiencyLevel, setProficiencyLevel] = useState("expert");
-  const [yearsOfExperience, setYearsOfExperience] = useState(7);
+  const [proficiencyLevel, setProficiencyLevel] = useState("beginner");
+  const [yearsOfExperience, setYearsOfExperience] = useState(1);
   const [isPrimary, setIsPrimary] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -52,7 +41,7 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
             existingSkills.map((s) => s.skillId || s.id || s.skill?.id)
           );
           const firstAvailable = list.find((s) => !existingIds.has(s.id));
-          if (firstAvailable) {
+          if (firstAvailable && !selectedSkillId) {
             setSelectedSkillId(firstAvailable.id);
           }
         }
@@ -67,7 +56,7 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
     return () => {
       isMounted = false;
     };
-  }, [isOpen, existingSkills]);
+  }, [isOpen, existingSkills, selectedSkillId]);
 
   // Set of already added skill IDs / names for deduping
   const existingSkillIds = useMemo(() => {
@@ -104,10 +93,8 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
     return catalog.find((s) => s.id === selectedSkillId) || null;
   }, [catalog, selectedSkillId]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
 
     if (!selectedSkillId) {
       toast.error("Please select a skill from the list");
@@ -123,7 +110,7 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
     setIsSubmitting(true);
     const payload = {
       skillId: selectedSkillId,
-      proficiencyLevel: proficiencyLevel,
+      proficiencyLevel,
       yearsOfExperience: yearsNum,
       isPrimary: Boolean(isPrimary),
     };
@@ -160,289 +147,293 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4 animate-fade-in">
-      <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl relative animate-scale-up max-h-[92vh] overflow-y-auto border border-gray-100">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          type="button"
-          className="absolute right-6 top-6 p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-        >
-          <X className="w-5 h-5" />
-        </button>
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 overflow-hidden font-sans">
+          {/* Dim/dull backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-[2px]"
+            onClick={onClose}
+          />
 
-        {/* Modal Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-2xl bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center shrink-0">
-            <Sparkles className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-900">Add Skill to Profile</h3>
-            <p className="text-xs text-gray-400 font-medium">
-              Showcase your expertise and get matched with relevant client projects
-            </p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Step 1: Skill Selection */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                <Layers className="w-3.5 h-3.5 text-[#016EA6]" />
-                Select Skill
-              </label>
-              <span className="text-[11px] text-gray-400 font-medium">
-                {catalog.length} available
-              </span>
-            </div>
-
-            {/* Search and Category Filter */}
-            <div className="space-y-2">
-              <div className="relative">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search skills e.g. Carpentry, Plumbing..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-medium text-gray-800 placeholder-gray-400 outline-none focus:border-[#016EA6] focus:bg-white transition-all"
-                />
-              </div>
-
-              {/* Category tabs */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setSelectedCategory(cat)}
-                    className={`px-3 py-1 rounded-full text-[11px] font-semibold transition-all cursor-pointer shrink-0 ${
-                      selectedCategory === cat
-                        ? "bg-[#016EA6] text-white shadow-xs"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200/80"
-                    }`}
+          {/* Full Viewport Height Sliding Drawer Modal */}
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            style={{ transformOrigin: "right center" }}
+            className="fixed inset-y-0 right-0 z-50 h-full w-full sm:max-w-xl md:max-w-2xl bg-white shadow-2xl flex flex-col justify-between overflow-hidden"
+          >
+            {/* Modal Header */}
+            <div className="p-4 sm:p-6 md:px-8 md:py-6 border-b border-gray-100 flex items-center justify-between gap-3 sm:gap-4 bg-white shrink-0">
+              <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
+                {/* Megaphone / Horn icon badge */}
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[#EEF4FF] flex items-center justify-center shrink-0">
+                  <svg
+                    width="20"
+                    height="20"
+                    className="sm:w-6 sm:h-6"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#016EA6"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                   >
-                    {cat}
-                  </button>
-                ))}
+                    <path d="M11 5L6 9H2v6h4l5 4V5z" />
+                    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                  </svg>
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-xl font-bold text-gray-900 leading-tight truncate sm:whitespace-normal">
+                    Add Skill to Profile
+                  </h3>
+                  <p className="text-[11px] sm:text-xs text-gray-500 font-normal mt-0.5 leading-snug truncate sm:whitespace-normal">
+                    Showcase your expertise and get matched with relevant client projects
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    toast.success("Skill draft saved");
+                    onClose();
+                  }}
+                  className="text-xs sm:text-sm font-semibold text-[#1E1B4B] hover:text-[#016EA6] transition-colors cursor-pointer whitespace-nowrap"
+                >
+                  Save draft
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="p-1 sm:p-1.5 text-gray-700 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                </button>
               </div>
             </div>
 
-            {/* Skills Catalog Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-1 border border-gray-100 rounded-2xl bg-gray-50/40">
-              {isLoadingCatalog ? (
-                <div className="col-span-2 py-8 text-center text-xs text-gray-400">
-                  Loading skills catalog...
-                </div>
-              ) : filteredSkills.length === 0 ? (
-                <div className="col-span-2 py-8 text-center text-xs text-gray-400">
-                  No skills match your search
-                </div>
-              ) : (
-                filteredSkills.map((skill) => {
-                  const isSelected = selectedSkillId === skill.id;
-                  const alreadyAdded =
-                    existingSkillIds.has(skill.id) ||
-                    existingSkillIds.has(skill.name);
+            {/* Scrollable Form Body */}
+            <form
+              onSubmit={handleSubmit}
+              className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 space-y-5 sm:space-y-6"
+            >
+              {/* Select Skill Section */}
+              <div className="space-y-3 sm:space-y-4">
+                <h4 className="text-base sm:text-xl font-bold text-[#1E1B4B] tracking-tight">
+                  Select Skill
+                </h4>
 
-                  return (
-                    <button
-                      key={skill.id}
-                      type="button"
-                      disabled={alreadyAdded}
-                      onClick={() => setSelectedSkillId(skill.id)}
-                      className={`text-left p-3 rounded-xl border transition-all cursor-pointer relative flex flex-col justify-between ${
-                        isSelected
-                          ? "border-[#016EA6] bg-[#016EA6]/5 shadow-xs ring-1 ring-[#016EA6]"
-                          : alreadyAdded
-                          ? "border-gray-200 bg-gray-100/60 opacity-60 cursor-not-allowed"
-                          : "border-gray-200 bg-white hover:border-[#016EA6]/50 hover:bg-gray-50/80"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="text-xs font-bold text-gray-800 leading-tight">
-                          {skill.name}
-                        </span>
-                        {isSelected && (
-                          <div className="w-4 h-4 rounded-full bg-[#016EA6] text-white flex items-center justify-center shrink-0">
-                            <Check className="w-2.5 h-2.5 stroke-[3px]" />
-                          </div>
-                        )}
-                        {alreadyAdded && !isSelected && (
-                          <span className="text-[9px] font-bold text-gray-400 bg-gray-200 px-1.5 py-0.5 rounded">
-                            Added
+                {/* Search Bar */}
+                <div className="bg-[#F8F9FA] rounded-xl sm:rounded-2xl px-3.5 sm:px-5 py-2.5 sm:py-3.5 flex items-center border border-transparent focus-within:border-gray-200 transition-all">
+                  <input
+                    type="text"
+                    placeholder="Search skills e.g carpentry, Plumbing"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full bg-transparent text-xs sm:text-sm text-gray-800 placeholder-gray-400 outline-none font-normal"
+                  />
+                </div>
+
+                {/* Category Pills */}
+                <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  {categories.map((cat) => {
+                    const isActive = selectedCategory === cat;
+                    return (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setSelectedCategory(cat)}
+                        className={`px-3.5 sm:px-5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all cursor-pointer shrink-0 ${
+                          isActive
+                            ? "bg-[#016EA6] text-white shadow-xs"
+                            : "bg-[#F3F4F6] text-gray-600 hover:bg-gray-200/80"
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Skill Cards Grid */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3.5">
+                  {isLoadingCatalog ? (
+                    <div className="col-span-2 py-8 sm:py-12 text-center text-xs text-gray-400">
+                      Loading available skills...
+                    </div>
+                  ) : filteredSkills.length === 0 ? (
+                    <div className="col-span-2 py-8 sm:py-12 text-center text-xs text-gray-400">
+                      No skills match your search
+                    </div>
+                  ) : (
+                    filteredSkills.map((skill) => {
+                      const isSelected = selectedSkillId === skill.id;
+                      const alreadyAdded =
+                        existingSkillIds.has(skill.id) ||
+                        existingSkillIds.has(skill.name);
+
+                      return (
+                        <button
+                          key={skill.id}
+                          type="button"
+                          disabled={alreadyAdded}
+                          onClick={() => setSelectedSkillId(skill.id)}
+                          className={`min-h-[85px] sm:min-h-[105px] rounded-xl sm:rounded-2xl p-3 sm:p-5 text-left transition-all cursor-pointer relative flex flex-col justify-start ${
+                            isSelected
+                              ? "border border-[#016EA6] bg-[#EAF4FB] shadow-xs"
+                              : alreadyAdded
+                              ? "border border-gray-200 bg-gray-50/70 opacity-60 cursor-not-allowed"
+                              : "border border-gray-200/90 bg-white hover:border-gray-300"
+                          }`}
+                        >
+                          <span className="text-xs sm:text-sm font-medium text-gray-900 leading-snug">
+                            {skill.name}
                           </span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <span className="text-[10px] font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                          {skill.category || "General"}
-                        </span>
-                      </div>
-                      {skill.description && (
-                        <p className="text-[10px] text-gray-500 line-clamp-1 mt-1 font-normal">
-                          {skill.description}
-                        </p>
-                      )}
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          </div>
-
-          {/* Step 2: Proficiency Level */}
-          <div className="space-y-2.5">
-            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-[#016EA6]" />
-              Proficiency Level
-            </label>
-            <div className="grid grid-cols-3 gap-2.5">
-              {PROFICIENCY_OPTIONS.map((opt) => {
-                const isSelected = proficiencyLevel === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setProficiencyLevel(opt.id)}
-                    className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-1 ${
-                      isSelected
-                        ? "border-[#016EA6] bg-[#016EA6]/5 ring-1 ring-[#016EA6]"
-                        : "border-gray-200 bg-white hover:border-gray-300"
-                    }`}
-                  >
-                    <span className="text-xs font-bold capitalize text-gray-900">
-                      {opt.label}
-                    </span>
-                    <span className="text-[9px] text-gray-400 leading-tight">
-                      {opt.description}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Step 3: Years of Experience */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-[#016EA6]" />
-                Years of Experience
-              </label>
-              <span className="text-xs font-bold text-[#016EA6]">
-                {yearsOfExperience} {Number(yearsOfExperience) === 1 ? "year" : "years"}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <input
-                type="number"
-                min="0"
-                max="50"
-                value={yearsOfExperience}
-                onChange={(e) => setYearsOfExperience(e.target.value)}
-                className="w-24 px-3.5 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-800 outline-none focus:border-[#016EA6] focus:bg-white text-center"
-              />
-
-              {/* Quick Presets */}
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {EXPERIENCE_PRESETS.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => setYearsOfExperience(preset)}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                      Number(yearsOfExperience) === preset
-                        ? "bg-[#016EA6] text-white shadow-xs"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                  >
-                    {preset} {preset === 1 ? "yr" : "yrs"}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Step 4: Primary Skill Toggle */}
-          <div className="p-3.5 bg-blue-50/50 rounded-2xl border border-blue-100/60 flex items-start gap-3">
-            <input
-              id="isPrimaryCheckbox"
-              type="checkbox"
-              checked={isPrimary}
-              onChange={(e) => setIsPrimary(e.target.checked)}
-              className="mt-1 w-4 h-4 text-[#016EA6] rounded border-gray-300 focus:ring-[#016EA6] cursor-pointer"
-            />
-            <label htmlFor="isPrimaryCheckbox" className="cursor-pointer select-none">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold text-gray-900">
-                  Set as Primary Skill
-                </span>
-                <Star className={`w-3.5 h-3.5 ${isPrimary ? "text-amber-500 fill-amber-500" : "text-gray-300"}`} />
-              </div>
-              <p className="text-[10px] text-gray-500 mt-0.5 leading-relaxed">
-                Highlights this skill at the top of your public profile and prioritizes you in client matching searches.
-              </p>
-            </label>
-          </div>
-
-          {/* Live Preview Card */}
-          {selectedSkill && (
-            <div className="p-3 bg-gray-50 rounded-2xl border border-dashed border-gray-200 space-y-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                Live Profile Badge Preview
-              </span>
-              <div className="flex items-center gap-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-2xs">
-                  {isPrimary && (
-                    <span className="flex items-center gap-0.5 text-[10px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200">
-                      <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                      Primary
-                    </span>
+                          {alreadyAdded && (
+                            <span className="text-[9px] sm:text-[10px] font-semibold text-gray-400 mt-1">
+                              Already added
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })
                   )}
-                  <span className="text-xs font-bold text-gray-800">
-                    {selectedSkill.name}
-                  </span>
-                  <span className="text-[10px] font-semibold capitalize text-[#016EA6] bg-[#016EA6]/10 px-2 py-0.5 rounded-full">
-                    {proficiencyLevel}
-                  </span>
-                  <span className="text-[10px] text-gray-400 font-medium">
-                    {yearsOfExperience} {Number(yearsOfExperience) === 1 ? "yr" : "yrs"}
-                  </span>
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-5 py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-full text-xs font-bold transition-all cursor-pointer"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || !selectedSkillId}
-              className="px-6 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Adding Skill...
-                </>
-              ) : (
-                "Add Skill to Profile"
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              {/* Proficiency Level Section */}
+              <div className="space-y-2 sm:space-y-3 pt-1">
+                <label className="text-[11px] sm:text-xs font-semibold text-gray-800 block">
+                  Proficiency Level
+                </label>
+                <div className="flex items-center gap-4 sm:gap-8 flex-wrap">
+                  {PROFICIENCY_OPTIONS.map((opt) => {
+                    const isSelected = proficiencyLevel === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setProficiencyLevel(opt.id)}
+                        className="flex items-center gap-2 sm:gap-2.5 cursor-pointer group"
+                      >
+                        <div
+                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                            isSelected
+                              ? "border-[#016EA6]"
+                              : "border-gray-300 bg-gray-100 group-hover:border-gray-400"
+                          }`}
+                        >
+                          {isSelected && (
+                            <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#016EA6]" />
+                          )}
+                        </div>
+                        <span className="text-[11px] sm:text-xs font-normal text-gray-800 capitalize">
+                          {opt.label}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Years of Experience Section */}
+              <div className="space-y-2 sm:space-y-3 pt-1">
+                <label className="text-[11px] sm:text-xs font-semibold text-gray-800 block">
+                  Years of Experience
+                </label>
+                <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+                  {/* Custom Number Input */}
+                  <input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={yearsOfExperience}
+                    onChange={(e) => setYearsOfExperience(e.target.value)}
+                    className="w-12 sm:w-14 h-8 sm:h-9 border border-gray-200 rounded-lg sm:rounded-xl text-center text-xs font-semibold text-gray-800 outline-none focus:border-[#016EA6] focus:bg-white bg-[#FAFAFA]"
+                  />
+
+                  {/* Preset Pills */}
+                  {EXPERIENCE_PRESETS.map((preset) => {
+                    const isSelected = Number(yearsOfExperience) === preset;
+                    return (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setYearsOfExperience(preset)}
+                        className={`px-3 sm:px-4 py-1.5 sm:py-2 border rounded-full text-[11px] sm:text-xs font-medium cursor-pointer transition-all ${
+                          isSelected
+                            ? "border-[#016EA6] bg-[#EAF4FB] text-[#016EA6] font-semibold"
+                            : "border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        {preset === 1 ? "1yr" : `${preset}yrs`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Primary Skill Toggle */}
+              <div className="pt-1">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={isPrimary}
+                    onChange={(e) => setIsPrimary(e.target.checked)}
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#016EA6] rounded border-gray-300 focus:ring-[#016EA6] cursor-pointer"
+                  />
+                  <span className="text-[11px] sm:text-xs font-medium text-gray-700 flex items-center gap-1">
+                    Set as Primary Skill
+                    <Star
+                      className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${
+                        isPrimary
+                          ? "text-amber-500 fill-amber-500"
+                          : "text-gray-300"
+                      }`}
+                    />
+                  </span>
+                </label>
+              </div>
+            </form>
+
+            {/* Modal Bottom Actions */}
+            <div className="p-4 sm:p-5 md:px-8 md:py-5 border-t border-gray-100 bg-white flex items-center gap-2.5 sm:gap-4 shrink-0">
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex-1 py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-full bg-[#F8F9FA] hover:bg-gray-100 text-gray-800 font-semibold text-xs sm:text-sm transition-all text-center cursor-pointer border border-transparent"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting || !selectedSkillId}
+                className="flex-1 py-2.5 sm:py-3.5 px-3 sm:px-6 rounded-full bg-[#016EA6] hover:bg-[#061EA6] text-white font-semibold text-xs sm:text-sm transition-all text-center cursor-pointer shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Adding Skill...
+                  </>
+                ) : (
+                  "Add Skill to Profile"
+                )}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };
 

@@ -38,7 +38,7 @@ const JobCard = ({
   };
 
   const [saved, setSaved] = useState(
-    currentJob?.isSaved || currentJob?.isBookmarked || isSaved || false
+    currentJob?.isSaved || currentJob?.isBookmarked || isSaved || false,
   );
   const [isApplying, setIsApplying] = useState(false);
 
@@ -104,7 +104,7 @@ const JobCard = ({
   return (
     <article
       id={`job-card-${cardId}`}
-      className={`bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative ${
+      className={`bg-[#f4f4f4] md:bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative ${
         cardShowBorder
           ? `border hover:border-[#016EA6] ${
               cardSelected
@@ -115,7 +115,7 @@ const JobCard = ({
       }`}
     >
       {/* Card body */}
-      <div className="p-5 flex flex-col gap-3 flex-1">
+      <div className="p-4 md:p-5 flex flex-col gap-3 flex-1">
         {/* Header: employer avatar + title/timestamp + save button */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -128,7 +128,7 @@ const JobCard = ({
                 onError={(e) => {
                   e.target.style.display = "none";
                   e.target.parentElement.innerHTML = `<div class="w-full h-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] font-bold text-sm">${displayEmployerName.charAt(
-                    0
+                    0,
                   )}</div>`;
                 }}
               />
@@ -136,10 +136,10 @@ const JobCard = ({
 
             {/* Title + Posted timestamp */}
             <div className="min-w-0">
-              <h3 className="text-sm font-semibold text-gray-900 leading-tight truncate">
+              <h3 className="text-[1.05rem] md:text-sm font-semibold text-gray-900 leading-tight truncate">
                 {displayTitle}
               </h3>
-              <span className="text-xs font-medium text-[#016EA6] mt-0.5 block truncate">
+              <span className="text-[0.72rem] md:text-xs font-medium text-[#016EA6] mt-0.5 block truncate">
                 {displayPostedAgo}
               </span>
             </div>
@@ -163,21 +163,21 @@ const JobCard = ({
         </div>
 
         {/* Description */}
-        <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
+        <p className="text-[0.72rem] md:text-xs text-gray-500 leading-relaxed line-clamp-3 flex-1">
           {displayDescription}
         </p>
       </div>
 
       {/* Footer: budget + Apply button */}
-      <div className="px-5 pb-4 flex items-center justify-between border-t border-gray-100 pt-3">
-        <span className="text-sm font-bold text-gray-900">
+      <div className="px-4 md:px-5 pb-4 flex items-center justify-between border-t border-gray-100 pt-3">
+        <span className="text-[1rem] md:text-sm font-bold text-gray-900">
           ₦ {numBudget.toLocaleString()}
         </span>
         <button
           id={`apply-job-btn-${cardId}`}
           onClick={handleApply}
           disabled={isApplying}
-          className="px-4 py-2 bg-[#e6f1f6] hover:bg-[#d5e7ef] text-[#2683b3] text-xs font-semibold rounded-full border border-[#2683b3]/10 transition-all duration-200 cursor-pointer disabled:opacity-70"
+          className="px-4 py-2 bg-[#dfeef6] hover:bg-[#d5e7ef] text-[#2a7eb5] text-[0.74rem] md:text-xs font-semibold rounded-full border border-[#2683b3]/10 transition-all duration-200 cursor-pointer disabled:opacity-70"
         >
           {isApplying ? "..." : "Apply"}
         </button>

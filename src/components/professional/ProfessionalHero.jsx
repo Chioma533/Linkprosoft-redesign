@@ -1,3 +1,4 @@
+
 import React from "react";
 import { FiAlertCircle, FiX } from "react-icons/fi";
 import { Link } from "react-router-dom";
@@ -6,17 +7,20 @@ const ProfessionalHero = ({ verificationDismissed, onDismissVerification }) => {
   return (
     <section
       id="professional-hero-section"
-      className="bg-[#EEF5F9] relative overflow-hidden"
+      className="relative overflow-hidden bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: "url('/professionalhero.jpg')",
+      }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-14">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
           {/* Left: headline + verification banner */}
           <div className="flex-1 max-w-full sm:max-w-xl">
-            <h1 className="text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
+            <h1 className="text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-white sm:text-4xl sm:leading-tight sm:tracking-tight">
               Find Your Next Opportunity
             </h1>
 
-            <p className="mt-0.5 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">
+            <p className="mt-0.5 text-[0.75rem] leading-relaxed text-white sm:mt-2 sm:text-base sm:font-normal">
               Looking for jobs? Browse openings curated specifically for your
               skillset
             </p>
@@ -55,13 +59,12 @@ const ProfessionalHero = ({ verificationDismissed, onDismissVerification }) => {
                 </div>
 
                 <div
-                  className="w-[43%] z-0"
-                  style={{ mixBlendMode: "multiply" }}
+                  className="relative z-30"
                 >
                   <img
                     src="/tools_bucket_illustration.png"
                     alt="Construction Tools"
-                    className="w-full object-contain translate-y-2 translate-x-6.25"
+                    className="relative z-30 w-full object-contain translate-y-3 translate-x-6.25"
                   />
                 </div>
               </div>
@@ -109,14 +112,11 @@ const ProfessionalHero = ({ verificationDismissed, onDismissVerification }) => {
           </div>
 
           {/* Right: Tools bucket illustration */}
-          <div
-            className="hidden sm:flex sm:shrink-0 sm:w-64 sm:max-w-xs sm:items-end sm:justify-center"
-            style={{ mixBlendMode: "multiply" }}
-          >
+          <div className="relative z-30 hidden sm:flex sm:shrink-0 sm:w-64 sm:max-w-xs sm:items-end sm:justify-center">
             <img
               src="/tools_bucket_illustration.png"
               alt="Construction Tools"
-              className="w-full object-contain sm:translate-y-25 lg:w-72"
+              className="relative z-30 w-full object-contain sm:translate-y-23 lg:w-72"
             />
           </div>
         </div>
@@ -129,3 +129,4 @@ const ProfessionalHero = ({ verificationDismissed, onDismissVerification }) => {
 };
 
 export default ProfessionalHero;
+

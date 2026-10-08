@@ -19,6 +19,7 @@ import CommunityPage from "./pages/CommunityPage";
 import ManageJobsPage from "./pages/buyer/ManageJobsPage";
 import PaymentScreen from "./pages/buyer/PaymentScreen";
 import VerificationPage from "./pages/verification/VerificationPage";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const App = () => {
   return (
@@ -47,6 +48,10 @@ const App = () => {
             <Route path="/payment-screen" element={<PaymentScreen />} />
 
             <Route path="/verification" element={<VerificationPage />} />
+
+            <Route element={<PrivateRoutes />}>
+              <Route path="/notifications" element={<NotificationsPage />} />
+            </Route>
 
             <Route element={<PrivateRoutes allowedRoles={["employer"]} />}>
               <Route path="/home" element={<DefaultBuyerScreen />} />

@@ -2,35 +2,6 @@ import React from "react";
 import { User, Loader2 } from "lucide-react";
 
 const RecentActivityFeed = ({ onNavigate, onViewAllActivities, activitiesData, isLoading = false }) => {
-  /*
-  const defaultActivities = [
-    {
-      id: 1,
-      name: "Marco Rossi",
-      role: "Professional (UI/UX Designer)",
-      action: "registered as a",
-      time: "8 days ago",
-      statusText: "Awaiting verification",
-    },
-    {
-      id: 2,
-      name: "Marco Rossi",
-      role: "Professional (UI/UX Designer)",
-      action: "registered as a",
-      time: "8 days ago",
-      statusText: "Awaiting verification",
-    },
-    {
-      id: 3,
-      name: "Marco Rossi",
-      role: "Professional (UI/UX Designer)",
-      action: "registered as a",
-      time: "8 days ago",
-      statusText: "Awaiting verification",
-    },
-  ];
-  */
-
   const activities = (activitiesData && activitiesData.length > 0) ? activitiesData : [];
 
   return (

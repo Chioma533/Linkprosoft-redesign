@@ -24,6 +24,7 @@ const DefaultProfessionalScreen = () => {
     isInitialLoading,
     fetchMatchedJobs,
     handleSkillChange,
+    excludeJobFromFeed,
   } = useProfessionalJobs();
 
   const [verificationDismissed, setVerificationDismissed] = useState(false);
@@ -75,6 +76,7 @@ const DefaultProfessionalScreen = () => {
         <JobApplicationPage
           job={selectedJob}
           onBack={() => setSelectedJob(null)}
+          onApplied={(jobId) => excludeJobFromFeed(jobId)}
         />
       ) : (
         <>

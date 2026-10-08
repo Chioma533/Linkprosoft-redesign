@@ -32,32 +32,6 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
     { id: "commission", label: "Commission" },
   ];
 
-  /*
-  // Seed data for Transactions view matching screenshot as fallback
-  const defaultTransactions = [
-    { id: "#TX-92841", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92842", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92843", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92844", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92845", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92846", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92847", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-    { id: "#TX-92848", user: "Jane Doe", job: "Wardrobe Installation", type: "Escrow Deposit", amount: "₦85,000", status: "Succesful", date: "24 jul 2026" },
-  ];
-
-  // Seed data for Escrow view matching screenshot as fallback
-  const defaultEscrowRecords = [
-    { id: "#ESC- 687", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 688", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 689", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 690", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 691", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 692", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 693", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-    { id: "#ESC- 694", job: "Wardrobe Installation", client: "Jane Doe", professional: "Samuel Owoniyi", amount: "₦85,000", date: "24 jul 2026", status: "Held" },
-  ];
-  */
-
   const [transactions, setTransactions] = useState([]);
   const [escrowRecords, setEscrowRecords] = useState([]);
   const [escrowMetrics, setEscrowMetrics] = useState(null);

@@ -22,22 +22,12 @@ import { jobService } from "../../api/services/jobService";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
-const DEFAULT_LATEST_JOB = {
-  id: "JOB-1001",
-  title: "Wardrobe Installation",
-  status: "Posted",
-  description:
-    "Hi, I’m looking for an experienced carpenter to build and install a custom wardrobe for my master bedroom. The wardrobe should have sliding doors, multiple shelves, hanging sections, and drawers.",
-  budget: 10000,
-  createdAt: "2026-08-22T12:00:00.000Z",
-};
-
 const ManageJobsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuthStore();
 
-  const [latestJob, setLatestJob] = useState(DEFAULT_LATEST_JOB);
-  const [allEmployerJobs, setAllEmployerJobs] = useState([DEFAULT_LATEST_JOB]);
+  const [latestJob, setLatestJob] = useState(null);
+  const [allEmployerJobs, setAllEmployerJobs] = useState([]);
   const [offers, setOffers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingOffers, setIsLoadingOffers] = useState(false);
@@ -198,7 +188,7 @@ const ManageJobsPage = () => {
     fetchEmployerData();
   };
 
-  const activeLatestJob = latestJob || DEFAULT_LATEST_JOB;
+  const activeLatestJob = latestJob;
   const activeOffers = offers;
 
   return (
@@ -345,15 +335,12 @@ const ManageJobsPage = () => {
               <div className="w-full max-w-[420px]">
                 <JobCard
                   id={`latest-job-${activeLatestJob.id}`}
-                  title={activeLatestJob.title || "Wardrobe Installation"}
+                  title={activeLatestJob.title}
                   employerName={userName}
                   employerAvatarUrl="/professional_avatar.png"
-                  postedAgo="Posted 2 min ago"
-                  description={
-                    activeLatestJob.description ||
-                    "Hi, I’m looking for an experienced carpenter to build and install a custom wardrobe for my master bedroom. The wardrobe should have sliding doors, multiple shelves, hanging sections, and drawers."
-                  }
-                  budget={Number(activeLatestJob.budget || 10000)}
+                  postedAgo="Posted recently"
+                  description={activeLatestJob.description}
+                  budget={Number(activeLatestJob.budget || 0)}
                   isSaved={false}
                   isSelected={false}
                   showBorder={false}

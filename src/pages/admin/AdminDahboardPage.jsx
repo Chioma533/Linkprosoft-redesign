@@ -7,7 +7,6 @@ import {
   Menu, 
   X, 
   LogOut, 
-  Bell, 
   Search,
   ChevronLeft,
   ChevronDown,
@@ -17,6 +16,7 @@ import {
 import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import { useNavigate } from "react-router-dom";
+import NotificationIcon from "../../components/icons/NotificationIcon";
 
 // Subpages
 import AdminOverviewSubpage from "./AdminOverviewSubpage";
@@ -241,16 +241,15 @@ const AdminDahboardPage = () => {
 
             {/* Notification Bell */}
             <div className="relative">
-              <button 
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+              <div
                 className="p-2 text-gray-500 hover:text-gray-800 rounded-xl hover:bg-gray-100/60 relative cursor-pointer border-none"
                 title="Notifications"
               >
-                <Bell className="w-4.5 h-4.5 stroke-[1.8]" />
+                <NotificationIcon size={18} />
                 {unreadCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
                 )}
-              </button>
+              </div>
 
               {/* Notification Drawer popup */}
               {isNotificationsOpen && (

@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiMessageSquare,
-  FiBell,
   FiUser,
   FiChevronDown,
   FiLogOut,
@@ -12,6 +11,7 @@ import {
 } from "react-icons/fi";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
+import NotificationIcon from "../../components/icons/NotificationIcon";
 
 /**
  * ProfessionalNavbar — top nav for the DefaultProfessionalScreen.
@@ -95,14 +95,13 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
               <FiMessageSquare className="w-5 h-5" />
             </button>
 
-            <button
+            <div
               id="nav-notifications-btn"
-              onClick={() => navigate("/professional/dashboard")}
               className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all cursor-pointer"
               title="Notifications"
             >
-              <FiBell className="w-5 h-5" />
-            </button>
+              <NotificationIcon size={20} />
+            </div>
 
             {/* Avatar + dropdown */}
             <div className="relative" ref={dropdownRef}>

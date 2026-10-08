@@ -3,6 +3,16 @@ import { useAuthStore } from "../../store/authStore";
 import { profileService } from "../../api/services/profileService";
 import { projectService } from "../../api/services/projectService";
 
+const getApplicationJobId = (application) => {
+  return (
+    application?.jobId ||
+    application?.job_id ||
+    application?.job?.id ||
+    application?.job?.jobId ||
+    application?.job?.job_id
+  );
+};
+
 const useProfessionalJobs = () => {
   const { user } = useAuthStore();
 
@@ -14,6 +24,7 @@ const useProfessionalJobs = () => {
   const [selectedSkillName, setSelectedSkillName] = useState("");
 
   const [rawJobs, setRawJobs] = useState([]);
+  const [appliedJobIds, setAppliedJobIds] = useState(() => new Set());
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
 
@@ -27,12 +38,27 @@ const useProfessionalJobs = () => {
     setIsLoadingJobs(true);
 
     try {
-      const jobs = await projectService.getJobs({
-        skillId,
-        limit: 50,
-      });
+      const [jobs, applications] = await Promise.all([
+        projectService.getJobs({
+          skillId,
+          limit: 50,
+        }),
+        projectService.getApplications(),
+      ]);
 
-      setRawJobs(Array.isArray(jobs) ? jobs : []);
+      const nextAppliedJobIds = new Set(
+        (Array.isArray(applications) ? applications : [])
+          .map(getApplicationJobId)
+          .filter(Boolean)
+          .map((jobId) => String(jobId).toLowerCase()),
+      );
+
+      setAppliedJobIds(nextAppliedJobIds);
+      setRawJobs(
+        (Array.isArray(jobs) ? jobs : []).filter(
+          (job) => !nextAppliedJobIds.has(String(job.id).toLowerCase()),
+        ),
+      );
     } catch (err) {
       console.error("Failed to fetch matched jobs:", err);
       setRawJobs([]);
@@ -116,6 +142,21 @@ const useProfessionalJobs = () => {
     [fetchMatchedJobs]
   );
 
+  const excludeJobFromFeed = useCallback((jobId) => {
+    if (!jobId) return;
+
+    const normalizedJobId = String(jobId).toLowerCase();
+
+    setAppliedJobIds((currentAppliedJobIds) => {
+      const nextAppliedJobIds = new Set(currentAppliedJobIds);
+      nextAppliedJobIds.add(normalizedJobId);
+      return nextAppliedJobIds;
+    });
+    setRawJobs((currentJobs) =>
+      currentJobs.filter((job) => String(job.id).toLowerCase() !== normalizedJobId),
+    );
+  }, []);
+
   return {
     user,
     proProfile,
@@ -123,10 +164,12 @@ const useProfessionalJobs = () => {
     selectedSkillId,
     selectedSkillName,
     rawJobs,
+    appliedJobIds,
     isLoadingJobs,
     isInitialLoading,
     fetchMatchedJobs,
     handleSkillChange,
+    excludeJobFromFeed,
   };
 };
 

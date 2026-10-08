@@ -4,6 +4,12 @@ const getJobSkillId = (job) => {
   return job.skillId || job.skill_id || job.skill?.id || job.skill?.skillId;
 };
 
+const getJobStatus = (job) => {
+  return String(job.status || job.jobStatus || job.job_status || "")
+    .trim()
+    .toLowerCase();
+};
+
 const getDaysAgo = (createdAt) => {
   if (!createdAt) return 0;
 
@@ -39,6 +45,10 @@ export const normalizeProfessionalJobs = ({
 
   return jobs
     .filter((job) => {
+      if (getJobStatus(job) === "in_progress") {
+        return false;
+      }
+
       const jobSkillId = getJobSkillId(job);
 
       if (jobSkillId) {

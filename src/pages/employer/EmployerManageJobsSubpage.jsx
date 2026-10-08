@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FiSearch, FiBriefcase, FiClock, FiCheckCircle, FiXCircle, FiPlus, FiMapPin, FiCalendar } from "react-icons/fi";
+import { FiSearch, FiBriefcase, FiClock, FiCheckCircle, FiXCircle, FiPlus, FiMapPin, FiCalendar, FiTrash2 } from "react-icons/fi";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 import StatsCard from "../../components/ui/StatsCard";
@@ -20,6 +20,9 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [activeSubTab, setActiveSubTab] = useState("All");
   const [showWizard, setShowWizard] = useState(false);
+  const [jobToDelete, setJobToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
 
   useEffect(() => {
     if (globalSearchQuery) {
@@ -69,6 +72,23 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
   useEffect(() => {
     fetchEmployerJobs();
   }, [fetchEmployerJobs]);
+
+  const confirmDeleteJob = async () => {
+    if (!jobToDelete) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+    try {
+      await jobService.deleteJob(jobToDelete.id);
+      // Remove job from local state immediately
+      setJobs((prevJobs) => prevJobs.filter((j) => j.id !== jobToDelete.id));
+      setJobToDelete(null);
+    } catch (err) {
+      console.error("Failed to delete job:", err);
+      setDeleteError(err.response?.data?.message || err.message || "Failed to delete job. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const normalizeStatus = (rawStatus) => {
     if (!rawStatus) return "Awaiting Offers";
@@ -278,6 +298,10 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
                     datePosted: "July 10",
                   }}
                   onViewDetails={() => onViewProject(job.id)}
+                  onDelete={(job) => {
+                    setDeleteError(null);
+                    setJobToDelete(job);
+                  }}
                 />
               ))
             ) : (
@@ -412,7 +436,7 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
               </div>
             ) : filteredJobs.length > 0 ? (
               filteredJobs.map((job) => (
-                <div key={job.id} className="bg-[#f9f9f9] p-6 rounded-3xl border border-[#e9e8e7]/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-300">
+                <div key={job.id} className="bg-[#f9f9f9] p-6 rounded-3xl border border-[#e9e8e7]/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 transition-all duration-300 hover:border-gray-300">
                   {/* Left Details */}
                   <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center w-full md:w-auto">
                     <div className="w-20 h-20 bg-gradient-to-tr from-rose-500 to-rose-600 rounded-2xl shrink-0 flex items-center justify-center text-white text-xl font-bold shadow-inner">
@@ -440,13 +464,27 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
                     </div>
                   </div>
 
-                  {/* View Project Button */}
-                  <button
-                    onClick={() => onViewProject(job.id)}
-                    className="w-full md:w-auto bg-[#EBF3FA] hover:bg-[#016EA6] text-[#016EA6] hover:text-white px-6 py-3 rounded-full text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer text-center"
-                  >
-                    View Project
-                  </button>
+                  {/* Right Actions: Delete & View Project */}
+                  <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDeleteError(null);
+                        setJobToDelete(job);
+                      }}
+                      title="Delete Job"
+                      aria-label="Delete Job"
+                      className="p-3 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all duration-200 cursor-pointer border border-transparent hover:border-rose-100"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => onViewProject(job.id)}
+                      className="w-full sm:w-auto bg-[#EBF3FA] hover:bg-[#016EA6] text-[#016EA6] hover:text-white px-6 py-3 rounded-full text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer text-center"
+                    >
+                      View Project
+                    </button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -457,6 +495,67 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {jobToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-gray-100">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                <FiTrash2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Delete Job Post</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Are you sure you want to remove this job?</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 space-y-1">
+              <p className="text-xs font-bold text-gray-800 line-clamp-1">{jobToDelete.title}</p>
+              <p className="text-[11px] text-gray-500">ID: {jobToDelete.id} • Budget: {formatCurrency(jobToDelete.budget)}</p>
+              <p className="text-[11px] text-rose-500 font-medium pt-1">This action cannot be undone.</p>
+            </div>
+
+            {deleteError && (
+              <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl text-xs text-rose-600 font-medium">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => {
+                  setJobToDelete(null);
+                  setDeleteError(null);
+                }}
+                className="px-5 py-2.5 rounded-full text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={confirmDeleteJob}
+                className="px-5 py-2.5 rounded-full text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 transition-colors cursor-pointer shadow-md shadow-rose-200 disabled:opacity-50 flex items-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <FiTrash2 className="w-3.5 h-3.5" />
+                    <span>Delete Job</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Post a Job Wizard */}
       {showWizard && (

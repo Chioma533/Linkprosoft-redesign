@@ -24,7 +24,7 @@ const jobApplication = {
   rating: "5.0",
 };
 
-const JobApplicationPage = ({ job = jobApplication, onBack }) => {
+const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
   const application = { ...jobApplication, ...job };
   const applyForJob = useDashboardStore((state) => state.applyForJob);
   const [form, setForm] = useState({
@@ -57,6 +57,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack }) => {
         Number(form.estimatedDays) || 1,
       );
       toast.success("Application submitted successfully.");
+      onApplied?.(application.id);
       setIsSubmitted(true);
     } catch (error) {
       toast.error(error.message || "Failed to submit application.");

@@ -8,7 +8,7 @@ const VerificationPreview = ({
 }) => {
   return (
     <aside
-      className={`rounded-2xl bg-[#fafafa] ${
+      className={`verification-preview-panel rounded-2xl bg-[#fafafa] ${
         compact ? "p-4" : "p-5 sm:p-6"
       }`}
     >
@@ -44,11 +44,11 @@ const VerificationPreview = ({
       </div>
 
       <div className="mt-6 flex gap-2 overflow-hidden">
-        <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#dcecef] bg-[#e9f5ee] text-[9px] font-semibold text-[#43876a]">
+        <div className="verification-document-card verification-document-valid flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#dcecef] bg-[#e9f5ee] text-[9px] font-semibold text-[#43876a]">
           {uploadedFile ? "ID ATTACHED" : "NIGERIA ID"}
         </div>
 
-        <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
+        <div className="verification-document-card flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
           IDENTITY CARD
         </div>
       </div>

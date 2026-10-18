@@ -69,7 +69,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
   if (isSubmitted) {
     return (
       <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-xl rounded-[1.75rem] border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
+        <div className="job-application-panel mx-auto max-w-xl rounded-[1.75rem] border border-gray-100 bg-white p-5 shadow-sm sm:p-8">
           <div className="flex justify-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#EAF5FB] text-[#016EA6] sm:h-20 sm:w-20">
               <FiCheckCircle className="h-8 w-8 sm:h-10 sm:w-10" />
@@ -88,7 +88,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
             has been sent successfully.
           </p>
 
-          <div className="mt-6 rounded-2xl border border-[#dfeaf0] bg-[#f7fafc] p-4 sm:p-5">
+          <div className="job-application-panel mt-6 rounded-2xl border border-[#dfeaf0] bg-[#f7fafc] p-4 sm:p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="h-12 w-12 overflow-hidden rounded-full border border-gray-200 bg-[#dfeaf0] shrink-0">
@@ -118,7 +118,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
               </button>
             </div>
 
-            <div className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#dfeaf0] bg-white px-3 py-2.5">
+            <div className="job-application-panel mt-4 flex items-center justify-between gap-3 rounded-xl border border-[#dfeaf0] bg-white px-3 py-2.5">
               <span className="text-xs text-gray-500">Budget</span>
               <span className="text-base font-bold text-gray-900">
                 ₦ {application.budget.toLocaleString()}
@@ -144,7 +144,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
     <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[380px_1fr] xl:grid-cols-[410px_1fr] lg:gap-8 items-start">
         {/* Left Card: Apply for Job preview */}
-        <section className="rounded-3xl border border-[#cfe4ef] bg-[#eef6fb] p-4 shadow-sm sm:p-6">
+        <section className="job-application-panel rounded-3xl border border-[#cfe4ef] bg-[#eef6fb] p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex items-center justify-between gap-3 border-b border-[#d8eaf5] pb-4">
             <h2 className="text-xl font-semibold text-gray-900 sm:text-[1.75rem]">
               Apply for job
@@ -221,7 +221,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
         </section>
 
         {/* Right Card: Application Details Form */}
-        <section className="rounded-3xl border border-[#e7edf1] bg-white p-4 shadow-sm sm:p-6 lg:p-7">
+        <section className="job-application-panel rounded-3xl border border-[#e7edf1] bg-white p-4 shadow-sm sm:p-6 lg:p-7">
           <div className="mb-6 border-b border-gray-100 pb-4">
             <h2 className="text-[1.4rem] font-semibold text-gray-900 sm:text-2xl">
               Application Details
@@ -242,7 +242,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
                 onChange={(event) =>
                   setForm({ ...form, coverLetter: event.target.value })
                 }
-                className="w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none transition focus:border-[#016EA6] focus:bg-white"
+                className="job-application-field w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 outline-none transition focus:border-[#016EA6] focus:bg-white"
                 placeholder="Tell the client why you're the best fit."
               />
             </label>
@@ -251,7 +251,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
               <label className="mb-2 block text-sm font-medium text-gray-700">
                 State your price
               </label>
-              <div className="flex items-center overflow-hidden rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] transition focus-within:border-[#016EA6] focus-within:bg-white">
+              <div className="job-application-field flex items-center overflow-hidden rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] transition focus-within:border-[#016EA6] focus-within:bg-white">
                 <span className="flex items-center justify-center bg-[#e5ecef] px-3.5 py-3 text-base font-semibold text-gray-700 select-none">
                   ₦
                 </span>
@@ -279,7 +279,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
                 onChange={(event) =>
                   setForm({ ...form, estimatedDays: event.target.value })
                 }
-                className="w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
+                className="job-application-field w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
               />
             </label>
 
@@ -290,7 +290,7 @@ const JobApplicationPage = ({ job = jobApplication, onBack, onApplied }) => {
               <input
                 type="text"
                 defaultValue="Immediately"
-                className="w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
+                className="job-application-field w-full rounded-xl border border-[#dfeaf0] bg-[#fbfcfd] px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-[#016EA6] focus:bg-white"
               />
             </label>
 

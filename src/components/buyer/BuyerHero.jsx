@@ -11,17 +11,17 @@ const BuyerHero = ({ verificationDismissed, onDismissVerification }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-7">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
           <div className="flex-1 max-w-full sm:max-w-xl">
-            <h1 className="text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
+            <h1 className="employer-homepage-hero-title text-[1.125rem] font-regular leading-[1.2] tracking-[-0.03em] text-gray-900 sm:text-4xl sm:leading-tight sm:tracking-tight">
               Find The Right Professional
             </h1>
 
-            <p className="mt-0.5 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">
+            <p className="employer-homepage-hero-description mt-0.5 text-[0.75rem] leading-relaxed text-gray-600 sm:mt-2 sm:text-base sm:font-normal">
               Need help with a project? Browse verified professionals.
             </p>
 
             {/* Mobile verification banner */}
             {!verificationDismissed && (
-              <div className="-mt-6 flex items-end justify-between gap-2 sm:hidden z-10">
+              <div className="mt-2 flex items-end justify-between gap-4 sm:hidden z-10">
                 <div
                   id="verification-banner"
                   className="w-[248px] shrink-0. rounded-[6px] border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
@@ -52,13 +52,13 @@ const BuyerHero = ({ verificationDismissed, onDismissVerification }) => {
                 </div>
 
                 <div
-                  className="w-[43%] z-0"
+                  className="w-[30%] max-w-[112px] z-0"
                   style={{ mixBlendMode: "multiply" }}
                 >
                   <img
                     src={ProfessionalIllustration}
                     alt="Construction Tools"
-                    className="w-full object-contain translate-y-[38px] translate-x-[25px]"
+                    className="w-full object-contain translate-y-[48px]"
                   />
                 </div>
               </div>

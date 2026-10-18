@@ -120,7 +120,7 @@ const SignupPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#EBF3FA]/40 flex flex-col justify-center items-center py-10 px-4">
+    <div className="auth-page min-h-screen bg-[#EBF3FA]/40 flex flex-col justify-center items-center py-10 px-4">
       <div className="w-full max-w-250 flex justify-center">
         <AnimatePresence mode="wait">
           {step === "role-selection" && (

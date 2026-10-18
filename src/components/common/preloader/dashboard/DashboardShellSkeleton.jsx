@@ -40,7 +40,7 @@ if (typeof document !== "undefined") {
 }
 
 /* ─────────────────── Primitive building blocks ───────────────────────────── */
-const BASE = "#EAEFF3", SHINE = "#F8FAFB";
+const BASE = "var(--dashboard-skeleton-shimmer-base)", SHINE = "var(--dashboard-skeleton-shimmer-highlight)";
 const shBg   = `linear-gradient(90deg,${BASE} 25%,${SHINE} 50%,${BASE} 75%)`;
 const shSize = "1600px 100%";
 const shAnim = "sk-shimmer 1.8s ease-in-out infinite";

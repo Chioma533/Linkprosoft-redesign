@@ -168,7 +168,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
     <>
       {/* Sidebar Container */}
       <div 
-        className={`bg-[#f9f9f9] border-r border-[#E6F1F6] flex flex-col h-screen transition-all duration-300 ease-in-out z-50
+        className={`dashboard-sidebar bg-[#f9f9f9] border-r border-[#E6F1F6] flex flex-col h-screen transition-all duration-300 ease-in-out z-50
           fixed inset-y-0 left-0 w-64
           md:sticky md:top-0 md:translate-x-0
           ${isOpen 
@@ -349,6 +349,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
 
         {/* Navigation Links */}
         <nav className={`relative flex-1 py-6 space-y-1.5 overflow-y-auto transition-all duration-300
+          ${role === "professional" && activeTab === "project-details" ? "professional-project-sidebar-nav" : ""}
           ${isOpen ? "px-4" : "px-2"}
         `}>
           <div

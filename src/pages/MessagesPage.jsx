@@ -93,7 +93,7 @@ const MessagesPage = () => {
         currentUserId={currentUser?.id} onAcceptRequest={(threadId) => respondToMessageRequest(threadId, "accept")}
         onDeclineRequest={(threadId) => respondToMessageRequest(threadId, "decline")}
         onStartConversation={() => setShowStartConversation(true)} />
-      <section className={`${showConversation ? "flex" : "hidden"} md:flex flex-col flex-1 bg-[#F7FAFC] min-w-0`}>
+      <section className={`messages-conversation-panel ${showConversation ? "flex" : "hidden"} md:flex flex-col flex-1 bg-[#F7FAFC] min-w-0`}>
         {activeThread ? <>
           <ConversationHeader thread={activeThread} onBackMobile={() => setShowConversation(false)} />
           <div className="flex-1 overflow-y-auto px-5 py-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">

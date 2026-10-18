@@ -5,7 +5,7 @@
  *
  * Layout (space-y-8):
  *  1. Welcome header
- *  2. Outer pale-blue wrapper (bg-[#E6F1F6] p-5 rounded-3xl)
+ *  2. Outer pale-blue wrapper (bg-[var(--dashboard-skeleton-muted)] p-5 rounded-3xl)
  *       a. Dark wallet banner (bg-[#00273A] rounded-3xl p-6/p-8)
  *            – Left: currency badge + balance + sub-text + CTA buttons
  *            – Right: decorative image placeholder
@@ -21,7 +21,7 @@ import { Bar, Circle, Pill } from "./DashboardShellSkeleton";
 /* ── Escrow row ─────────────────────────────────────────────────────────── */
 const EscrowRow = ({ delay = "0s" }) => (
   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "14px 0", borderBottom: "1px solid #F5F7FA", gap: 12 }}>
+    padding: "14px 0", borderBottom: "1px solid var(--dashboard-skeleton-border)", gap: 12 }}>
     <div style={{ flex: 1 }}>
       <Bar w="55%" h={11} r={6} delay={delay} />
       <Bar w="38%" h={9} r={5} mt={5} delay={delay} />
@@ -35,7 +35,7 @@ const EscrowRow = ({ delay = "0s" }) => (
 /* ── Transaction row ────────────────────────────────────────────────────── */
 const TxRow = ({ delay = "0s" }) => (
   <div style={{ display: "flex", alignItems: "center", gap: 14,
-    padding: "14px 0", borderBottom: "1px solid #F5F7FA" }}>
+    padding: "14px 0", borderBottom: "1px solid var(--dashboard-skeleton-border)" }}>
     {/* Icon circle */}
     <Circle size={40} delay={delay} />
     <div style={{ flex: 1 }}>
@@ -60,7 +60,7 @@ const WalletSkeleton = () => (
     </div>
 
     {/* 2. Outer pale-blue wrapper */}
-    <div style={{ background: "#E6F1F6", borderRadius: 24, padding: 20 }}>
+    <div style={{ background: "var(--dashboard-skeleton-muted)", borderRadius: 24, padding: 20 }}>
 
       {/* 2a. Dark wallet banner */}
       <div style={{
@@ -104,12 +104,12 @@ const WalletSkeleton = () => (
         gap: 16, marginTop: 16 }}>
         {["0s","0.05s","0.10s","0.15s"].map((d, i) => (
           <div key={i} style={{
-            background: "#fff", borderRadius: 20, padding: "16px",
+            background: "var(--dashboard-skeleton-surface)", borderRadius: 20, padding: "16px",
             display: "flex", alignItems: "center", gap: 12,
             border: "1px solid rgba(1,110,166,0.06)",
           }}>
             <div style={{ width: 36, height: 36, borderRadius: 10,
-              background: "#EAF1F6", flexShrink: 0 }} />
+              background: "var(--dashboard-skeleton-muted)", flexShrink: 0 }} />
             <div style={{ flex: 1 }}>
               <Bar w="55%" h={10} r={5} delay={d} />
               <Bar w="40%" h={18} r={7} mt={7} delay={d} />
@@ -120,8 +120,8 @@ const WalletSkeleton = () => (
     </div>
 
     {/* 3. Active Escrow */}
-    <div style={{ background: "#fff", borderRadius: 24,
-      border: "1px solid #F0F4F6", padding: 24 }}>
+    <div style={{ background: "var(--dashboard-skeleton-surface)", borderRadius: 24,
+      border: "1px solid var(--dashboard-skeleton-border)", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "center",
         justifyContent: "space-between", marginBottom: 20 }}>
         <Bar w={130} h={14} r={7} />
@@ -133,8 +133,8 @@ const WalletSkeleton = () => (
     </div>
 
     {/* 4. Recent Transactions */}
-    <div style={{ background: "#fff", borderRadius: 24,
-      border: "1px solid #F0F4F6", padding: 24 }}>
+    <div style={{ background: "var(--dashboard-skeleton-surface)", borderRadius: 24,
+      border: "1px solid var(--dashboard-skeleton-border)", padding: 24 }}>
       <div style={{ display: "flex", alignItems: "center",
         justifyContent: "space-between", marginBottom: 20 }}>
         <Bar w={160} h={14} r={7} />

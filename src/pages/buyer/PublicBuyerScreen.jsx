@@ -15,6 +15,7 @@ import { toast } from "react-hot-toast";
 import ProfessionalSearchBar from "../../components/buyer/ProfessionalSearchBar";
 import ProfessionalCard from "../../components/buyer/ProfessionalCard";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
+import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 import { searchService } from "../../api/services/searchService";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 
@@ -138,6 +139,7 @@ const PublicBuyerNavbar = () => {
 
           {/* Desktop Right: Sign In / Get Started */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeSwitcher />
             <Link
               to="/login"
               id="public-nav-login-btn"
@@ -169,6 +171,7 @@ const PublicBuyerNavbar = () => {
                   <FiMenu className="w-6 h-6 text-gray-700" />
                 )}
               </button>
+              <ThemeSwitcher />
               <h1 className="text-base font-bold text-gray-900 tracking-tight">
                 Browse Professionals
               </h1>

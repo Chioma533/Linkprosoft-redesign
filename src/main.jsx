@@ -3,11 +3,14 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { PreLoaderProvider } from './context/PreLoaderContext.jsx';
+import { ThemeProvider } from './context/ThemeProvider.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <PreLoaderProvider>
-    <App />
-    </PreLoaderProvider>
+    <ThemeProvider>
+      <PreLoaderProvider>
+        <App />
+      </PreLoaderProvider>
+    </ThemeProvider>
   </StrictMode>,
 )

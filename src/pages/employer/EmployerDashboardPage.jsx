@@ -65,9 +65,11 @@ const EmployerDashboardPage = () => {
   };
 
   return (
-    <DashboardLayout>
-      {renderActiveSubpage()}
-    </DashboardLayout>
+    <div className="employer-dashboard">
+      <DashboardLayout>
+        {renderActiveSubpage()}
+      </DashboardLayout>
+    </div>
   );
 };
 

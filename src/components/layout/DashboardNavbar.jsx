@@ -21,6 +21,7 @@ import MessageIcon from "../icons/Message02Icon";
 import NotificationIcon from "../icons/NotificationIcon";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
+import ThemeSwitcher from "../common/ThemeSwitcher";
 
 const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   const { user, logout } = useAuthStore();
@@ -222,7 +223,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   };
 
   return (
-    <header className="h-20 bg-[#f9f9f9] border-b-2 border-[#E6F1F6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
+    <header className="dashboard-navbar h-20 bg-[#f9f9f9] border-b-2 border-[#E6F1F6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
       {/* Title / Left controls */}
       <div className="flex items-center gap-2 sm:gap-4">
         {title === "profile" ? (
@@ -480,16 +481,16 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
         {/* Mobile Search Trigger */}
         <button
           onClick={() => setMobileSearchOpen(true)}
-          className="p-2 text-gray-500 hover:text-gray-900 bg-sky-50 hover:bg-sky-100 rounded-xl transition-all cursor-pointer md:hidden flex items-center justify-center"
+          className="p-2 bg-[#016EA6] text-white hover:bg-[#01507B] active:bg-[#013554] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#016EA6] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all cursor-pointer md:hidden flex items-center justify-center"
           title="Open Search"
         >
-          <FiSearch className="w-5 h-5 text-gray-600" />
+          <FiSearch className="w-5 h-5" />
         </button>
 
         {/* Messages Alert */}
         <button
           onClick={() => setActiveTab(role === "employer" ? "messages" : "chat")}
-          className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer"
+          className="relative p-2 md:inline-flex md:items-center md:justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer"
           title="Messages"
         >
           <MessageIcon className="w-5 h-5" />
@@ -500,7 +501,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
         {/* Notifications Alert */}
         <div
-          className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer hidden md:block"
+          className="dashboard-notifications-action relative p-2 md:items-center md:justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer hidden md:flex"
           title="Notifications"
         >
           <NotificationIcon size={20} />
@@ -511,6 +512,8 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
         {/* Vertical Divider */}
         <div className="w-px h-6 bg-gray-100 hidden sm:block" />
+
+        <ThemeSwitcher />
 
         {/* Profile Avatar Dropdown */}
         <div className="relative bg-white rounded-full p-0.6" ref={dropdownRef}>
@@ -576,7 +579,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
       {/* ── Mobile Global Search Modal ── */}
       {mobileSearchOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex flex-col justify-start md:hidden p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-[70] flex flex-col justify-start md:hidden p-4">
           <div className="bg-white rounded-3xl p-4 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-3">
               <div className="relative flex-1">

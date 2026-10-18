@@ -252,7 +252,7 @@ const OverviewSubpage = () => {
               </>
             ) : (
               /* Modern Empty State for Active Jobs */
-              <div className="py-12 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+              <div className="professional-dashboard-empty-state py-12 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
                 <div className="text-[#016EA6] mb-3 flex items-center justify-center">
                   <FiBriefcase className="w-8 h-8 stroke-[2]" />
                 </div>
@@ -266,7 +266,7 @@ const OverviewSubpage = () => {
                   {jobSearch ? (
                     <button
                       onClick={() => setJobSearch("")}
-                      className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-bold transition-all cursor-pointer"
+                      className="professional-dashboard-clear-search px-4 py-2 bg-sky-50 hover:bg-sky-100 text-[#016EA6] rounded-full text-xs font-bold transition-all cursor-pointer"
                     >
                       Clear Search
                     </button>

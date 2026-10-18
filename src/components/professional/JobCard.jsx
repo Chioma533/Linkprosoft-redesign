@@ -177,7 +177,7 @@ const JobCard = ({
           id={`apply-job-btn-${cardId}`}
           onClick={handleApply}
           disabled={isApplying}
-          className="px-4 py-2 bg-[#dfeef6] hover:bg-[#d5e7ef] text-[#2a7eb5] text-[0.74rem] md:text-xs font-semibold rounded-full border border-[#2683b3]/10 transition-all duration-200 cursor-pointer disabled:opacity-70"
+          className="px-4 py-2 bg-[#dfeef6] hover:bg-gray-100 text-[#016EA6] text-[0.74rem] md:text-xs font-semibold rounded-full border border-gray-200 transition-all duration-200 cursor-pointer disabled:opacity-70"
         >
           {isApplying ? "..." : "Apply"}
         </button>

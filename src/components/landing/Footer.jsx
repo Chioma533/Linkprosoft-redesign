@@ -32,11 +32,11 @@ const Footer = () => {
                 <input
                   type="text"
                   placeholder="Search professional near you"
-                  className="bg-blue border-none outline-none flex-1 pl-4 text-gray-500 placeholder-gray-500 text-md md:text-base focus:ring-0 focus:outline-none"
+                  className="bg-blue border-none outline-none min-w-0 flex-1 pl-4 text-gray-500 placeholder-gray-500 text-sm md:text-base focus:ring-0 focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="px-6 py-2.5 bg-[#0561A6] hover:bg-[#0561A6]/95 text-white font-semibold text-sm rounded-full transition-all shrink-0 shadow"
+                  className="px-4 md:px-6 py-2.5 bg-[#0561A6] hover:bg-[#0561A6]/95 text-white font-semibold text-sm rounded-full transition-all shrink-0 shadow"
                 >
                   Search
                 </button>

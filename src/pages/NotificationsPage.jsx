@@ -52,7 +52,7 @@ const NotificationRow = ({ item, selected, onClick }) => (
   <button
     type="button"
     onClick={onClick}
-    className={`group flex w-full items-center gap-4 border-b border-[#e7eaee] px-5 py-4 text-left transition-colors hover:bg-white ${
+    className={`group flex w-full items-start sm:items-center gap-3 sm:gap-4 border-b border-[#e7eaee] px-3 sm:px-5 py-4 text-left transition-colors hover:bg-white ${
       selected ? "bg-white" : "bg-[#f8f8f9]"
     }`}
   >
@@ -66,7 +66,7 @@ const NotificationRow = ({ item, selected, onClick }) => (
           <p className="truncate text-[15px] font-medium text-[#1f2430]">
             {item.person}
           </p>
-          <p className="mt-1 text-[15px] text-[#3b3e45]">{item.message}</p>
+          <p className="mt-1 break-words text-[14px] sm:text-[15px] text-[#3b3e45]">{item.message}</p>
         </div>
 
         <div className={`mt-1 h-3.5 w-3.5 shrink-0 rounded-full ${item.accent}`} />
@@ -123,19 +123,19 @@ const NotificationsPage = () => {
   const userAvatar = user?.avatar || user?.profileImage || user?.profile_image;
 
   return (
-    <div className="min-h-screen bg-[#f3f4f7] text-[#1e232b]">
-      <header className="border-b border-[#e8ebee] bg-[#f8f8f9] px-5 py-4 md:px-8">
-        <div className="mx-auto flex max-w-[1360px] items-center gap-4">
+    <div className="notifications-page min-h-screen bg-[#f3f4f7] text-[#1e232b]">
+      <header className="border-b border-[#e8ebee] bg-[#f8f8f9] px-3 py-3 sm:px-5 sm:py-4 md:px-8">
+        <div className="mx-auto flex min-w-0 max-w-[1360px] items-center gap-2 sm:gap-4">
           <button
             type="button"
             aria-label="Back"
             onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#dfe4ea] bg-white text-[#303843] transition hover:bg-[#f3f8ff]"
+            className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-full border border-[#dfe4ea] bg-white text-[#303843] transition hover:bg-[#f3f8ff]"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
 
-          <h1 className="flex-1 text-[22px] font-semibold tracking-[-0.02em] text-[#1d252d]">
+          <h1 className="min-w-0 flex-1 truncate text-[18px] sm:text-[22px] font-semibold tracking-[-0.02em] text-[#1d252d]">
             Notifications
           </h1>
 
@@ -150,24 +150,24 @@ const NotificationsPage = () => {
             />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex shrink-0 items-center gap-1 sm:gap-3">
             <button
               type="button"
               aria-label="Messages"
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e4e7eb] bg-white text-[#3b4450] transition hover:bg-[#f4f9ff]"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#e4e7eb] bg-white text-[#3b4450] transition hover:bg-[#f4f9ff]"
             >
               <MessageSquareText className="h-4 w-4" />
             </button>
             <div
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e4e7eb] bg-white text-[#3b4450] transition hover:bg-[#f4f9ff]"
+              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-[#e4e7eb] bg-white text-[#3b4450] transition hover:bg-[#f4f9ff]"
             >
               <NotificationIcon size={18} />
             </div>
-            <div className="flex items-center gap-3 rounded-full border border-[#e4e7eb] bg-white px-2 py-1.5">
-              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#f2d4ce] via-[#d7b7a0] to-[#7d8dae] text-[10px] font-bold text-white">
+            <div className="flex min-w-0 items-center gap-2 sm:gap-3 rounded-full border border-[#e4e7eb] bg-white px-1.5 sm:px-2 py-1">
+              <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#f2d4ce] via-[#d7b7a0] to-[#7d8dae] text-[10px] font-bold text-white">
                 {userAvatar ? <img src={userAvatar} alt={userName} className="h-full w-full object-cover" /> : userName.split(" ").slice(0, 2).map((part) => part[0]).join("").toUpperCase()}
               </div>
-              <span className="mr-1 text-[15px] font-medium text-[#2c3138]">
+              <span className="mr-1 hidden max-w-36 truncate text-[15px] font-medium text-[#2c3138] sm:block">
                 {userName}
               </span>
             </div>
@@ -175,14 +175,14 @@ const NotificationsPage = () => {
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1360px] px-5 py-8 md:px-8">
-        <div className="mb-6 flex items-center gap-3">
+      <main className="mx-auto w-full max-w-[1360px] px-3 py-5 sm:px-5 sm:py-8 md:px-8">
+        <div className="mb-4 sm:mb-6 flex max-w-full items-center gap-2 overflow-x-auto pb-1 sm:gap-3">
           {tabLabels.map((tab) => (
             <button
               key={tab.key}
               type="button"
               onClick={() => setActiveTab(tab.key)}
-              className={`rounded-xl border px-5 py-3 text-[16px] font-semibold transition ${
+              className={`shrink-0 rounded-xl border px-3 sm:px-5 py-2.5 sm:py-3 text-[13px] sm:text-[16px] font-semibold transition ${
                 activeTab === tab.key
                   ? "border-[#016EA6] bg-[#016EA6] text-white"
                   : "border-[#e3e5e8] bg-transparent text-[#5b6670] hover:bg-white"
@@ -193,12 +193,12 @@ const NotificationsPage = () => {
           ))}
         </div>
 
-        <div className="overflow-hidden rounded-[28px] border border-[#e6e8eb] bg-[#f7f7f8]">
-          <div className="grid min-h-[780px] grid-cols-1 xl:grid-cols-[1.58fr_0.92fr]">
-            <section className="border-r border-[#edf0f3] bg-[#f8f8f9]">
+        <div className="w-full min-w-0 overflow-hidden rounded-2xl sm:rounded-[28px] border border-[#e6e8eb] bg-[#f7f7f8]">
+          <div className="grid min-h-0 grid-cols-1 xl:min-h-[780px] xl:grid-cols-[1.58fr_0.92fr]">
+            <section className="min-w-0 border-b border-[#edf0f3] bg-[#f8f8f9] xl:border-b-0 xl:border-r">
               <div className="space-y-0">
                 {isLoading ? (
-                  <div className="flex h-60 items-center justify-center text-[#6b7280]">Loading notifications...</div>
+                  <div className="flex h-40 sm:h-60 items-center justify-center px-4 text-center text-[#6b7280]">Loading notifications...</div>
                 ) : filteredNotifications.length > 0 ? (
                   filteredNotifications.map((item) => (
                     <NotificationRow
@@ -209,31 +209,31 @@ const NotificationsPage = () => {
                     />
                   ))
                 ) : (
-                  <div className="flex h-60 items-center justify-center text-[#6b7280]">
+                  <div className="flex h-40 sm:h-60 items-center justify-center px-4 text-center text-[#6b7280]">
                     No notifications available.
                   </div>
                 )}
               </div>
             </section>
 
-            <aside className="bg-[#f4f5f6] p-4">
-              <div className="rounded-[26px] border border-[#e7eaee] bg-[#f8f8f8] p-4">
-                <div className="flex items-center justify-between gap-2 rounded-full bg-[#eef1f4] p-1">
+            <aside className="min-w-0 bg-[#f4f5f6] p-2.5 sm:p-4">
+              <div className="min-w-0 rounded-2xl sm:rounded-[26px] border border-[#e7eaee] bg-[#f8f8f8] p-3 sm:p-4">
+                <div className="flex items-center gap-1 sm:gap-2 rounded-full bg-[#eef1f4] p-1">
                   <button
                     type="button"
-                    className="flex-1 rounded-full bg-[#016EA6] px-4 py-2 text-[13px] font-semibold text-white"
+                    className="min-w-0 flex-1 rounded-full bg-[#016EA6] px-2 sm:px-4 py-2 text-[12px] sm:text-[13px] font-semibold text-white"
                   >
                     Unread
                   </button>
                   <button
                     type="button"
-                    className="flex-1 rounded-full px-4 py-2 text-[13px] font-medium text-[#5f6975]"
+                    className="min-w-0 flex-1 rounded-full px-2 sm:px-4 py-2 text-[12px] sm:text-[13px] font-medium text-[#5f6975]"
                   >
                     Archives
                   </button>
                   <button
                     type="button"
-                    className="flex-1 rounded-full px-4 py-2 text-[13px] font-medium text-[#5f6975]"
+                    className="min-w-0 flex-1 rounded-full px-2 sm:px-4 py-2 text-[12px] sm:text-[13px] font-medium text-[#5f6975]"
                   >
                     Blocked
                   </button>
@@ -252,7 +252,7 @@ const NotificationsPage = () => {
                   </div>
                 </div>
 
-                <div className="mt-5 space-y-0">
+                <div className="mt-3 sm:mt-5 space-y-0">
                   {messages.length > 0 ? messages.map((chat, index) => (
                     <div
                       key={chat.id}

@@ -30,7 +30,7 @@ const ProfessionalJobResults = ({
 
   if (proSkills.length === 0) {
     return (
-      <div className="py-16 px-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+      <div className="professional-jobs-empty py-16 px-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
         <div className="w-12 h-12 rounded-full bg-[#016EA6]/10 text-[#016EA6] flex items-center justify-center mb-3">
           <FiBriefcase className="w-6 h-6" />
         </div>
@@ -62,7 +62,7 @@ const ProfessionalJobResults = ({
       filters.datePosted;
 
     return (
-      <div className="py-16 px-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+      <div className="professional-jobs-empty py-16 px-4 rounded-2xl bg-gray-50 border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
         <div className="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mb-3">
           <FiBriefcase className="w-6 h-6" />
         </div>

@@ -86,10 +86,10 @@ const VerificationPage = () => {
     const isPaymentCompleted = completedSteps.includes("payment");
 
     return (
-      <main className="min-h-screen bg-[#f7f7f7] px-4 py-8 text-[#171a1c] sm:px-8 sm:py-12">
-        <section className="mx-auto max-w-[960px] rounded-[28px] bg-white px-5 py-10 sm:px-12 sm:py-16">
-          <div className="flex items-start justify-between gap-5">
-            <div>
+      <main className="verification-page verification-overview-page min-h-screen bg-[#f7f7f7] px-4 py-6 text-[#171a1c] sm:px-8 sm:py-12">
+        <section className="verification-shell mx-auto max-w-[960px] rounded-[28px] bg-white px-4 py-7 sm:px-12 sm:py-16">
+          <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:items-start sm:justify-between sm:gap-5">
+            <div className="min-w-0">
               <h1 className="text-[clamp(1.75rem,4vw,2.35rem)] leading-tight">
                 Holla! Let&apos;s Get You Verified
               </h1>
@@ -104,11 +104,11 @@ const VerificationPage = () => {
             <img
               src={IdentityIllustration}
               alt=""
-              className="hidden shrink-0 text-[#0879aa] sm:block"
+              className="w-20 shrink-0 text-[#0879aa] sm:w-[174px]"
             />
           </div>
 
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
+          <div className="mt-7 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
             {[
               {
                 icon: UserRound,
@@ -140,7 +140,7 @@ const VerificationPage = () => {
             ].map(({ icon: Icon, title, description, step, isCompleted, isLocked }) => (
               <article
                 key={title}
-                className={`flex min-h-[250px] flex-col rounded-2xl border p-5 transition ${
+                className={`flex min-h-[230px] min-w-0 flex-col rounded-2xl border p-5 transition sm:min-h-[250px] ${
                   isLocked
                     ? "border-[#e7e8e8] bg-[#fafafa] opacity-60"
                     : "border-[#e7e8e8] bg-white"
@@ -187,8 +187,8 @@ const VerificationPage = () => {
   }
 
   return (
-    <main className="min-h-screen bg-[#f7f7f7] px-3 py-5 sm:px-8 sm:py-12">
-      <section className="mx-auto max-w-[960px] rounded-[28px] bg-white px-4 py-7 sm:px-12 sm:py-8">
+    <main className="verification-page min-h-screen bg-[#f7f7f7] px-3 py-5 sm:px-8 sm:py-12">
+      <section className="verification-shell mx-auto max-w-[960px] rounded-[28px] bg-white px-4 py-7 sm:px-12 sm:py-8">
         <VerificationProgress
           activeStep={stepNumber}
           completedSteps={completedSteps}
@@ -205,7 +205,7 @@ const VerificationPage = () => {
                 image={IdentityIllustration}
               />
 
-              <div className="mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.25fr_.75fr] sm:p-6">
+              <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.25fr_.75fr] sm:p-6">
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <VerificationField
                     label="First Name"
@@ -264,7 +264,7 @@ const VerificationPage = () => {
                         const file = event.target.files?.[0];
                         if (file) handleIdentityUpload(file);
                       }}
-                      className="mt-2 block h-20 w-full cursor-pointer rounded-xl border border-[#e7e8e8] px-4 py-7 text-xs text-[#85898b] file:hidden"
+                      className="verification-upload-field mt-2 block h-20 w-full cursor-pointer rounded-xl border border-[#e7e8e8] px-4 py-7 text-xs text-[#85898b] file:hidden"
                     />
                     {uploadedFile && (
                       <span className="mt-1 block text-[10px] text-[#0879aa]">
@@ -317,7 +317,7 @@ const VerificationPage = () => {
                 image={PreviewIllustration}
               />
 
-              <div className="mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.1fr_.9fr] sm:p-6">
+              <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.1fr_.9fr] sm:p-6">
                 <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden rounded-2xl bg-[#dbe5e7] sm:min-h-[380px]">
                   <img
                     src={selfiePreviewUrl || selfieImage}
@@ -327,7 +327,7 @@ const VerificationPage = () => {
 
                   <div className="absolute inset-x-8 top-1/2 h-32 -translate-y-1/2 rounded-[48%] border-2 border-[#52d6e8]" />
 
-                  <label className="absolute bottom-5 cursor-pointer rounded-full bg-white px-5 py-3 text-xs text-[#242729] shadow-sm hover:bg-gray-50 transition">
+                  <label className="verification-camera-button absolute bottom-5 cursor-pointer rounded-full bg-white px-5 py-3 text-xs text-[#242729] shadow-sm hover:bg-gray-50 transition">
                     <Camera size={15} className="mr-2 inline" />
                     {selfieCaptured ? "Selfie captured" : "Take Selfie"}
                     <input
@@ -340,7 +340,7 @@ const VerificationPage = () => {
                   </label>
                 </div>
 
-                <div className="flex min-h-[300px] flex-col rounded-2xl bg-[#fafafa] p-5 sm:min-h-[380px]">
+                <div className="verification-preview-panel flex min-h-[300px] flex-col rounded-2xl bg-[#fafafa] p-5 sm:min-h-[380px]">
                   <div className="flex items-center justify-between border-b border-[#ececec] pb-4 text-sm text-[#424648]">
                     Preview
                     <X size={16} className="text-[#787d80]" />
@@ -379,7 +379,7 @@ const VerificationPage = () => {
                 image={PaymentIllustration}
               />
 
-              <div className="mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.25fr_.75fr] sm:p-6">
+              <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.25fr_.75fr] sm:p-6">
                 <div className="grid content-start gap-5 sm:grid-cols-2">
                   <label className="block text-xs text-[#44484a]">
                     <span>Bank Name</span>
@@ -398,7 +398,7 @@ const VerificationPage = () => {
                           }
                         }
                       }}
-                      className="mt-2 h-10 w-full rounded-full border border-[#e7e8e8] px-4 text-xs text-[#333] outline-none placeholder:text-[#a5a8aa] focus:border-[#0879aa]"
+                      className="verification-input mt-2 h-10 w-full rounded-full border border-[#e7e8e8] px-4 text-xs text-[#333] outline-none placeholder:text-[#a5a8aa] focus:border-[#0879aa]"
                     />
                     <datalist id="banks-datalist">
                       {banks.map((b) => (
@@ -472,8 +472,8 @@ const VerificationPage = () => {
                 image={PreviewIllustration}
               />
 
-              <div className="mt-6 rounded-2xl border border-[#e7e8e8] p-3 sm:p-5">
-                <div className="rounded-2xl bg-[#fafafa] p-5 sm:p-8">
+              <div className="verification-panel mt-6 rounded-2xl border border-[#e7e8e8] p-3 sm:p-5">
+                <div className="verification-preview-panel rounded-2xl bg-[#fafafa] p-5 sm:p-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Column 1 */}
                     <div className="grid grid-cols-2 gap-x-6 gap-y-6 text-xs">
@@ -511,13 +511,13 @@ const VerificationPage = () => {
                   </div>
 
                   <div className="mt-8 flex gap-3 overflow-hidden">
-                    <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#dcecef] bg-[#e9f5ee] text-[9px] font-semibold text-[#43876a]">
+                    <div className="verification-document-card verification-document-valid flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#dcecef] bg-[#e9f5ee] text-[9px] font-semibold text-[#43876a]">
                       {uploadedFile ? "ID ATTACHED" : "NIGERIA ID"}
                     </div>
-                    <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
+                    <div className="verification-document-card flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
                       IDENTITY CARD
                     </div>
-                    <div className="flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
+                    <div className="verification-document-card flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
                       IDENTITY CARD
                     </div>
                   </div>

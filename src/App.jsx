@@ -25,7 +25,7 @@ const App = () => {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-white text-gray-900 font-sans">
+        <div className="app-shell min-h-screen bg-white text-gray-900 font-sans">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/waitlist" element={<Waitlist />} />
@@ -94,8 +94,8 @@ const App = () => {
               // Apply to all toasts
               className: "my-global-toast",
               style: {
-                background: "#fff",
-                color: "#646465",
+                background: "var(--app-surface)",
+                color: "var(--app-text-secondary)",
                 borderRadius: "18px",
                 padding: "20px",
               },

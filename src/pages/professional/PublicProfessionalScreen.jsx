@@ -14,6 +14,7 @@ import {
 import JobSearchBar from "../../components/professional/JobSearchBar";
 import JobCard from "../../components/professional/JobCard";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
+import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 
 /* ─────────────────────────────────────────────────────────────
@@ -158,6 +159,7 @@ const PublicProfessionalNavbar = () => {
 
           {/* Desktop Right: Sign In / Sign Up */}
           <div className="hidden md:flex items-center gap-3">
+            <ThemeSwitcher />
             <Link
               to="/login"
               id="public-nav-login-btn"
@@ -189,6 +191,7 @@ const PublicProfessionalNavbar = () => {
                   <FiMenu className="w-6 h-6 text-gray-700" />
                 )}
               </button>
+              <ThemeSwitcher />
               <h1 className="text-base font-bold text-gray-900 tracking-tight">
                 Browse Jobs
               </h1>

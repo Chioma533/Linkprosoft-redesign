@@ -507,8 +507,16 @@ const WalletSubpage = () => {
       </div>
 
       {isWithdrawOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-xs p-4 animate-fade-in text-gray-800">
-          <div className="bg-white rounded-[32px] max-w-4xl w-full p-6 sm:p-8 relative animate-scale-up max-h-[90vh] overflow-y-auto">
+        <div className={`fixed inset-0 z-50 flex ${
+          withdrawStep === 2
+            ? "items-end justify-center p-0 md:items-center md:p-4"
+            : "items-center justify-center p-4"
+        } bg-black/45 backdrop-blur-xs animate-fade-in text-gray-800`}>
+          <div className={`bg-white ${
+            withdrawStep === 2
+              ? "w-full max-w-none rounded-t-[32px] rounded-b-none p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] max-h-[90dvh] md:max-w-4xl md:rounded-[32px] md:p-8 md:pb-8 md:max-h-[90vh]"
+              : "rounded-[32px] max-w-4xl w-full p-6 sm:p-8 max-h-[90vh]"
+          } relative animate-scale-up overflow-y-auto overscroll-contain`}>
             <button
               onClick={() => {
                 setIsWithdrawOpen(false);

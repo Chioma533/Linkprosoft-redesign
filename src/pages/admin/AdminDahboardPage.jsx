@@ -17,6 +17,7 @@ import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import { useNavigate } from "react-router-dom";
 import NotificationIcon from "../../components/icons/NotificationIcon";
+import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 
 // Subpages
 import AdminOverviewSubpage from "./AdminOverviewSubpage";
@@ -30,7 +31,7 @@ import AdminSettingsSubpage from "./AdminSettingsSubpage";
 const AdminDahboardPage = () => {
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("jobs"); // default view tab
+  const [activeTab, setActiveTab] = useState("jobs");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
@@ -117,7 +118,7 @@ const AdminDahboardPage = () => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] text-gray-800 font-sans relative overflow-hidden">
+    <div className="admin-dashboard flex h-screen bg-[#F8FAFC] text-gray-800 font-sans relative overflow-hidden">
       {/* Mobile Backdrop overlay for drawer sidebar */}
       {isSidebarOpen && (
         <div 
@@ -156,9 +157,9 @@ const AdminDahboardPage = () => {
               <button
                 key={item.id}
                 onClick={() => handleTabChange(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer border-none select-none relative ${
-                  isActive 
-                    ? "bg-[#016EA6] text-white shadow-xs" 
+                className={`admin-nav-item w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-bold transition-all duration-200 cursor-pointer border-none select-none relative ${
+                  isActive
+                    ? "admin-nav-item-active bg-[#016EA6] text-white shadow-xs"
                     : "text-gray-500 hover:bg-gray-100/70 hover:text-gray-900"
                 }`}
               >
@@ -196,8 +197,8 @@ const AdminDahboardPage = () => {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Top Navbar matching exact UI screenshot (No bottom border!) */}
-        <header className="bg-[#F8FAFC] border-none h-16 px-4 sm:px-6 md:px-8 flex items-center justify-between shrink-0 relative">
-          <div className="flex items-center gap-3">
+        <header className="bg-[#F8FAFC] border-none h-16 px-3 sm:px-6 md:px-8 grid grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 shrink-0 relative">
+          <div className="flex min-w-0 items-center gap-3">
             {/* Hamburger for mobile */}
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -217,13 +218,13 @@ const AdminDahboardPage = () => {
             </button>
 
             {/* Subpage Title */}
-            <h2 className="text-base sm:text-lg font-bold text-gray-800 tracking-tight capitalize select-none ml-1">
+            <h2 className="min-w-0 truncate text-base sm:text-lg font-bold text-gray-800 tracking-tight capitalize select-none ml-1">
               {getSubpageTitle()}
             </h2>
           </div>
 
           {/* Center Search Pill Bar */}
-          <div className="relative hidden md:flex items-center">
+          <div className="relative hidden md:flex items-center justify-self-center">
             <Search className="w-4 h-4 text-gray-400 absolute left-4 pointer-events-none" />
             <input 
               type="text" 
@@ -233,16 +234,17 @@ const AdminDahboardPage = () => {
           </div>
 
           {/* Right Header Controls: Messages, Notifications, Profile Dropdown */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex min-w-0 flex-nowrap items-center justify-self-end gap-1 sm:gap-2 md:gap-3">
+            <ThemeSwitcher />
             {/* Chat Icon */}
-            <button className="p-2 text-gray-500 hover:text-gray-800 rounded-xl hover:bg-gray-100/60 transition-colors cursor-pointer border-none">
-              <MessageSquare className="w-4.5 h-4.5 stroke-[1.8]" />
+            <button className="admin-header-icon-button inline-flex w-9 h-9 shrink-0 items-center justify-center p-0 text-gray-500 hover:text-gray-800 rounded-xl transition-colors cursor-pointer border-none">
+              <MessageSquare className="block w-[18px] h-[18px] stroke-[1.8]" />
             </button>
 
             {/* Notification Bell */}
-            <div className="relative">
+            <div className="relative flex shrink-0 items-center justify-center">
               <div
-                className="p-2 text-gray-500 hover:text-gray-800 rounded-xl hover:bg-gray-100/60 relative cursor-pointer border-none"
+                className="admin-header-icon-button inline-flex w-9 h-9 shrink-0 items-center justify-center p-0 text-gray-500 hover:text-gray-800 rounded-xl transition-colors relative cursor-pointer border-none"
                 title="Notifications"
               >
                 <NotificationIcon size={18} />
@@ -279,16 +281,16 @@ const AdminDahboardPage = () => {
             </div>
 
             {/* Profile Dropdown: Avatar + Name + Dropdown Arrow */}
-            <div className="flex items-center gap-2.5 ml-2 cursor-pointer group select-none">
+            <div className="flex shrink-0 items-center gap-0 sm:gap-2.5 ml-1 sm:ml-2 cursor-pointer group select-none">
               <img 
                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" 
                 alt="Elvis Chimannda" 
-                className="w-8 h-8 rounded-full object-cover shrink-0"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover shrink-0"
               />
               <span className="text-xs font-bold text-gray-800 hidden sm:inline group-hover:text-[#016EA6] transition-colors">
                 Elvis Chimannda
               </span>
-              <ChevronDown className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+              <ChevronDown className="hidden sm:block w-3.5 h-3.5 text-gray-500 shrink-0" />
             </div>
           </div>
         </header>

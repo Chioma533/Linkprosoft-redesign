@@ -15,7 +15,7 @@ const VerificationActionBar = ({
         type="button"
         onClick={onBack}
         disabled={isLoading}
-        className="h-10 w-full sm:w-auto rounded-full border border-[#e8e8e8] px-10 text-xs text-[#777b7d] transition hover:border-[#0879aa] disabled:opacity-50"
+        className="verification-back-button h-10 w-full sm:w-auto rounded-full border border-[#e8e8e8] px-10 text-xs text-[#777b7d] transition hover:border-[#0879aa] disabled:opacity-50"
       >
         {backLabel}
       </button>

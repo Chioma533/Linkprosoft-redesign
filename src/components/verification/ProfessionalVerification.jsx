@@ -25,7 +25,7 @@ const ProfessionalVerification = ({
 
   return (
     <>
-      <div className="mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:p-6 lg:grid-cols-[1.25fr_.75fr]">
+      <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:p-6 lg:grid-cols-[1.25fr_.75fr]">
         {/* Form */}
         <div className="min-w-0">
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">

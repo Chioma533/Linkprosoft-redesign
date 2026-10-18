@@ -16,7 +16,7 @@ const VerificationField = ({
 
       <input
         {...props}
-        className={`mt-2 h-10 w-full rounded-full border px-4 text-xs text-[#333] outline-none transition placeholder:text-[#a5a8aa] ${
+        className={`verification-input mt-2 h-10 w-full rounded-full border px-4 text-xs text-[#333] outline-none transition placeholder:text-[#a5a8aa] ${
           error
             ? "border-red-400 focus:border-red-500"
             : "border-[#e7e8e8] focus:border-[#0879aa]"

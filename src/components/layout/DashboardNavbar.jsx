@@ -21,6 +21,7 @@ import MessageIcon from "../icons/Message02Icon";
 import NotificationIcon from "../icons/NotificationIcon";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
+import VerificationBadge from "../common/VerificationBadge";
 
 const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   const { user, logout } = useAuthStore();
@@ -526,9 +527,12 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
               )}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-xs font-semibold text-gray-900 leading-tight">
-                {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Samuel Owoniyi")}
-              </p>
+              <div className="flex items-center gap-1.5">
+                <p className="text-xs font-semibold text-gray-900 leading-tight">
+                  {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Samuel Owoniyi")}
+                </p>
+                <VerificationBadge user={user} />
+              </div>
               <p className="text-[10px] text-gray-400 capitalize">
                 {role}
               </p>
@@ -543,9 +547,12 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-slide-up">
               <div className="px-4 py-2 border-b border-gray-50">
-                <p className="text-sm font-semibold text-gray-900 leading-none">
-                  {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Samuel Owoniyi")}
-                </p>
+                <div className="flex items-center gap-1.5">
+                  <p className="text-sm font-semibold text-gray-900 leading-none">
+                    {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Samuel Owoniyi")}
+                  </p>
+                  <VerificationBadge user={user} />
+                </div>
                 <p className="text-xs text-gray-400 mt-1 truncate">
                   {user?.email || "user@example.com"}
                 </p>

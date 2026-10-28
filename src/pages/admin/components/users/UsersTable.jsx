@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Search, ChevronDown, Eye, UserCheck, UserX, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
-const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = false }) => {
+const getUserName = (u) =>
+  u?.name ||
+  u?.fullName ||
+  u?.full_name ||
+  `${u?.firstName || u?.first_name || ""} ${u?.lastName || u?.last_name || ""}`.trim() ||
+  u?.username ||
+  (u?.email ? u.email.split("@")[0] : "") ||
+  "User";
+
+const UsersTable = ({ users = [], onSelectUser, onVerifyUser, onToggleStatus, isLoading = false }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRole, setSelectedRole] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
@@ -10,8 +19,9 @@ const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = fals
 
   // Filter users
   const filteredUsers = users.filter((u) => {
+    const userName = getUserName(u);
     const matchesSearch =
-      (u.name && u.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (userName && userName.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (u.id && u.id.toLowerCase().includes(searchQuery.toLowerCase()));
 
@@ -152,14 +162,14 @@ const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = fals
               </tr>
             ) : (
               paginatedUsers.map((user) => {
-                const initials = user.name
-                  ? user.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .substring(0, 2)
-                      .toUpperCase()
-                  : "MS";
+                const displayName = getUserName(user);
+                const initials = displayName
+                  .split(" ")
+                  .filter(Boolean)
+                  .map((n) => n[0])
+                  .join("")
+                  .substring(0, 2)
+                  .toUpperCase() || "U";
 
                 return (
                   <tr
@@ -173,7 +183,7 @@ const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = fals
                           {initials}
                         </div>
                         <span className="text-xs sm:text-sm font-bold text-gray-800">
-                          {user.name}
+                          {displayName}
                         </span>
                       </div>
                     </td>
@@ -190,7 +200,14 @@ const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = fals
 
                     {/* Verification */}
                     <td className="py-3.5 px-3">
-                      <span className="text-[#016EA6] font-bold text-xs hover:underline cursor-pointer">
+                      <span
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onVerifyUser) onVerifyUser(user);
+                        }}
+                        className="text-[#016EA6] font-bold text-xs hover:underline cursor-pointer"
+                        title="Click to view and review user verification details"
+                      >
                         {user.verified === "verified"
                           ? "Verified"
                           : user.verified === "pending"
@@ -245,14 +262,14 @@ const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = fals
           </div>
         ) : (
           paginatedUsers.map((user) => {
-            const initials = user.name
-              ? user.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .substring(0, 2)
-                  .toUpperCase()
-              : "MS";
+            const displayName = getUserName(user);
+            const initials = displayName
+              .split(" ")
+              .filter(Boolean)
+              .map((n) => n[0])
+              .join("")
+              .substring(0, 2)
+              .toUpperCase() || "U";
 
             return (
               <div
@@ -265,7 +282,7 @@ const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = fals
                       {initials}
                     </div>
                     <div>
-                      <h4 className="font-bold text-gray-800 text-sm">{user.name}</h4>
+                      <h4 className="font-bold text-gray-800 text-sm">{displayName}</h4>
                       <p className="text-[10px] text-gray-400">{user.email}</p>
                     </div>
                   </div>
@@ -283,7 +300,14 @@ const UsersTable = ({ users = [], onSelectUser, onToggleStatus, isLoading = fals
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-none">
-                  <span className="text-[#016EA6] font-bold text-xs">
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (onVerifyUser) onVerifyUser(user);
+                    }}
+                    className="text-[#016EA6] font-bold text-xs hover:underline cursor-pointer"
+                    title="Click to view and review user verification details"
+                  >
                     {user.verified === "verified" ? "Verified" : "Unverified"}
                   </span>
                   <span

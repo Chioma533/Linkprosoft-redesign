@@ -16,7 +16,7 @@ const extractUser = (response) => {
   return null;
 };
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   user: storedUser,
   token: storedToken,
   isAuthenticated: !!storedToken || !!storedUser,
@@ -49,6 +49,20 @@ export const useAuthStore = create((set) => ({
       isAuthenticated: !!currentToken || !!currentUser,
       error: null,
     });
+  },
+
+  refreshCurrentUser: async () => {
+    try {
+      const user = extractUser(await authService.getCurrentUser());
+      if (!user) return null;
+
+      const currentUser = get().user;
+      useAuthStore.getState().setAuth({ user: { ...currentUser, ...user } });
+      return user;
+    } catch {
+      // Keep the existing session intact if the background profile refresh fails.
+      return null;
+    }
   },
 
   signup: async (userData) => {

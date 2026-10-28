@@ -19,7 +19,7 @@ import {
 import { toast } from "react-hot-toast";
 import { adminService } from "../../api/services/adminService";
 
-const AdminVerificationSubpage = () => {
+const AdminVerificationSubpage = ({ initialUser = null, onNavigate }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [accountTypeFilter, setAccountTypeFilter] = useState("all");
@@ -236,6 +236,99 @@ const AdminVerificationSubpage = () => {
     fetchVerificationData();
   }, [fetchVerificationData]);
 
+  // If initialUser was passed (e.g. from Users table "Unverified" link), focus directly on that user's dossier
+  useEffect(() => {
+    if (!initialUser) return;
+
+    // Check if initialUser already exists in requests queue
+    const matched = requests.find((r) => r.userId === initialUser.id || r.userId === initialUser._id);
+    if (matched) {
+      setSelectedRequest(matched);
+      return;
+    }
+
+    // Build the request dossier from initialUser
+    const userReq = {
+      id: `#VR-${initialUser.id ? String(initialUser.id).slice(-5) : "88219"}`,
+      userId: initialUser.id || initialUser._id,
+      name: initialUser.name || "User",
+      initials: (initialUser.name || "U")
+        .split(" ")
+        .filter(Boolean)
+        .map((n) => n[0])
+        .join("")
+        .substring(0, 2)
+        .toUpperCase() || "US",
+      accountType: initialUser.role === "employer" ? "Client" : "Professional",
+      verificationType: "Identity & Professional Verification",
+      submitted: initialUser.joined || "Recently",
+      status: initialUser.verified === "verified" ? "approved" : "in_progress",
+      statusText: initialUser.verified === "verified" ? "Approved" : "In Progress",
+      details: {
+        name: initialUser.name || "User",
+        profession: initialUser.category || "Professional",
+        email: initialUser.email || "user@linkprosoft.com",
+        phone: initialUser.phone || "+234 800 000 0000",
+        location: initialUser.location || "Lagos, Nigeria",
+        submittedDate: initialUser.joined || "Recently",
+      },
+      documents: initialUser.documents || null,
+      idDocumentUrl: initialUser.idDocumentUrl || null,
+      idDocumentBackUrl: initialUser.idDocumentBackUrl || null,
+      selfieUrl: initialUser.selfieUrl || null,
+    };
+
+    setSelectedRequest(userReq);
+
+    // Fetch user dossier from backend if available to enrich with real uploaded documents
+    if (initialUser.id) {
+      adminService
+        .getUserById(initialUser.id)
+        .then((res) => {
+          const dossier = res?.data?.user || res?.data || res;
+          if (dossier) {
+            setSelectedRequest((prev) => {
+              if (!prev || prev.userId !== (initialUser.id || initialUser._id)) return prev;
+              const docUrl =
+                dossier.idDocumentUrl ||
+                dossier.verification?.idDocumentUrl ||
+                dossier.identityDocumentUrl ||
+                dossier.kyc?.idUrl;
+              const docBackUrl =
+                dossier.idDocumentBackUrl ||
+                dossier.verification?.idDocumentBackUrl;
+              const selfie =
+                dossier.selfieUrl ||
+                dossier.faceUrl ||
+                dossier.verification?.selfieUrl ||
+                dossier.kyc?.selfieUrl;
+
+              return {
+                ...prev,
+                details: {
+                  ...prev.details,
+                  name: dossier.fullName || dossier.name || prev.details.name,
+                  email: dossier.email || prev.details.email,
+                  phone: dossier.phone || dossier.phoneNumber || prev.details.phone,
+                  profession: dossier.profession || dossier.category || prev.details.profession,
+                  location: dossier.address || dossier.location || prev.details.location,
+                  submittedDate: dossier.createdAt
+                    ? new Date(dossier.createdAt).toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
+                    : prev.details.submittedDate,
+                },
+                idDocumentUrl: docUrl || prev.idDocumentUrl,
+                idDocumentBackUrl: docBackUrl || prev.idDocumentBackUrl,
+                selfieUrl: selfie || prev.selfieUrl,
+              };
+            });
+          }
+        })
+        .catch((e) => {
+          console.warn("[AdminVerificationSubpage] Failed to fetch additional user dossier:", e.message);
+        });
+    }
+  }, [initialUser, requests]);
+
   const statCards = [
     {
       id: "pending",
@@ -320,10 +413,15 @@ const AdminVerificationSubpage = () => {
             Verification Request {selectedRequest.id}
           </h1>
           <button
-            onClick={() => setSelectedRequest(null)}
+            onClick={() => {
+              setSelectedRequest(null);
+              if (initialUser && onNavigate) {
+                onNavigate("users");
+              }
+            }}
             className="text-xs font-bold text-[#016EA6] hover:underline cursor-pointer border-none bg-transparent"
           >
-            ← Back to all requests
+            ← {initialUser ? "Back to Users" : "Back to all requests"}
           </button>
         </div>
 
@@ -406,14 +504,14 @@ const AdminVerificationSubpage = () => {
                 {/* ID Card Front */}
                 <div className="bg-gray-50/70 rounded-2xl p-3.5 border-none space-y-2">
                   <img
-                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=300&auto=format&fit=crop&q=80"
+                    src={selectedRequest.idDocumentUrl || selectedRequest.documents?.idFront || "https://images.unsplash.com/photo-1544717305-2782549b5136?w=300&auto=format&fit=crop&q=80"}
                     alt="Government ID Front"
                     className="w-full h-32 object-cover rounded-xl shadow-xs"
                   />
                   <div className="flex items-center justify-between pt-1">
                     <div>
                       <span className="text-xs font-bold text-gray-800 block">Government ID</span>
-                      <span className="text-[10px] font-medium text-gray-400 block">Passport 2.6 mb</span>
+                      <span className="text-[10px] font-medium text-gray-400 block">Identity Document</span>
                     </div>
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 stroke-[2]" />
                   </div>
@@ -422,14 +520,14 @@ const AdminVerificationSubpage = () => {
                 {/* ID Card Back */}
                 <div className="bg-gray-50/70 rounded-2xl p-3.5 border-none space-y-2">
                   <img
-                    src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=300&auto=format&fit=crop&q=80"
+                    src={selectedRequest.idDocumentBackUrl || selectedRequest.documents?.idBack || selectedRequest.idDocumentUrl || "https://images.unsplash.com/photo-1544717305-2782549b5136?w=300&auto=format&fit=crop&q=80"}
                     alt="Government ID Back"
                     className="w-full h-32 object-cover rounded-xl shadow-xs"
                   />
                   <div className="flex items-center justify-between pt-1">
                     <div>
                       <span className="text-xs font-bold text-gray-800 block">Government ID</span>
-                      <span className="text-[10px] font-medium text-gray-400 block">Passport 2.6 mb</span>
+                      <span className="text-[10px] font-medium text-gray-400 block">Back / Secondary Document</span>
                     </div>
                     <CheckCircle2 className="w-4 h-4 text-emerald-500 stroke-[2]" />
                   </div>
@@ -448,12 +546,12 @@ const AdminVerificationSubpage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"
+                  src={selectedRequest.selfieUrl || selectedRequest.documents?.selfie || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"}
                   alt="Selfie 1"
                   className="w-full h-44 sm:h-52 object-cover rounded-2xl border-none shadow-xs"
                 />
                 <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"
+                  src={selectedRequest.selfieUrl || selectedRequest.documents?.selfie || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&auto=format&fit=crop&q=80"}
                   alt="Selfie 2"
                   className="w-full h-44 sm:h-52 object-cover rounded-2xl border-none shadow-xs"
                 />
@@ -562,10 +660,13 @@ const AdminVerificationSubpage = () => {
                   onClick={() => {
                     setShowSuccessModal(false);
                     setSelectedRequest(null);
+                    if (initialUser && onNavigate) {
+                      onNavigate("users");
+                    }
                   }}
                   className="w-full py-3.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold text-sm rounded-full transition-all cursor-pointer border-none"
                 >
-                  Go back home
+                  {initialUser ? "Go back to Users" : "Go back to Requests"}
                 </button>
               </div>
             </div>

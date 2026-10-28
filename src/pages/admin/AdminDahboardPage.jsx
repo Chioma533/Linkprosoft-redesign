@@ -31,8 +31,15 @@ const AdminDahboardPage = () => {
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("jobs"); // default view tab
+  const [tabParams, setTabParams] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+
+  const handleNavigate = (tab, params = null) => {
+    setActiveTab(tab);
+    setTabParams(params);
+    setIsSidebarOpen(false);
+  };
 
   // System admin notifications
   const [notifications, setNotifications] = useState([
@@ -85,23 +92,23 @@ const AdminDahboardPage = () => {
   const renderActiveSubpage = () => {
     switch (activeTab) {
       case "overview":
-        return <AdminOverviewSubpage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <AdminOverviewSubpage onNavigate={handleNavigate} />;
       case "users":
-        return <AdminUsersSubpage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <AdminUsersSubpage onNavigate={handleNavigate} />;
       case "verifications":
-        return <AdminVerificationSubpage />;
+        return <AdminVerificationSubpage initialUser={tabParams?.user} onNavigate={handleNavigate} />;
       case "jobs":
-        return <AdminJobsSubpage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <AdminJobsSubpage onNavigate={handleNavigate} />;
       case "disputes":
-        return <AdminDisputesSubpage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <AdminDisputesSubpage onNavigate={handleNavigate} />;
       case "payments":
       case "wallet":
       case "finance":
-        return <AdminPaymentsSubpage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <AdminPaymentsSubpage onNavigate={handleNavigate} />;
       case "settings":
         return <AdminSettingsSubpage />;
       default:
-        return <AdminJobsSubpage onNavigate={(tab) => setActiveTab(tab)} />;
+        return <AdminJobsSubpage onNavigate={handleNavigate} />;
     }
   };
 

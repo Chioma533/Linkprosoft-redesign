@@ -7,6 +7,8 @@ import LoginPage from "./pages/auth/LoginPage";
 import ProfessionalDashboardPage from "./pages/professionals/ProfessionalDashboardPage";
 import PrivateRoutes from "./routes/PrivateRoutes";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuthStore } from "./store/authStore";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import EmployerDashboardPage from "./pages/employer/EmployerDashboardPage";
@@ -22,6 +24,12 @@ import VerificationPage from "./pages/verification/VerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
 
 const App = () => {
+  const { token, refreshCurrentUser } = useAuthStore();
+
+  useEffect(() => {
+    if (token) refreshCurrentUser();
+  }, [token, refreshCurrentUser]);
+
   return (
     <AuthProvider>
       <Router>

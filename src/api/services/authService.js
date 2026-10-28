@@ -56,7 +56,7 @@ export const authService = {
   },
 
   getCurrentUser: async () => {
-    const response = await axiosInstance.get(API_PATHS.PROFILE.GET_PROFILE);
+    const response = await axiosInstance.get(API_PATHS.AUTH.ME);
     return response.data;
   },
 

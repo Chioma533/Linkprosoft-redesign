@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, Calendar, Edit3, Briefcase, Award, Star, ShieldCheck, Check, Plus, X, Upload, ExternalLink } from "lucide-react";
+import { MapPin, Calendar, Edit3, Briefcase, Award, Star, Check, Plus, X, Upload, ExternalLink } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { profileService } from "../../api/services/profileService";
 import AddSkillModal from "../../components/professional/AddSkillModal";
 import coverImg from "../../assets/images/IMG-20260704-WA0194.jpg";
 import avatarImg from "../../assets/images/handyman.jfif";
 import { toast } from "react-hot-toast";
+import VerificationBadge from "../../components/common/VerificationBadge";
 
 const ProfileSubpage = () => {
   const { user } = useAuthStore();
@@ -181,10 +182,7 @@ const ProfileSubpage = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
-                <span className="px-2 py-0.5 bg-blue-50 text-[#016EA6] text-[10px] font-bold rounded-full flex items-center gap-1">
-                  <ShieldCheck className="w-3 h-3" />
-                  <span>Pro</span>
-                </span>
+                <VerificationBadge user={user} />
               </div>
               <p className="text-xs text-gray-500 mt-1 font-semibold">
                 {displayProfession}

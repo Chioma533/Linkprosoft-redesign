@@ -11,6 +11,7 @@ import {
 } from "react-icons/fi";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
+import VerificationBadge from "../../components/common/VerificationBadge";
 import NotificationIcon from "../../components/icons/NotificationIcon";
 
 /**
@@ -131,9 +132,10 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
               {profileDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50">
                   <div className="px-4 py-2.5 border-b border-gray-50">
-                    <p className="text-sm font-semibold text-gray-900 leading-none truncate">
-                      {userName}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-sm font-semibold text-gray-900 leading-none truncate">{userName}</p>
+                      <VerificationBadge user={user} />
+                    </div>
                     <p className="text-xs text-gray-400 mt-1 capitalize truncate">
                       Professional
                     </p>

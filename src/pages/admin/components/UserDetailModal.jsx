@@ -46,10 +46,10 @@ const UserDetailModal = ({ user, onClose, onToggleStatus }) => {
           {/* Avatar and basic info */}
           <div className="flex items-center gap-4 border-b border-gray-50 pb-5">
             <div className="w-14 h-14 rounded-full bg-blue-50 text-[#016EA6] flex items-center justify-center font-extrabold text-2xl shrink-0">
-              {user.name.charAt(0)}
+              {(user?.name || user?.fullName || "User").charAt(0).toUpperCase()}
             </div>
             <div>
-              <h2 className="text-lg font-bold text-gray-900">{user.name}</h2>
+              <h2 className="text-lg font-bold text-gray-900">{user?.name || user?.fullName || "User"}</h2>
               <span className={`inline-block px-2 py-0.5 mt-1 rounded text-[9px] uppercase font-bold ${
                 user.role === "employer" ? "bg-purple-50 text-purple-600" : "bg-blue-50 text-blue-600"
               }`}>

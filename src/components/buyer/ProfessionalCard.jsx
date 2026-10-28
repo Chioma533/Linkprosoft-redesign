@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FiStar, FiBookmark } from "react-icons/fi";
+import VerificationBadge from "../common/VerificationBadge";
 
 /**
  * ProfessionalCard — matches the Figma design for the "Default Buyer Screen"
@@ -18,6 +19,7 @@ const ProfessionalCard = ({
   isSelected = false,
   onContact,
   onBookmark,
+  user,
 }) => {
   const [bookmarked, setBookmarked] = useState(isBookmarked);
   const [isContacting, setIsContacting] = useState(false);
@@ -91,9 +93,12 @@ const ProfessionalCard = ({
             </div>
             {/* Name + Role */}
             <div className="min-w-0">
-              <h3 className="text-base font-semibold text-gray-900 leading-tight truncate">
-                {name}
-              </h3>
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-base font-semibold text-gray-900 leading-tight truncate">
+                  {name}
+                </h3>
+                <VerificationBadge user={user} />
+              </div>
               <span className="text-sm font-medium text-[#016EA6] mt-0.5 block truncate">
                 {role}
               </span>

@@ -633,6 +633,7 @@ const PublicBuyerScreen = () => {
                     reviewCount={pro.reviewCount ?? pro.totalReviews ?? 0}
                     bio={pro.bio || "No bio available"}
                     pricePerDay={pro.pricePerDay ?? pro.hourlyRate ?? 0}
+                    user={{ ...pro, ...pro.user }}
                     isBookmarked={false}
                     isSelected={idx === 0 && safeCurrentPage === 1}
                     onContact={() => navigate("/login")}

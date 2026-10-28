@@ -17,7 +17,7 @@ const AdminUsersSubpage = ({ onNavigate }) => {
     try {
       const [metricsRes, usersRes] = await Promise.allSettled([
         adminService.getUserMetrics(),
-        adminService.getUsers({ page: 1, limit: 20 }),
+        adminService.getUsers({ page: 1, limit: 100 }),
       ]);
 
       if (metricsRes.status === "fulfilled" && metricsRes.value?.data) {
@@ -27,18 +27,42 @@ const AdminUsersSubpage = ({ onNavigate }) => {
       if (usersRes.status === "fulfilled" && usersRes.value?.data) {
         const items = usersRes.value.data.items || usersRes.value.data.users || usersRes.value.data;
         if (Array.isArray(items) && items.length > 0) {
-          const normalized = items.map((u) => ({
-            id: u.id || u._id || `U-${Math.floor(Math.random() * 1000)}`,
-            name: u.name || `${u.firstName || ""} ${u.lastName || ""}`.trim() || "User",
-            email: u.email || "",
-            role: u.role || "professional",
-            category: u.category || u.profession || "Plumbing",
-            status: u.status || (u.isSuspended ? "suspended" : "active"),
-            verified: u.isVerified || u.verificationStatus === "approved" || u.verificationStatus === "VERIFIED" ? "verified" : (u.verificationStatus || "unverified"),
-            joined: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase() : "",
-            phone: u.phone || u.phoneNumber || "+234 800 000 0000",
-            bio: u.bio || u.description || "Linkprosoft platform member.",
-          }));
+          const normalized = items.map((u) => {
+            const resolvedName =
+              u.name ||
+              u.fullName ||
+              u.full_name ||
+              `${u.firstName || u.first_name || ""} ${u.lastName || u.last_name || ""}`.trim() ||
+              u.profile?.fullName ||
+              u.profile?.name ||
+              u.user?.fullName ||
+              u.user?.name ||
+              u.username ||
+              (u.email ? u.email.split("@")[0] : "") ||
+              "User";
+
+            return {
+              id: u.id || u._id || `U-${Math.floor(Math.random() * 1000)}`,
+              name: resolvedName,
+              email: u.email || "",
+              role: u.role || "professional",
+              category: u.category || u.profession || u.profile?.category || "Plumbing",
+              status: u.status || (u.isSuspended ? "suspended" : "active"),
+              verified:
+                u.isVerified === true ||
+                u.verification_status === "verified" ||
+                u.verificationStatus === "verified" ||
+                u.verificationStatus === "approved" ||
+                u.verificationStatus === "VERIFIED"
+                  ? "verified"
+                  : u.verification_status === "pending" || u.verificationStatus === "pending"
+                  ? "pending"
+                  : (u.verification_status || u.verificationStatus || "unverified"),
+              joined: u.createdAt ? new Date(u.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).toLowerCase() : "",
+              phone: u.phone || u.phoneNumber || "+234 800 000 0000",
+              bio: u.bio || u.description || "Linkprosoft platform member.",
+            };
+          });
           setUsers(normalized);
         } else {
           setUsers([]);
@@ -181,6 +205,7 @@ const AdminUsersSubpage = ({ onNavigate }) => {
         users={users}
         isLoading={isLoading}
         onSelectUser={(u) => setSelectedUser(u)}
+        onVerifyUser={(u) => onNavigate && onNavigate("verifications", { user: u })}
         onToggleStatus={toggleUserStatus}
       />
 

@@ -169,7 +169,7 @@ const ApplicationsSubpage = () => {
       <DashboardStats stats={stats} />
 
       {/* Applications list card */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between">
+      <div className="professional-applications-card bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-6 gap-3">
             <div className="flex items-center gap-2.5">
@@ -309,7 +309,7 @@ const ApplicationsSubpage = () => {
             </>
           ) : (
             /* Modern Empty State */
-            <div className="py-14 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+            <div className="professional-dashboard-empty-state py-14 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
               <div className="text-[#016EA6] mb-3 flex items-center justify-center">
                 <FiFileText className="w-8 h-8 stroke-[2]" />
               </div>
@@ -449,4 +449,3 @@ const ApplicationsSubpage = () => {
 };
 
 export default ApplicationsSubpage;
-

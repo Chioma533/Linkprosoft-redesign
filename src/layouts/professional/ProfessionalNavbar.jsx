@@ -13,6 +13,7 @@ import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import VerificationBadge from "../../components/common/VerificationBadge";
 import NotificationIcon from "../../components/icons/NotificationIcon";
+import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 
 /**
  * ProfessionalNavbar — top nav for the DefaultProfessionalScreen.
@@ -98,7 +99,7 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
 
             <div
               id="nav-notifications-btn"
-              className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all cursor-pointer"
+              className="relative flex items-center justify-center p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all cursor-pointer"
               title="Notifications"
             >
               <NotificationIcon size={20} />
@@ -162,11 +163,12 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
                 </div>
               )}
             </div>
+            <ThemeSwitcher />
           </div>
 
           {/* Mobile Navigation Header (Figma Mobile Design: Menu Icon | Browse Jobs | Messages | Avatar) */}
           <div className="flex md:hidden items-center justify-between w-full h-full">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <button
                 id="mobile-menu-btn"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -179,12 +181,13 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
                   <FiMenu className="w-6 h-6 text-gray-700" />
                 )}
               </button>
-              <h1 className="text-base font-bold text-gray-900 tracking-tight">
+              <h1 className="text-base font-bold text-gray-900 tracking-tight truncate">
                 Browse Jobs
               </h1>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 shrink-0">
+              <ThemeSwitcher />
               <button
                 id="mobile-messages-btn"
                 onClick={() => navigate("/professional/dashboard")}

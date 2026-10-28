@@ -88,7 +88,10 @@ const ProfessionalBottomNav = ({ activeTab = "browse-jobs" }) => {
 
       {/* iOS Home Indicator Bar */}
       <div className="pb-1 pt-0.5 flex justify-center">
-        <div className="w-32 h-1 bg-gray-900/80 rounded-full" />
+        <div
+          className="w-32 h-1 rounded-full"
+          style={{ backgroundColor: "var(--app-text)" }}
+        />
       </div>
     </div>
   );

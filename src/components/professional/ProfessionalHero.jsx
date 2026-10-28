@@ -2,17 +2,21 @@
 import React from "react";
 import { FiAlertCircle, FiX } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { useTheme } from "../../context/useTheme";
 
 const ProfessionalHero = ({ verificationDismissed, onDismissVerification }) => {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
   return (
     <section
       id="professional-hero-section"
-      className="relative overflow-hidden bg-cover bg-center bg-no-repeat"
+      className="relative overflow-hidden bg-cover bg-center bg-no-repeat before:absolute before:inset-0 before:bg-black/45"
       style={{
         backgroundImage: "url('/professionalhero.jpg')",
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-14">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-14">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
           {/* Left: headline + verification banner */}
           <div className="flex-1 max-w-full sm:max-w-xl">
@@ -30,20 +34,26 @@ const ProfessionalHero = ({ verificationDismissed, onDismissVerification }) => {
               <div className="mt-0 flex items-end justify-between gap-2 sm:hidden z-10">
                 <div
                   id="verification-banner"
-                  className="w-62 shrink-0 rounded-md border border-[#ff8d28]/30 bg-[#fff4ea] py-2.5 px-1.5"
+                  className={`w-62 shrink-0 rounded-md border border-orange-500/30 py-2.5 px-1.5 ${
+                    isDark ? "bg-[#3b2d21]" : "bg-[#fff4ea]"
+                  }`}
                 >
                   <div className="flex items-center justify-between gap-1.5">
                     <div className="flex min-w-0 items-center gap-1.5">
                       <FiAlertCircle className="h-3 w-3 shrink-0 translate-y-[0.5px] text-orange-500" />
 
-                      <p className="text-[7.14px] font-semibold leading-[1.1] tracking-[-0.01em] text-[#59310e]">
+                      <p className={`text-[7.14px] font-semibold leading-[1.1] tracking-[-0.01em] ${
+                        isDark ? "text-orange-100" : "text-[#59310e]"
+                      }`}>
                         Verification Required
                       </p>
                     </div>
                   </div>
 
                   <div className="mt-0 ml-1.5 flex items-center justify-between gap-1.5">
-                    <p className="flex-1 min-w-0 ml-3 self-center text-[5.5px] leading-[1.1] tracking-[-0.01em] text-[#ff8d28]">
+                    <p className={`flex-1 min-w-0 ml-3 self-center text-[5.5px] leading-[1.1] tracking-[-0.01em] ${
+                      isDark ? "text-orange-300" : "text-orange-700"
+                    }`}>
                       Complete your verification to apply for jobs and receive
                       payments securely.
                     </p>
@@ -75,16 +85,22 @@ const ProfessionalHero = ({ verificationDismissed, onDismissVerification }) => {
               <div className="hidden sm:block">
                 <div
                   id="verification-banner"
-                  className="mt-6 flex max-w-md items-center gap-3 rounded-xl border border-[#ff8d28]/30 bg-[#fff4ea] p-3 px-5 py-4"
+                  className={`mt-6 flex max-w-md items-center gap-3 rounded-xl border border-orange-500/30 p-3 px-5 py-4 ${
+                    isDark ? "bg-[#3b2d21]" : "bg-[#fff4ea]"
+                  }`}
                 >
                   <FiAlertCircle className="h-5 w-5 shrink-0 text-orange-500" />
 
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[#59310e]">
+                    <p className={`text-xs font-semibold ${
+                      isDark ? "text-orange-100" : "text-[#59310e]"
+                    }`}>
                       Verification Required
                     </p>
 
-                    <p className="mt-0.5 text-[11px] leading-relaxed text-[#ff8d28]">
+                    <p className={`mt-0.5 text-[11px] leading-relaxed ${
+                      isDark ? "text-orange-300" : "text-orange-700"
+                    }`}>
                       Complete your verification to apply for jobs and receive
                       payments securely.
                     </p>

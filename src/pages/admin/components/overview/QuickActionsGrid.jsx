@@ -44,7 +44,7 @@ const QuickActionsGrid = ({ onNavigate, onOpenAnnouncement }) => {
             <button
               key={act.id}
               onClick={act.onClick}
-              className="bg-[#EAF6FB] hover:bg-[#DCF1FA] active:bg-[#CEEAFA] border border-[#D0E7F3] rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-2.5 transition-all duration-200 group cursor-pointer relative overflow-hidden select-none"
+              className="admin-overview-hover bg-[#EAF6FB] hover:bg-[#DCF1FA] active:bg-[#CEEAFA] border border-[#D0E7F3] rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center text-center gap-2.5 transition-all duration-200 group cursor-pointer relative overflow-hidden select-none"
             >
               {/* Corner accent tag line matching design details */}
               <div className="w-6 h-6 absolute top-1 left-1 border-t-2 border-l-2 border-[#A3D5EC] rounded-tl-lg opacity-70" />

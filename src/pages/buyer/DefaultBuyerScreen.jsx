@@ -65,7 +65,7 @@ const DefaultBuyerScreen = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans pb-24 md:pb-12">
+    <div className="employer-homepage min-h-screen bg-gray-50 font-sans pb-24 md:pb-12">
       <BuyerNavbar activePage="browse" />
 
       <BuyerHero

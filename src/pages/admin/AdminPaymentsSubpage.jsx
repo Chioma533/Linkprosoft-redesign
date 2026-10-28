@@ -234,7 +234,7 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
                       </tr>
                     ) : (
                       escrowRecords.map((item, idx) => (
-                        <tr key={idx} className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
+                        <tr key={idx} className="admin-hover-row admin-transaction-row border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
                           <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">{item.id}</td>
                           <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.job}</td>
                           <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.client}</td>
@@ -332,9 +332,14 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
               </div>
             </div>
 
-            {/* Desktop Table View */}
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left border-none">
+            {/* Transactions Table */}
+            <div
+              className="w-full overflow-x-auto overscroll-x-contain"
+              role="region"
+              aria-label="Transactions table"
+              tabIndex={0}
+            >
+              <table className="w-full min-w-[980px] text-left border-none">
                 <thead>
                   <tr className="border-none text-xs font-semibold text-gray-400">
                     <th className="py-3.5 px-3">TRX ID</th>
@@ -365,7 +370,7 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
                     </tr>
                   ) : (
                     transactions.map((item, idx) => (
-                      <tr key={idx} className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
+                      <tr key={idx} className="admin-hover-row admin-transaction-row border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer">
                         <td className="py-3.5 px-3 text-xs sm:text-sm font-bold text-gray-800">{item.id}</td>
                         <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.user}</td>
                         <td className="py-3.5 px-3 text-xs font-semibold text-gray-700">{item.job}</td>
@@ -387,37 +392,6 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
                   )}
                 </tbody>
               </table>
-            </div>
-
-            {/* Mobile View */}
-            <div className="md:hidden space-y-3">
-              {isLoading ? (
-                <div className="text-center py-8 text-gray-400 text-xs font-medium flex items-center justify-center gap-2">
-                  <Loader2 className="w-5 h-5 animate-spin text-[#016EA6]" />
-                  <span>Loading transactions...</span>
-                </div>
-              ) : (
-                transactions.map((item, idx) => (
-                  <div key={idx} className="bg-gray-50/40 p-4 rounded-2xl space-y-2.5 border-none">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-gray-800 text-sm">{item.id} - {item.job}</h4>
-                      <button className="p-1 text-gray-500 hover:text-[#016EA6]">
-                        <Eye className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between text-xs font-semibold text-gray-600">
-                      <span>User: {item.user}</span>
-                      <span>Type: {item.type}</span>
-                    </div>
-                    <div className="flex items-center justify-between pt-1">
-                      <span className="font-extrabold text-gray-900 text-sm">{item.amount}</span>
-                      <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#E6F9F0] text-[#00CC66]">
-                        {item.status}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
             </div>
 
             {/* Pagination Footer */}

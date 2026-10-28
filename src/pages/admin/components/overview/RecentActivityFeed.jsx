@@ -26,7 +26,7 @@ const RecentActivityFeed = ({ onNavigate, onViewAllActivities, activitiesData, i
           activities.map((item) => (
             <div
               key={item.id}
-              className="bg-gray-50/40 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors hover:bg-gray-50/80"
+              className="admin-overview-hover bg-gray-50/40 rounded-2xl p-3.5 sm:p-4 flex items-center justify-between gap-3 transition-colors hover:bg-gray-50/80"
             >
             {/* Left User avatar & action info */}
             <div className="flex items-center gap-3 min-w-0">

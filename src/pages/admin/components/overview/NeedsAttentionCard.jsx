@@ -57,7 +57,7 @@ const NeedsAttentionCard = ({ onNavigate, onViewAllAlerts, alertsData }) => {
             <div
               key={item.id}
               onClick={() => onNavigate && onNavigate(item.targetTab)}
-              className={`${item.bgColor} border ${item.borderColor} ${item.hoverBorder} rounded-2xl p-3.5 sm:p-4 flex items-center justify-between cursor-pointer transition-all duration-200 group select-none`}
+              className={`admin-overview-hover admin-needs-attention-item admin-needs-attention-${item.id} ${item.bgColor} border ${item.borderColor} ${item.hoverBorder} rounded-2xl p-3.5 sm:p-4 flex items-center justify-between cursor-pointer transition-all duration-200 group select-none`}
             >
               <div className="flex items-center gap-3">
                 <Icon className={`w-5 h-5 ${item.textColor} stroke-[1.8] shrink-0 group-hover:scale-105 transition-transform`} />
@@ -76,7 +76,7 @@ const NeedsAttentionCard = ({ onNavigate, onViewAllAlerts, alertsData }) => {
       {/* View All Critical Alerts Footer Button */}
       <button
         onClick={onViewAllAlerts}
-        className="text-[#016EA6] hover:text-[#015582] text-xs sm:text-[13px] font-bold text-center mt-4 pt-1 cursor-pointer transition-colors block w-full hover:underline"
+        className="admin-needs-attention-link text-[#016EA6] hover:text-[#015582] text-xs sm:text-[13px] font-bold text-center mt-4 pt-1 cursor-pointer transition-colors block w-full hover:underline"
       >
         View All Critical Alerts
       </button>

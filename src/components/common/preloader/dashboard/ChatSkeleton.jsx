@@ -15,7 +15,7 @@
 
 import { Bar, Circle, Pill } from "./DashboardShellSkeleton";
 
-const shBg   = "linear-gradient(90deg,#EAEFF3 25%,#F8FAFB 50%,#EAEFF3 75%)";
+const shBg   = "linear-gradient(90deg,var(--dashboard-skeleton-shimmer-base) 25%,var(--dashboard-skeleton-shimmer-highlight) 50%,var(--dashboard-skeleton-shimmer-base) 75%)";
 const shSize = "1600px 100%";
 const shAnim = "sk-shimmer 1.8s ease-in-out infinite";
 
@@ -25,7 +25,7 @@ const ContactRow = ({ active = false, delay = "0s" }) => (
     display: "flex", alignItems: "center", gap: 12,
     padding: "14px 16px",
     background: active ? "#EEF5F9" : "transparent",
-    borderBottom: "1px solid #F5F7FA",
+    borderBottom: "1px solid var(--dashboard-skeleton-border)",
   }}>
     <Circle size={40} delay={delay} />
     <div style={{ flex: 1, minWidth: 0 }}>
@@ -58,7 +58,7 @@ const SentBubble = ({ w = "45%", delay = "0s" }) => (
     <div style={{
       maxWidth: w, padding: "12px 16px",
       borderRadius: "16px 0 16px 16px",
-      background: "#E6F1F6",
+      background: "var(--dashboard-skeleton-muted)",
       height: 38,
       width: w,
     }} />
@@ -68,14 +68,14 @@ const SentBubble = ({ w = "45%", delay = "0s" }) => (
 /* ── Main export ────────────────────────────────────────────────────────── */
 const ChatSkeleton = () => (
   <div style={{
-    background: "#fff", borderRadius: 24, border: "1px solid #F0F4F6",
+    background: "var(--dashboard-skeleton-surface)", borderRadius: 24, border: "1px solid var(--dashboard-skeleton-border)",
     display: "flex", overflow: "hidden",
     height: "calc(100vh - 160px)", /* fills the main content area */
   }}>
 
     {/* LEFT: Contacts list — w-80 = 320px */}
     <div style={{
-      width: 300, minWidth: 300, borderRight: "1px solid #F0F4F6",
+      width: 300, minWidth: 300, borderRight: "1px solid var(--dashboard-skeleton-border)",
       display: "flex", flexDirection: "column",
     }}>
       {/* Search */}
@@ -98,7 +98,7 @@ const ChatSkeleton = () => (
       {/* Header */}
       <div style={{
         padding: "16px 24px",
-        borderBottom: "1px solid #F0F4F6",
+        borderBottom: "1px solid var(--dashboard-skeleton-border)",
         display: "flex", alignItems: "center", gap: 14, flexShrink: 0,
       }}>
         <Circle size={42} />
@@ -134,7 +134,7 @@ const ChatSkeleton = () => (
 
       {/* Message input */}
       <div style={{
-        padding: "14px 20px", borderTop: "1px solid #F0F4F6",
+        padding: "14px 20px", borderTop: "1px solid var(--dashboard-skeleton-border)",
         display:"flex", alignItems:"center", gap:12, flexShrink:0,
       }}>
         <div style={{

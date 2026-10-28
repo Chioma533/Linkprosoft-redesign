@@ -8,16 +8,12 @@ import { debugLog } from "../utils/debugLogger";
 import { DashboardContentSkeleton } from "../components/common/preloader/DashboardLoadingScreen";
 
 const DashboardLayout = ({ children }) => {
-  const { activeTab, setActiveTab, fetchDashboardData, isLoading } = useDashboardStore();
+  const { activeTab, setActiveTab, fetchDashboardData, isLoading, error } = useDashboardStore();
   const { user } = useAuthStore();
   const role = user?.role || "professional";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  /* ── Per-tab skeleton display ────────────────────────────────────────── *
-   * showSkeleton starts true (skeleton on first paint) and is reset to    *
-   * true every time the user switches tabs. A 2.5 s timer then clears it. *
-   * This guarantees every subpage — initial load AND every tab switch —   *
-   * shows its matching skeleton for at least 2.5 s before content.        */
+  // The tab timer is retained only for employers; professionals follow request state.
   const [showSkeleton, setShowSkeleton] = useState(true);
 
   useEffect(() => {
@@ -38,10 +34,17 @@ const DashboardLayout = ({ children }) => {
 
   /* Fires on mount (initial tab) AND on every subsequent tab switch */
   useEffect(() => {
+    if (role === "professional") {
+      setShowSkeleton(false);
+      return undefined;
+    }
+
     setShowSkeleton(true);
     const timer = setTimeout(() => setShowSkeleton(false), 2500);
     return () => clearTimeout(timer);   // cancel if tab changes before 2.5 s
-  }, [activeTab]);
+  }, [activeTab, role]);
+
+  const shouldShowSkeleton = isLoading || (role !== "professional" && showSkeleton);
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -76,8 +79,20 @@ const DashboardLayout = ({ children }) => {
 
         {/* Viewport Content - renders subpage skeleton or real content */}
         <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-w-7xl w-full mx-auto pb-24 md:pb-8">
-          {(showSkeleton || isLoading) ? (
+          {shouldShowSkeleton ? (
             <DashboardContentSkeleton subpage={activeTab} />
+          ) : error && role === "professional" ? (
+            <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center">
+              <p className="text-sm font-semibold text-gray-800">We couldn’t load your dashboard.</p>
+              <p className="mt-1 text-xs text-gray-500">{error}</p>
+              <button
+                type="button"
+                onClick={fetchDashboardData}
+                className="mt-4 rounded-full bg-[#016EA6] px-4 py-2 text-xs font-semibold text-white transition-colors hover:bg-[#061EA6]"
+              >
+                Try again
+              </button>
+            </div>
           ) : (
             children
           )}

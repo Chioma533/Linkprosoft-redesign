@@ -174,7 +174,7 @@ const UsersTable = ({ users = [], onSelectUser, onVerifyUser, onToggleStatus, is
                 return (
                   <tr
                     key={user.id}
-                    className="border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer"
+                    className="admin-hover-row admin-user-row border-none hover:bg-gray-50/70 rounded-2xl transition-colors group cursor-pointer"
                   >
                     {/* User avatar and name */}
                     <td className="py-3.5 px-3">

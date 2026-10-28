@@ -3,11 +3,11 @@ import { Bar, Circle, Pill, useIsMobile } from "./DashboardShellSkeleton";
 
 const StatCardSk = ({ delay = "0s" }) => (
   <div style={{
-    background:"#fff", borderRadius:24, border:"1px solid #F0F4F6",
+    background:"var(--dashboard-skeleton-surface)", borderRadius:24, border:"1px solid var(--dashboard-skeleton-border)",
     padding:"20px", display:"flex", alignItems:"center", gap:16,
   }}>
     <div style={{ width:40, height:40, borderRadius:12,
-      background:"#EAF1F6", flexShrink:0 }} />
+      background:"var(--dashboard-skeleton-muted)", flexShrink:0 }} />
     <div style={{ flex:1 }}>
       <Bar w="55%" h={11} r={6} delay={delay} />
       <Bar w="38%" h={20} r={8} mt={8} delay={delay} />
@@ -16,7 +16,7 @@ const StatCardSk = ({ delay = "0s" }) => (
 );
 
 const TableRow = ({ cols = 5, delay = "0s" }) => (
-  <tr style={{ borderBottom:"1px solid #F5F7FA" }}>
+  <tr style={{ borderBottom:"1px solid var(--dashboard-skeleton-border)" }}>
     {Array.from({ length: cols }).map((_, i) => (
       <td key={i} style={{ padding:"14px 0", paddingRight:16 }}>
         <Bar w={i === 0 ? 70 : i === 1 ? "85%" : i === 2 ? 80 : i === 3 ? 60 : 72}
@@ -28,7 +28,7 @@ const TableRow = ({ cols = 5, delay = "0s" }) => (
 
 const MessageRow = ({ delay = "0s" }) => (
   <div style={{ display:"flex", alignItems:"center", gap:12, padding:"10px 0",
-    borderBottom:"1px solid #F5F7FA" }}>
+    borderBottom:"1px solid var(--dashboard-skeleton-border)" }}>
     <Circle size={36} delay={delay} />
     <div style={{ flex:1 }}>
       <Bar w="50%" h={11} r={6} delay={delay} />
@@ -40,7 +40,7 @@ const MessageRow = ({ delay = "0s" }) => (
 
 const NotifRow = ({ delay = "0s" }) => (
   <div style={{ display:"flex", alignItems:"flex-start", gap:12, padding:"10px 0",
-    borderBottom:"1px solid #F5F7FA" }}>
+    borderBottom:"1px solid var(--dashboard-skeleton-border)" }}>
     <div style={{ width:8, height:8, borderRadius:"50%",
       background:"#016EA6", flexShrink:0, marginTop:3 }} />
     <div style={{ flex:1 }}>
@@ -52,7 +52,7 @@ const NotifRow = ({ delay = "0s" }) => (
 
 const PerfRow = ({ delay = "0s" }) => (
   <div style={{ display:"flex", alignItems:"center", gap:16,
-    background:"#F9FAFB", padding:12, borderRadius:16, marginBottom:12 }}>
+    background:"var(--dashboard-skeleton-muted)", padding:12, borderRadius:16, marginBottom:12 }}>
     <Circle size={40} delay={delay} />
     <div style={{ flex:1 }}>
       <Bar w="50%" h={11} r={6} delay={delay} />
@@ -63,15 +63,15 @@ const PerfRow = ({ delay = "0s" }) => (
 
 const OverviewSkeletonMobile = () => (
   <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-    <div style={{ background:"#fff", borderRadius:18, border:"1px solid #F0F4F6", padding:16 }}>
+    <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:18, border:"1px solid var(--dashboard-skeleton-border)", padding:16 }}>
       <Bar w={180} h={22} r={8} />
       <Bar w={120} h={10} r={5} mt={8} delay="0.05s" />
     </div>
 
     <div style={{ display:"grid", gridTemplateColumns:"repeat(2, minmax(0, 1fr))", gap:12 }}>
       {["0s","0.05s","0.10s","0.15s"].map((d, i) => (
-        <div key={i} style={{ background:"#fff", borderRadius:16, border:"1px solid #F0F4F6", padding:12, display:"flex", alignItems:"center", gap:10 }}>
-          <div style={{ width:32, height:32, borderRadius:10, background:"#EAF1F6", flexShrink:0 }} />
+        <div key={i} style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:16, border:"1px solid var(--dashboard-skeleton-border)", padding:12, display:"flex", alignItems:"center", gap:10 }}>
+          <div style={{ width:32, height:32, borderRadius:10, background:"var(--dashboard-skeleton-muted)", flexShrink:0 }} />
           <div style={{ flex:1 }}>
             <Bar w="60%" h={9} r={5} delay={d} />
             <Bar w="40%" h={14} r={6} mt={6} delay={d} />
@@ -80,13 +80,13 @@ const OverviewSkeletonMobile = () => (
       ))}
     </div>
 
-    <div style={{ background:"#fff", borderRadius:18, border:"1px solid #F0F4F6", padding:16 }}>
+    <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:18, border:"1px solid var(--dashboard-skeleton-border)", padding:16 }}>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:12 }}>
         <Bar w={118} h={12} r={6} />
         <Pill w={52} h={24} delay="0.04s" />
       </div>
       {["0s","0.05s","0.10s","0.15s"].map((d, i) => (
-        <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0", borderBottom:i < 3 ? "1px solid #F5F7FA" : "none" }}>
+        <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0", borderBottom:i < 3 ? "1px solid var(--dashboard-skeleton-border)" : "none" }}>
           <Circle size={28} delay={d} />
           <div style={{ flex:1 }}>
             <Bar w="55%" h={9} r={5} delay={d} />
@@ -96,13 +96,13 @@ const OverviewSkeletonMobile = () => (
       ))}
     </div>
 
-    <div style={{ background:"#fff", borderRadius:18, border:"1px solid #F0F4F6", padding:16 }}>
+    <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:18, border:"1px solid var(--dashboard-skeleton-border)", padding:16 }}>
       <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
         <Bar w={90} h={12} r={6} />
         <Bar w={36} h={9} r={5} delay="0.04s" />
       </div>
       {["0s","0.05s","0.10s","0.15s"].map((d, i) => (
-        <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0", borderBottom:i < 3 ? "1px solid #F5F7FA" : "none" }}>
+        <div key={i} style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 0", borderBottom:i < 3 ? "1px solid var(--dashboard-skeleton-border)" : "none" }}>
           <div style={{ width:8, height:8, borderRadius:"50%", background:"#016EA6", marginTop:2 }} />
           <div style={{ flex:1 }}>
             <Bar w="75%" h={8} r={4} delay={d} />
@@ -132,8 +132,8 @@ const OverviewSkeleton = () => {
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"2fr 1fr", gap:32 }}>
-        <div style={{ background:"#fff", borderRadius:24,
-          border:"1px solid #F0F4F6", padding:24 }}>
+        <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:24,
+          border:"1px solid var(--dashboard-skeleton-border)", padding:24 }}>
           <div style={{ display:"flex", alignItems:"center",
             justifyContent:"space-between", marginBottom:24 }}>
             <Bar w={110} h={14} r={7} />
@@ -146,7 +146,7 @@ const OverviewSkeleton = () => {
 
           <table style={{ width:"100%", borderCollapse:"collapse" }}>
             <thead>
-              <tr style={{ borderBottom:"1px solid #F0F4F6" }}>
+              <tr style={{ borderBottom:"1px solid var(--dashboard-skeleton-border)" }}>
                 {["Order ID","Job title","Category","Client","Status","Payment"].map((_, i) => (
                   <th key={i} style={{ paddingBottom:12, paddingRight:16 }}>
                     <Bar w={i===0?60:i===1?70:55} h={9} r={5} />
@@ -162,8 +162,8 @@ const OverviewSkeleton = () => {
           </table>
         </div>
 
-        <div style={{ background:"#fff", borderRadius:24,
-          border:"1px solid #F0F4F6", padding:24,
+        <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:24,
+          border:"1px solid var(--dashboard-skeleton-border)", padding:24,
           display:"flex", flexDirection:"column", justifyContent:"space-between" }}>
           <div>
             <div style={{ display:"flex", alignItems:"center",
@@ -175,7 +175,7 @@ const OverviewSkeleton = () => {
               <MessageRow key={i} delay={d} />
             ))}
           </div>
-          <div style={{ borderTop:"1px solid #F5F7FA", paddingTop:16,
+          <div style={{ borderTop:"1px solid var(--dashboard-skeleton-border)", paddingTop:16,
             marginTop:16, textAlign:"center" }}>
             <Bar w={100} h={10} r={6} style={{ margin:"0 auto" }} />
           </div>
@@ -183,8 +183,8 @@ const OverviewSkeleton = () => {
       </div>
 
       <div style={{ display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:32 }}>
-        <div style={{ background:"#fff", borderRadius:24,
-          border:"1px solid #F0F4F6", padding:24 }}>
+        <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:24,
+          border:"1px solid var(--dashboard-skeleton-border)", padding:24 }}>
           <div style={{ display:"flex", alignItems:"center",
             justifyContent:"space-between", marginBottom:24 }}>
             <Bar w={110} h={14} r={7} />
@@ -195,8 +195,8 @@ const OverviewSkeleton = () => {
           ))}
         </div>
 
-        <div style={{ background:"#fff", borderRadius:24,
-          border:"1px solid #F0F4F6", padding:24 }}>
+        <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:24,
+          border:"1px solid var(--dashboard-skeleton-border)", padding:24 }}>
           <div style={{ display:"flex", alignItems:"center",
             justifyContent:"space-between", marginBottom:24 }}>
             <Bar w={130} h={14} r={7} />
@@ -207,14 +207,14 @@ const OverviewSkeleton = () => {
           <PerfRow delay="0.15s" />
         </div>
 
-        <div style={{ background:"#fff", borderRadius:24,
-          border:"1px solid #F0F4F6", padding:24 }}>
+        <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:24,
+          border:"1px solid var(--dashboard-skeleton-border)", padding:24 }}>
           <Bar w={110} h={14} r={7} mb={24} />
           <div style={{ height:176, borderRadius:16,
-            border:"1px dashed #E0E7ED",
+            border:"1px dashed var(--dashboard-skeleton-border)",
             display:"flex", flexDirection:"column",
             alignItems:"center", justifyContent:"center", gap:10 }}>
-            <div style={{ width:32, height:32, borderRadius:8, background:"#EEF2F5" }} />
+            <div style={{ width:32, height:32, borderRadius:8, background:"var(--dashboard-skeleton-muted)" }} />
             <Bar w={130} h={9} r={5} />
             <Bar w={100} h={9} r={5} delay="0.05s" />
           </div>

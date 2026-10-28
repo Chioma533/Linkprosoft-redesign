@@ -93,7 +93,7 @@ const DefaultProfessionalScreen = () => {
             id="jobs-results-section"
             className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12"
           >
-            <div className="bg-transparent border-0 p-0 md:bg-white md:rounded-2xl md:border md:border-gray-100 md:p-8">
+            <div className="professional-jobs-surface bg-transparent border-0 p-0 md:bg-white md:rounded-2xl md:border md:border-gray-100 md:p-8">
               <JobResultsHeader
                 selectedSkillName={selectedSkillName}
                 filteredJobsCount={filteredJobs.length}

@@ -15,7 +15,7 @@ const OverviewStatCard = ({
   return (
     <div 
       onClick={onClick}
-      className={`${bgColor} rounded-2xl sm:rounded-3xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-200 hover:border-gray-300 ${onClick ? "cursor-pointer" : ""}`}
+      className={`${bgColor} ${onClick ? "admin-overview-hover cursor-pointer" : ""} rounded-2xl sm:rounded-3xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-200 hover:border-gray-300`}
     >
       {/* Top row: Title and Icon */}
       <div className="flex items-start justify-between gap-2">

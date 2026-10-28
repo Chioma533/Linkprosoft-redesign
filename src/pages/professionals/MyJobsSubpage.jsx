@@ -251,7 +251,7 @@ const MyJobsSubpage = () => {
             </>
           ) : (
             /* Modern Empty State */
-            <div className="py-14 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
+            <div className="professional-dashboard-empty-state py-14 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
               <div className="text-[#016EA6] mb-3 flex items-center justify-center">
                 <FiBriefcase className="w-8 h-8 stroke-[2]" />
               </div>

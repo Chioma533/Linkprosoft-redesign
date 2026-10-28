@@ -7,6 +7,7 @@ import NotificationIcon from "../../components/icons/NotificationIcon";
 import { useAuthStore } from "../../store/authStore";
 import VerificationBadge from "../../components/common/VerificationBadge";
 import PostJobWizard from "../../pages/employer/PostJobWizard";
+import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 
 const BuyerNavbar = ({ activePage = "browse" }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -72,6 +73,7 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
 
             {/* Right: Action buttons (Desktop) */}
             <div className="hidden md:flex items-center gap-3">
+              <ThemeSwitcher />
               {/* Messages */}
               <button
                 id="nav-messages-btn"
@@ -201,6 +203,7 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
                     }}
                   />
                 </button>
+                <ThemeSwitcher />
               </div>
             </div>
           </div>

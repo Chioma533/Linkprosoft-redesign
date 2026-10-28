@@ -1,14 +1,14 @@
 import React from "react";
 import { Bar, Circle, Pill, useIsMobile } from "./DashboardShellSkeleton";
 
-const shBg   = "linear-gradient(90deg,#EAEFF3 25%,#F8FAFB 50%,#EAEFF3 75%)";
+const shBg   = "linear-gradient(90deg,var(--dashboard-skeleton-shimmer-base) 25%,var(--dashboard-skeleton-shimmer-highlight) 50%,var(--dashboard-skeleton-shimmer-base) 75%)";
 const shSize = "1600px 100%";
 const shAnim = "sk-shimmer 1.8s ease-in-out infinite";
 
 const ProCardSk = ({ delay = "0s" }) => (
   <article style={{
-    background: "#F9F9F9", borderRadius: 16,
-    border: "1px solid #EAEEF1",
+    background: "var(--dashboard-skeleton-subtle)", borderRadius: 16,
+    border: "1px solid var(--dashboard-skeleton-border)",
     display: "flex", flexDirection: "column", overflow: "hidden",
   }}>
     <div style={{ padding: 20, display:"flex", flexDirection:"column", gap:12, flex:1 }}>
@@ -22,7 +22,7 @@ const ProCardSk = ({ delay = "0s" }) => (
           </div>
         </div>
         <div style={{ width:32, height:32, borderRadius:10,
-          border:"1px solid #E8ECF0", background:"#F0F4F6", flexShrink:0 }} />
+          border:"1px solid var(--dashboard-skeleton-border)", background:"var(--dashboard-skeleton-border)", flexShrink:0 }} />
       </div>
       <div style={{ display:"flex", alignItems:"center", gap:4 }}>
         {[0,1,2,3,4].map(i => (
@@ -38,7 +38,7 @@ const ProCardSk = ({ delay = "0s" }) => (
         <Bar w="72%"  h={10} r={5} delay={delay} />
       </div>
     </div>
-    <div style={{ padding:"12px 20px 16px", borderTop:"1px solid #EAEEF1",
+    <div style={{ padding:"12px 20px 16px", borderTop:"1px solid var(--dashboard-skeleton-border)",
       display:"flex", alignItems:"center", justifyContent:"space-between" }}>
       <Bar w={80} h={13} r={6} delay={delay} />
       <Pill w={72} h={30} delay={delay} />
@@ -48,8 +48,8 @@ const ProCardSk = ({ delay = "0s" }) => (
 
 const JobCardSk = ({ delay = "0s" }) => (
   <article style={{
-    background: "#F9F9F9", borderRadius: 16,
-    border: "1px solid #EAEEF1",
+    background: "var(--dashboard-skeleton-subtle)", borderRadius: 16,
+    border: "1px solid var(--dashboard-skeleton-border)",
     display: "flex", flexDirection: "column", overflow: "hidden",
   }}>
     <div style={{ padding:20, display:"flex", flexDirection:"column", gap:12, flex:1 }}>
@@ -63,7 +63,7 @@ const JobCardSk = ({ delay = "0s" }) => (
           </div>
         </div>
         <div style={{ width:32, height:32, borderRadius:10,
-          border:"1px solid #E8ECF0", background:"#F0F4F6", flexShrink:0 }} />
+          border:"1px solid var(--dashboard-skeleton-border)", background:"var(--dashboard-skeleton-border)", flexShrink:0 }} />
       </div>
       <div style={{ display:"flex", flexDirection:"column", gap:6, flex:1 }}>
         <Bar w="100%" h={10} r={5} delay={delay} />
@@ -71,7 +71,7 @@ const JobCardSk = ({ delay = "0s" }) => (
         <Bar w="70%"  h={10} r={5} delay={delay} />
       </div>
     </div>
-    <div style={{ padding:"12px 20px 16px", borderTop:"1px solid #EAEEF1",
+    <div style={{ padding:"12px 20px 16px", borderTop:"1px solid var(--dashboard-skeleton-border)",
       display:"flex", alignItems:"center", justifyContent:"space-between" }}>
       <Bar w={80} h={13} r={6} delay={delay} />
       <Pill w={64} h={30} delay={delay} />
@@ -85,19 +85,19 @@ const GridPageSkeletonMobile = ({ cardType = "professional" }) => {
 
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:14 }}>
-      <div style={{ background:"#fff", borderRadius:18, border:"1px solid #F0F4F6", padding:14 }}>
+      <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:18, border:"1px solid var(--dashboard-skeleton-border)", padding:14 }}>
         <Bar w={148} h={18} r={7} />
         <Bar w={90} h={9} r={5} mt={8} delay="0.04s" />
       </div>
 
       <div style={{ display:"flex", alignItems:"center", gap:8, overflowX:"auto", paddingBottom:4 }}>
-        <div style={{ minWidth: 160, height: 34, borderRadius: 999, background: "linear-gradient(90deg,#EAEFF3 25%,#F8FAFB 50%,#EAEFF3 75%)", backgroundSize: "1600px 100%", animation: "sk-shimmer 1.8s ease-in-out infinite" }} />
+        <div style={{ minWidth: 160, height: 34, borderRadius: 999, background: "linear-gradient(90deg,var(--dashboard-skeleton-shimmer-base) 25%,var(--dashboard-skeleton-shimmer-highlight) 50%,var(--dashboard-skeleton-shimmer-base) 75%)", backgroundSize: "1600px 100%", animation: "sk-shimmer 1.8s ease-in-out infinite" }} />
         <Pill w={80} h={34} delay="0.05s" />
         <Pill w={74} h={34} delay="0.09s" />
         <Pill w={70} h={34} delay="0.13s" />
       </div>
 
-      <div style={{ background:"#fff", borderRadius:18, border:"1px solid #F0F4F6", padding:14 }}>
+      <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:18, border:"1px solid var(--dashboard-skeleton-border)", padding:14 }}>
         <div style={{ marginBottom:14 }}>
           <Bar w="38%" h={12} r={6} delay="0.04s" />
           <Bar w="20%" h={9} r={5} mt={6} delay="0.07s" />
@@ -137,7 +137,7 @@ const GridPageSkeleton = ({ cardType = "professional" }) => {
         <Pill w={76}  h={40} delay="0.19s" />
       </div>
 
-      <div style={{ background:"#fff", borderRadius:20, border:"1px solid #F0F4F6", padding:24 }}>
+      <div style={{ background:"var(--dashboard-skeleton-surface)", borderRadius:20, border:"1px solid var(--dashboard-skeleton-border)", padding:24 }}>
         <div style={{ marginBottom:24 }}>
           <Bar w="28%" h={16} r={7} delay="0.04s" />
           <Bar w="16%" h={11} r={6} mt={7} delay="0.07s" />

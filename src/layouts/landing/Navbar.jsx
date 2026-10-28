@@ -4,6 +4,7 @@ import { FiMenu, FiX } from "react-icons/fi";
 import Logo from "../../../public/temp_figma_mockups/linkprosoft-logo.png";
 
 import Button from "../../components/common/Button";
+import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,7 +38,7 @@ const Navbar = () => {
         </div>
 
         {/* Right: Desktop Action buttons */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="landing-nav-actions hidden md:flex items-center gap-6">
           <Link
             to="/signup"
             className="text-gray-600 font-medium hover:text-[#061EA6] transition-colors"
@@ -53,16 +54,21 @@ const Navbar = () => {
             </Button>
 
           </Link>
+          <ThemeSwitcher className="landing-theme-switcher" />
         </div>
 
-        {/* Mobile menu trigger */}
-        <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
-          aria-label="Toggle Menu"
-        >
-          {mobileMenuOpen ? <FiX className="text-2xl" /> : <FiMenu className="text-2xl" />}
-        </button>
+        {/* Mobile menu and theme controls */}
+        <div className="md:hidden flex items-center gap-1">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            aria-label="Toggle Menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            {mobileMenuOpen ? <FiX className="text-2xl" /> : <FiMenu className="text-2xl" />}
+          </button>
+          <ThemeSwitcher />
+        </div>
       </div>
 
       {/* Mobile Drawer */}

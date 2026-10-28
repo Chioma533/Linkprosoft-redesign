@@ -3,10 +3,10 @@ import { Bar, Circle, Pill, useIsMobile } from "./DashboardShellSkeleton";
 
 const StatCardSk = ({ delay = "0s" }) => (
   <div style={{
-    background: "#fff", borderRadius: 24, border: "1px solid #F0F4F6",
+    background: "var(--dashboard-skeleton-surface)", borderRadius: 24, border: "1px solid var(--dashboard-skeleton-border)",
     padding: "20px", display: "flex", alignItems: "center", gap: 16,
   }}>
-    <div style={{ width: 40, height: 40, borderRadius: 12, background: "#EAF1F6", flexShrink: 0 }} />
+    <div style={{ width: 40, height: 40, borderRadius: 12, background: "var(--dashboard-skeleton-muted)", flexShrink: 0 }} />
     <div style={{ flex: 1 }}>
       <Bar w="55%" h={11} r={6} delay={delay} />
       <Bar w="38%" h={20} r={8} mt={8} delay={delay} />
@@ -23,7 +23,7 @@ const ThSk = ({ w = 55, delay = "0s" }) => (
 const TrSk = ({ cols = 6, delay = "0s" }) => {
   const widths = [70, "72%", 80, 90, 68, 80];
   return (
-    <tr style={{ borderBottom: "1px solid #F7F9FB" }}>
+    <tr style={{ borderBottom: "1px solid var(--dashboard-skeleton-border)" }}>
       {Array.from({ length: cols }).map((_, i) => (
         <td key={i} style={{ padding: "13px 16px 13px 0" }}>
           {i === cols - 1 ? (
@@ -40,7 +40,7 @@ const TrSk = ({ cols = 6, delay = "0s" }) => {
 };
 
 const TableRowMobile = ({ delay = "0s" }) => (
-  <div style={{ background: "#fff", borderRadius: 16, border: "1px solid #F0F4F6", padding: 12 }}>
+  <div style={{ background: "var(--dashboard-skeleton-surface)", borderRadius: 16, border: "1px solid var(--dashboard-skeleton-border)", padding: 12 }}>
     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
       <Bar w={88} h={10} r={5} delay={delay} />
       <Pill w={62} h={22} delay={delay} />
@@ -59,7 +59,7 @@ const TablePageSkeleton = ({ cols = 6, rows = 7, showStats = true, showFilter = 
   if (isMobile) {
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <div style={{ background: "#fff", borderRadius: 18, border: "1px solid #F0F4F6", padding: 14 }}>
+        <div style={{ background: "var(--dashboard-skeleton-surface)", borderRadius: 18, border: "1px solid var(--dashboard-skeleton-border)", padding: 14 }}>
           <Bar w={180} h={20} r={8} />
           <Bar w={120} h={10} r={5} mt={8} delay="0.04s" />
         </div>
@@ -67,8 +67,8 @@ const TablePageSkeleton = ({ cols = 6, rows = 7, showStats = true, showFilter = 
         {showStats && (
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
             {["0s", "0.05s", "0.10s", "0.15s"].map((d, i) => (
-              <div key={i} style={{ background: "#fff", borderRadius: 14, border: "1px solid #F0F4F6", padding: 12, display: "flex", gap: 10, alignItems: "center" }}>
-                <div style={{ width: 30, height: 30, borderRadius: 10, background: "#EAF1F6", flexShrink: 0 }} />
+              <div key={i} style={{ background: "var(--dashboard-skeleton-surface)", borderRadius: 14, border: "1px solid var(--dashboard-skeleton-border)", padding: 12, display: "flex", gap: 10, alignItems: "center" }}>
+                <div style={{ width: 30, height: 30, borderRadius: 10, background: "var(--dashboard-skeleton-muted)", flexShrink: 0 }} />
                 <div style={{ flex: 1 }}>
                   <Bar w="60%" h={8} r={4} delay={d} />
                   <Bar w="45%" h={12} r={6} mt={6} delay={d} />
@@ -80,14 +80,14 @@ const TablePageSkeleton = ({ cols = 6, rows = 7, showStats = true, showFilter = 
 
         {showFilter && (
           <div style={{ display: "flex", alignItems: "center", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
-            <div style={{ minWidth: 150, height: 34, borderRadius: 999, background: "linear-gradient(90deg,#EAEFF3 25%,#F8FAFB 50%,#EAEFF3 75%)", backgroundSize: "1600px 100%", animation: "sk-shimmer 1.8s ease-in-out infinite" }} />
+            <div style={{ minWidth: 150, height: 34, borderRadius: 999, background: "linear-gradient(90deg,var(--dashboard-skeleton-shimmer-base) 25%,var(--dashboard-skeleton-shimmer-highlight) 50%,var(--dashboard-skeleton-shimmer-base) 75%)", backgroundSize: "1600px 100%", animation: "sk-shimmer 1.8s ease-in-out infinite" }} />
             <Pill w={84} h={34} delay="0.05s" />
             <Pill w={78} h={34} delay="0.09s" />
             <Pill w={72} h={34} delay="0.13s" />
           </div>
         )}
 
-        <div style={{ background: "#fff", borderRadius: 18, border: "1px solid #F0F4F6", padding: 14 }}>
+        <div style={{ background: "var(--dashboard-skeleton-surface)", borderRadius: 18, border: "1px solid var(--dashboard-skeleton-border)", padding: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
             <Bar w={100} h={12} r={6} />
             <Pill w={56} h={24} delay="0.04s" />
@@ -119,7 +119,7 @@ const TablePageSkeleton = ({ cols = 6, rows = 7, showStats = true, showFilter = 
 
       {showFilter && (
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          <div style={{ position: "relative", flex: "0 0 auto", width: 240, height: 38, borderRadius: 999, background: "linear-gradient(90deg,#EAEFF3 25%,#F8FAFB 50%,#EAEFF3 75%)", backgroundSize: "1600px 100%", animation: "sk-shimmer 1.8s ease-in-out infinite" }} />
+          <div style={{ position: "relative", flex: "0 0 auto", width: 240, height: 38, borderRadius: 999, background: "linear-gradient(90deg,var(--dashboard-skeleton-shimmer-base) 25%,var(--dashboard-skeleton-shimmer-highlight) 50%,var(--dashboard-skeleton-shimmer-base) 75%)", backgroundSize: "1600px 100%", animation: "sk-shimmer 1.8s ease-in-out infinite" }} />
           <Pill w={112} h={38} delay="0.05s" />
           <Pill w={104} h={38} delay="0.09s" />
           <Pill w={96}  h={38} delay="0.13s" />
@@ -127,7 +127,7 @@ const TablePageSkeleton = ({ cols = 6, rows = 7, showStats = true, showFilter = 
         </div>
       )}
 
-      <div style={{ background: "#fff", borderRadius: 24, border: "1px solid #F0F4F6", padding: 24 }}>
+      <div style={{ background: "var(--dashboard-skeleton-surface)", borderRadius: 24, border: "1px solid var(--dashboard-skeleton-border)", padding: 24 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <Bar w={120} h={14} r={7} />
           <div style={{ display: "flex", gap: 8 }}>
@@ -139,7 +139,7 @@ const TablePageSkeleton = ({ cols = 6, rows = 7, showStats = true, showFilter = 
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 560 }}>
             <thead>
-              <tr style={{ borderBottom: "1px solid #F0F4F6" }}>
+              <tr style={{ borderBottom: "1px solid var(--dashboard-skeleton-border)" }}>
                 {[60, 80, 60, 70, 58, 56].slice(0, cols).map((w, i) => (
                   <ThSk key={i} w={w} delay={`${i * 0.03}s`} />
                 ))}
@@ -153,7 +153,7 @@ const TablePageSkeleton = ({ cols = 6, rows = 7, showStats = true, showFilter = 
           </table>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20, paddingTop: 16, borderTop: "1px solid #F5F7FA" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--dashboard-skeleton-border)" }}>
           <Bar w={90} h={10} r={5} delay="0.05s" />
           <div style={{ display: "flex", gap: 6 }}>
             {[0, 1, 2, 3, 4].map(i => (

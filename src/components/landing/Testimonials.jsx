@@ -69,7 +69,7 @@ const TESTIMONIALS = [
 
 const Testimonials = () => {
   return (
-    <section className="w-full bg-white py-16 md:py-24 px-4 md:px-12 flex flex-col items-center gap-10">
+    <section className="testimonials-section w-full py-16 md:py-24 px-4 md:px-12 flex flex-col items-center gap-10">
       {/* Header */}
       <div className="text-center flex flex-col items-center gap-4 max-w-2xl">
         <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 leading-tight">
@@ -89,7 +89,7 @@ const Testimonials = () => {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: idx * 0.05 }}
-            className="break-inside-avoid mb-6 bg-[#FAF9F9]/80 border border-gray-100 rounded-3xl p-6 md:p-8 flex flex-col gap-4 hover:shadow-md hover:scale-[1.01] transition-all"
+            className="testimonials-card break-inside-avoid mb-6 border border-gray-100 rounded-3xl p-6 md:p-8 flex flex-col gap-4 hover:shadow-md hover:scale-[1.01] transition-all"
           >
             {/* Stars Rating */}
             <div className="flex items-center gap-2">

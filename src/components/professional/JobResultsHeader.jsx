@@ -10,7 +10,7 @@ const JobResultsHeader = ({
   onSkillChange,
 }) => {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+    <div className="professional-jobs-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
       <div>
         <h2 className="text-base sm:text-lg font-semibold text-gray-900">
           Related to{" "}
@@ -34,8 +34,8 @@ const JobResultsHeader = ({
       </div>
 
       {skills.length > 1 && (
-        <div className="hidden md:flex items-center gap-1.5 flex-wrap">
-          <span className="text-xs font-semibold text-gray-400 mr-1">
+        <div className="professional-skill-filters hidden md:flex items-center gap-1.5 flex-wrap">
+          <span className="professional-skill-filter-label text-xs font-semibold text-gray-400 mr-1">
             Filter by skill:
           </span>
 
@@ -53,7 +53,7 @@ const JobResultsHeader = ({
                 className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
                   isActive
                     ? "bg-[#016EA6] text-white border-[#016EA6] shadow-xs"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-[#016EA6]"
+                    : "professional-skill-chip bg-white text-gray-600 border-gray-200 hover:border-[#016EA6]"
                 }`}
               >
                 <FiZap

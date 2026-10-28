@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from "framer-motion";
 import { FiUserPlus } from 'react-icons/fi';
 import { authSlides } from '../constants/authSlide';
+import ThemeSwitcher from '../components/common/ThemeSwitcher';
 
 
 const AuthLayout = ({children, icon: Icon = FiUserPlus}) => {
@@ -22,6 +23,7 @@ const AuthLayout = ({children, icon: Icon = FiUserPlus}) => {
       transition={{ duration: 0.35, ease: "easeOut" }}
       className="w-full max-w-[960px] mx-auto px-4 md:px-0 flex flex-col md:flex-row items-center gap-10 md:gap-16 "
     >
+      <div className="auth-theme-switcher"><ThemeSwitcher /></div>
       {/* Left Column: Handyman testimonial image (Desktop only) */}
       <div className="hidden md:block w-1/2 relative aspect-[4/5] rounded-[2.5rem] overflow-hidden group shadow-md">
         <AnimatePresence mode="wait">

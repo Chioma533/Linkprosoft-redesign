@@ -65,7 +65,7 @@ const JobCard = ({ job, onApply, onSave, ...rest }) => {
   return (
     <article
       id={`job-card-${job?.id ?? "card"}`}
-      className="bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border border-transparent hover:border-[#016EA6] hover:shadow-xs"
+      className="professional-job-card bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border border-transparent hover:border-[#016EA6] hover:shadow-xs"
     >
       <div className="p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-start justify-between gap-3">

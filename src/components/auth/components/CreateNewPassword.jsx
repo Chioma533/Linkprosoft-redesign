@@ -12,7 +12,7 @@ const CreateNewPassword = ({ onSubmit, onClose, isLoading, error }) => {
     setPassword(e.target.value);
     if (validationError) setValidationError("");
   };
-
+  
   const validate = () => {
     if (!password) {
       setValidationError("Password is required");

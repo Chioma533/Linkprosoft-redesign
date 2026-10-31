@@ -28,22 +28,32 @@ const requestSessionUser = async (fetchImpl, apiBaseUrl) => {
 // OAuth and regular session restoration both use HttpOnly cookies.  Deliberately
 // omit headers here so a value left by an older bearer-token implementation can
 // never override the session selected by the backend.
-export const getCookieSessionUser = async (fetchImpl, apiBaseUrl) => {
-  try {
-    return await requestSessionUser(fetchImpl, apiBaseUrl);
-  } catch (error) {
-    if (error.status !== 401) throw error;
-  }
+let activeSessionLookup = null;
 
-  const refreshResponse = await fetchImpl(endpoint(apiBaseUrl, "/api/auth/refresh-token"), {
-    method: "POST",
-    credentials: "include",
+export const getCookieSessionUser = (fetchImpl, apiBaseUrl) => {
+  if (activeSessionLookup) return activeSessionLookup;
+
+  activeSessionLookup = (async () => {
+    try {
+      return await requestSessionUser(fetchImpl, apiBaseUrl);
+    } catch (error) {
+      if (error.status !== 401) throw error;
+    }
+
+    const refreshResponse = await fetchImpl(endpoint(apiBaseUrl, "/api/auth/refresh-token"), {
+      method: "POST",
+      credentials: "include",
+    });
+    if (!refreshResponse.ok) {
+      const error = new Error("Your sign-in session has expired");
+      error.status = refreshResponse.status;
+      throw error;
+    }
+
+    return requestSessionUser(fetchImpl, apiBaseUrl);
+  })().finally(() => {
+    activeSessionLookup = null;
   });
-  if (!refreshResponse.ok) {
-    const error = new Error("Your sign-in session has expired");
-    error.status = refreshResponse.status;
-    throw error;
-  }
 
-  return requestSessionUser(fetchImpl, apiBaseUrl);
+  return activeSessionLookup;
 };

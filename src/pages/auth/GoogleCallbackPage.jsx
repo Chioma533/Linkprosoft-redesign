@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "../../store/authStore";
@@ -11,8 +11,11 @@ import Preloader from "../../components/common/preloader/PreLoader";
 const GoogleCallbackPage = () => {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
+  const hasVerified = useRef(false);
 
   useEffect(() => {
+    if (hasVerified.current) return;
+    hasVerified.current = true;
     const verifyGoogleSignIn = async () => {
       try {
         const userData = await getCookieSessionUser(fetch, API_BASE_URL);

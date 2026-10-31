@@ -1,5 +1,6 @@
 import axiosInstance from "../../utils/axiosInstance";
 import { API_BASE_URL, API_PATHS } from "../../utils/apiPaths";
+import { getCookieSessionUser } from "../../utils/cookieSession";
 
 const getGoogleAuthUrl = () => {
   const backendBaseUrl = API_BASE_URL;
@@ -56,15 +57,7 @@ export const authService = {
   },
 
   getCurrentUser: async () => {
-    try {
-      const response = await axiosInstance.get(API_PATHS.AUTH.ME);
-      return response.data;
-    } catch (error) {
-      if (error.response?.status !== 401) throw error;
-      await axiosInstance.post(API_PATHS.AUTH.REFRESH_TOKEN);
-      const response = await axiosInstance.get(API_PATHS.AUTH.ME);
-      return response.data;
-    }
+    return getCookieSessionUser(fetch, API_BASE_URL);
   },
 
   login: async (credentials) => {

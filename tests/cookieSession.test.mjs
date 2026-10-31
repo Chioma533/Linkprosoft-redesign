@@ -40,3 +40,18 @@ test("a 401 refreshes the cookie session once and profile state comes from the r
     "https://api.example.test/api/auth/me",
   ]);
 });
+
+test("simultaneous profile restores share one cookie request", async () => {
+  let requests = 0;
+  const fetchImpl = async () => {
+    requests += 1;
+    return response(200, { user: { id: "cookie-user" } });
+  };
+
+  const [first, second] = await Promise.all([
+    getCookieSessionUser(fetchImpl, "https://api.example.test"),
+    getCookieSessionUser(fetchImpl, "https://api.example.test"),
+  ]);
+  assert.equal(requests, 1);
+  assert.equal(first.id, second.id);
+});

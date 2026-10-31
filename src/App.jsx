@@ -9,7 +9,6 @@ import PrivateRoutes from "./routes/PrivateRoutes";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { useEffect } from "react";
 import { useAuthStore } from "./store/authStore";
-import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from "react-hot-toast";
 import EmployerDashboardPage from "./pages/employer/EmployerDashboardPage";
 import AdminDahboardPage from "./pages/admin/AdminDahboardPage";
@@ -33,8 +32,7 @@ const App = () => {
   }, [refreshCurrentUser]);
 
   return (
-    <AuthProvider>
-      <Router>
+    <Router>
         <div className="app-shell min-h-screen bg-white text-gray-900 font-sans">
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -116,8 +114,7 @@ const App = () => {
             }}
           />
         </div>
-      </Router>
-    </AuthProvider>
+    </Router>
   );
 };
 

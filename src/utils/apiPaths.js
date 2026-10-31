@@ -1,7 +1,7 @@
 // Local development talks directly to the local backend. Production requests
 // are same-origin and are proxied by Vercel's /api rewrite to the backend.
-//export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
-export const API_BASE_URL = "http://localhost:5020";
+export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
+//export const API_BASE_URL = "http://localhost:5020";
 
 export const API_PATHS = {
   AUTH: {

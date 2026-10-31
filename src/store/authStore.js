@@ -1,12 +1,10 @@
 import { create } from "zustand";
 import { authService } from "../api/services/authService";
-import { toast } from "react-hot-toast"
 import { useMessagingStore } from "./messagingStore";
 import { socketManager } from "../utils/socketManager";
+import { clearPersistedAuth } from "../utils/cookieSession";
+import { useDashboardStore } from "./dashboardStore";
 
-
-const storedUser = JSON.parse(localStorage.getItem("user")) || null;
-const storedToken = localStorage.getItem("token") || null;
 
 const extractUser = (response) => {
   if (response?.user) return response.user;
@@ -16,51 +14,46 @@ const extractUser = (response) => {
   return null;
 };
 
-export const useAuthStore = create((set, get) => ({
-  user: storedUser,
-  token: storedToken,
-  isAuthenticated: !!storedToken || !!storedUser,
+export const useAuthStore = create((set) => ({
+  user: null,
+  token: null,
+  isAuthenticated: false,
   error: null,
   isLoading: false,
+  isSessionLoading: true,
 
-  setAuth: ({ user, token }) => {
-    if (token !== undefined) {
-      if (token) {
-        localStorage.setItem("token", token);
-      } else {
-        localStorage.removeItem("token");
-      }
-    }
-
-    if (user !== undefined) {
-      if (user) {
-        localStorage.setItem("user", JSON.stringify(user));
-      } else {
-        localStorage.removeItem("user");
-      }
-    }
-
-    const currentUser = user !== undefined ? user : storedUser;
-    const currentToken = token !== undefined ? token : storedToken;
-
+  setAuth: ({ user }) => {
+    // User identity is derived from the cookie session, never persisted tokens.
+    clearPersistedAuth();
     set({
-      user: currentUser || null,
-      token: currentToken || null,
-      isAuthenticated: !!currentToken || !!currentUser,
+      user: user || null,
+      token: null,
+      isAuthenticated: !!user,
       error: null,
+      isSessionLoading: false,
     });
   },
 
   refreshCurrentUser: async () => {
     try {
       const user = extractUser(await authService.getCurrentUser());
-      if (!user) return null;
+      if (!user) {
+        set({ isSessionLoading: false });
+        return null;
+      }
 
-      const currentUser = get().user;
-      useAuthStore.getState().setAuth({ user: { ...currentUser, ...user } });
+      useAuthStore.getState().setAuth({ user });
       return user;
-    } catch {
-      // Keep the existing session intact if the background profile refresh fails.
+    } catch (error) {
+      // A failed cookie refresh means this identity is no longer authoritative.
+      if (error.response?.status === 401 || error.status === 401) {
+        clearPersistedAuth();
+        useDashboardStore.getState().reset();
+        useMessagingStore.getState().reset();
+        set({ user: null, token: null, isAuthenticated: false, isSessionLoading: false });
+      } else {
+        set({ isSessionLoading: false });
+      }
       return null;
     }
   },
@@ -90,6 +83,11 @@ export const useAuthStore = create((set, get) => ({
   },
 
   googleSignin: async (role, professionalType) => {
+    // Do this before leaving the app: a stale identity must not survive OAuth.
+    clearPersistedAuth();
+    useDashboardStore.getState().reset();
+    useMessagingStore.getState().reset();
+    set({ user: null, token: null, isAuthenticated: false, error: null, isSessionLoading: false });
     set({ isLoading: true, error: null });
     try {
       const data = await authService.googleSignin(role, professionalType);
@@ -106,7 +104,6 @@ export const useAuthStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const data = await authService.verifyEmail({ email, otp_code: otpCode });
-      const token = data?.token || data?.accessToken || data?.data?.token || data?.data?.accessToken;
       let user = extractUser(data);
 
       if (!user) {
@@ -118,7 +115,7 @@ export const useAuthStore = create((set, get) => ({
       }
 
       set({ isLoading: false });
-      useAuthStore.getState().setAuth({ user, token });
+      useAuthStore.getState().setAuth({ user });
       return data;
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || "OTP verification failed";
@@ -135,11 +132,10 @@ export const useAuthStore = create((set, get) => ({
       // console.log("LOGIN RESPONSE:", response);
 
       const authData = response.data;
-      const token = authData.accessToken || authData.token;
       const user = authData.user || null;
 
       set({ isLoading: false });
-      useAuthStore.getState().setAuth({ user, token });
+      useAuthStore.getState().setAuth({ user });
 
       return response;
     } catch (error) {
@@ -158,12 +154,13 @@ export const useAuthStore = create((set, get) => ({
     } finally {
       socketManager.disconnect();
       useMessagingStore.getState().reset();
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      useDashboardStore.getState().reset();
+      clearPersistedAuth();
       set({
         user: null,
         token: null,
         isAuthenticated: false,
+        isSessionLoading: false,
         isLoading: false,
       });
     }

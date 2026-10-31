@@ -1,26 +1,21 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { authService } from "../api/services/authService";
+import { clearPersistedAuth, extractAuthenticatedUser } from "../utils/cookieSession";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem("token") || null);
+  const [token, setToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const savedToken = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user");
-      
-      if (savedToken && savedUser) {
-        try {
-          setToken(savedToken);
-          setUser(JSON.parse(savedUser));
-        } catch (error) {
-          console.error("Failed to parse user data from localStorage", error);
-          logout();
-        }
+      clearPersistedAuth();
+      try {
+        setUser(extractAuthenticatedUser(await authService.getCurrentUser()));
+      } catch {
+        setUser(null);
       }
       setIsLoading(false);
     };
@@ -40,15 +35,7 @@ export const AuthProvider = ({ children }) => {
   const verifyOtp = async (email, code) => {
     try {
       const data = await authService.verifyEmail({ email, otp_code: code });
-      // If server returns a token and user details, save them
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-        setToken(data.token);
-      }
-      if (data?.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setUser(data.user);
-      }
+      setUser(extractAuthenticatedUser(data) || extractAuthenticatedUser(await authService.getCurrentUser()));
       return data;
     } catch (error) {
       throw error.response?.data?.message || error.message || "Verification failed";
@@ -58,25 +45,21 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const data = await authService.login(credentials);
-      if (data?.token) {
-        localStorage.setItem("token", data.token);
-        setToken(data.token);
-      }
-      if (data?.user) {
-        localStorage.setItem("user", JSON.stringify(data.user));
-        setUser(data.user);
-      }
+      setUser(extractAuthenticatedUser(data) || extractAuthenticatedUser(await authService.getCurrentUser()));
       return data;
     } catch (error) {
       throw error.response?.data?.message || error.message || "Login failed";
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setToken(null);
-    setUser(null);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } finally {
+      clearPersistedAuth();
+      setToken(null);
+      setUser(null);
+    }
   };
 
   const forgotPassword = async (email) => {

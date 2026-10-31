@@ -56,8 +56,15 @@ export const authService = {
   },
 
   getCurrentUser: async () => {
-    const response = await axiosInstance.get(API_PATHS.AUTH.ME);
-    return response.data;
+    try {
+      const response = await axiosInstance.get(API_PATHS.AUTH.ME);
+      return response.data;
+    } catch (error) {
+      if (error.response?.status !== 401) throw error;
+      await axiosInstance.post(API_PATHS.AUTH.REFRESH_TOKEN);
+      const response = await axiosInstance.get(API_PATHS.AUTH.ME);
+      return response.data;
+    }
   },
 
   login: async (credentials) => {
@@ -67,7 +74,7 @@ export const authService = {
   },
 
   logout: async () => {
-    const response = await axiosInstance.post(API_PATHS.AUTH.LOGOUT);
+    const response = await axiosInstance.post(API_PATHS.AUTH.LOGOUT, undefined, { withCredentials: true });
     return response.data;
   },
 

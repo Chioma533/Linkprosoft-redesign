@@ -24,11 +24,13 @@ import VerificationPage from "./pages/verification/VerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
 
 const App = () => {
-  const { token, refreshCurrentUser } = useAuthStore();
+  const { refreshCurrentUser } = useAuthStore();
 
   useEffect(() => {
-    if (token) refreshCurrentUser();
-  }, [token, refreshCurrentUser]);
+    // Restore from the HttpOnly cookie after a reload; there is no bearer token
+    // in localStorage to use as an authentication source.
+    refreshCurrentUser();
+  }, [refreshCurrentUser]);
 
   return (
     <AuthProvider>

@@ -4,7 +4,6 @@ import DashboardNavbar from "../components/layout/DashboardNavbar";
 import { useDashboardStore } from "../store/dashboardStore";
 import { useAuthStore } from "../store/authStore";
 import { Home, Search, Briefcase, FileText, Wallet } from "lucide-react";
-import { debugLog } from "../utils/debugLogger";
 import { DashboardContentSkeleton } from "../components/common/preloader/DashboardLoadingScreen";
 
 const DashboardLayout = ({ children }) => {
@@ -17,19 +16,7 @@ const DashboardLayout = ({ children }) => {
   const [showSkeleton, setShowSkeleton] = useState(true);
 
   useEffect(() => {
-    // Persist token debug info so it survives redirects / page reloads
-    try {
-      const token = localStorage.getItem("token");
-      debugLog("token_before_fetchDashboardData", token);
-    } catch (e) {
-      debugLog("token_before_fetchDashboardData_error", String(e));
-    }
-
-    // Also log fetch start/finish for more context
-    debugLog("fetchDashboardData_start", { timestamp: new Date().toISOString() });
-    fetchDashboardData()
-      .then(() => debugLog("fetchDashboardData_success", { timestamp: new Date().toISOString() }))
-      .catch((err) => debugLog("fetchDashboardData_failure", { timestamp: new Date().toISOString(), error: (err && err.message) || String(err) }));
+    fetchDashboardData();
   }, [fetchDashboardData]);
 
   /* Fires on mount (initial tab) AND on every subsequent tab switch */

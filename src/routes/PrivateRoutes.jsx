@@ -2,7 +2,10 @@ import { Navigate, Outlet } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 
 const PrivateRoutes = ({ allowedRoles = [] }) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, isSessionLoading } = useAuthStore();
+
+  // Wait for cookie-backed /me restoration before deciding this is a guest.
+  if (isSessionLoading) return null;
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

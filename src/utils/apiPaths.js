@@ -1,7 +1,9 @@
-// Local development talks directly to the local backend. Production requests
-// are same-origin and are proxied by Vercel's /api rewrite to the backend.
-export const API_BASE_URL = "https://linkprosoft-backend-hxmc.onrender.com";
-//export const API_BASE_URL = "http://localhost:5020";
+// Production must remain same-origin so OAuth cookies created by the Vercel
+// `/api` rewrite are first-party. Configure VITE_API_BASE_URL only for an
+// intentionally separate API origin (such as local development).
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? (
+  import.meta.env.PROD ? "" : "http://localhost:5020"
+);
 
 export const API_PATHS = {
   AUTH: {

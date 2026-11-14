@@ -631,7 +631,7 @@ const PublicBuyerScreen = () => {
                     name={fullName}
                     role={roleName}
                     location={locationName}
-                    avatarUrl={pro.avatarUrl || pro.user?.avatar || "/professional_avatar.png"}
+                    avatarUrl={pro.avatarUrl || pro.user?.avatarUrl || pro.user?.avatar || "/professional_avatar.png"}
                     rating={pro.rating ?? pro.avgRating ?? 0}
                     reviewCount={pro.reviewCount ?? pro.totalReviews ?? 0}
                     bio={pro.bio || "No bio available"}

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "../../store/authStore";
 import verificationService from "../../api/services/verificationService";
+import mediaService from "../../api/services/mediaService";
 import {
   VERIFICATION_VIEWS,
   INITIAL_PROFILE,
@@ -58,10 +59,12 @@ const useVerification = () => {
   });
 
   const [idDocumentFile, setIdDocumentFile] = useState(null);
+  const [idDocumentMediaId, setIdDocumentMediaId] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
 
   const [selfieCaptured, setSelfieCaptured] = useState(false);
   const [selfieBlob, setSelfieBlob] = useState(null);
+  const [selfieMediaId, setSelfieMediaId] = useState(null);
   const [selfiePreviewUrl, setSelfiePreviewUrl] = useState(null);
 
   const [banks, setBanks] = useState(FALLBACK_BANKS);
@@ -136,7 +139,13 @@ const useVerification = () => {
 
   const handleIdentityUpload = (file) => {
     if (!file) return;
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+    if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) {
+      toast.error("Upload a JPG, PNG, WebP, or PDF smaller than 5 MB.");
+      return;
+    }
     setIdDocumentFile(file);
+    setIdDocumentMediaId(null);
     setUploadedFile(file.name);
     if (errors.idDocument) {
       setErrors((prev) => ({ ...prev, idDocument: undefined }));
@@ -192,7 +201,7 @@ const useVerification = () => {
     if (!profile.dateOfBirth?.trim()) newErrors.dateOfBirth = "Date of birth is required";
     if (!profile.address?.trim()) newErrors.address = "Residential address is required";
     if (!profile.nationality?.trim()) newErrors.nationality = "Nationality is required";
-    if (!idDocumentFile && !uploadedFile) newErrors.idDocument = "Identity document is required";
+    if (!idDocumentFile) newErrors.idDocument = "Identity document is required";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -202,18 +211,17 @@ const useVerification = () => {
 
     setIsLoading(true);
     try {
-      const formData = new FormData();
-      formData.append("firstName", profile.firstName);
-      formData.append("lastName", profile.lastName);
-      formData.append("phone", profile.phone);
-      formData.append("dateOfBirth", profile.dateOfBirth);
-      formData.append("address", profile.address);
-      formData.append("nationality", profile.nationality);
-      if (idDocumentFile) {
-        formData.append("idDocument", idDocumentFile);
-      }
-
-      await verificationService.submitIdentity(formData);
+      const mediaId = idDocumentMediaId || (await mediaService.uploadFile(idDocumentFile, "kyc_id")).mediaId;
+      setIdDocumentMediaId(mediaId);
+      await verificationService.submitIdentity({
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        phone: profile.phone,
+        dateOfBirth: profile.dateOfBirth,
+        address: profile.address,
+        nationality: profile.nationality,
+        idDocumentMediaId: mediaId,
+      });
       setCompletedSteps((prev) => Array.from(new Set([...prev, "identity"])));
       setHighestReachedStep((prev) => Math.max(prev, 2));
       toast.success("Identity details saved!");
@@ -223,10 +231,6 @@ const useVerification = () => {
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Failed to save identity details.";
       toast.error(msg);
-      // Allow progression in demo/offline mode if needed
-      setCompletedSteps((prev) => Array.from(new Set([...prev, "identity"])));
-      setHighestReachedStep((prev) => Math.max(prev, 2));
-      setView(VERIFICATION_VIEWS.PROFESSIONAL);
       return false;
     } finally {
       setIsLoading(false);
@@ -266,9 +270,6 @@ const useVerification = () => {
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Failed to save professional details.";
       toast.error(msg);
-      setCompletedSteps((prev) => Array.from(new Set([...prev, "professional"])));
-      setHighestReachedStep((prev) => Math.max(prev, 3));
-      setView(VERIFICATION_VIEWS.FACE);
       return false;
     } finally {
       setIsLoading(false);
@@ -284,12 +285,9 @@ const useVerification = () => {
 
     setIsLoading(true);
     try {
-      const formData = new FormData();
-      if (selfieBlob) {
-        formData.append("selfieImage", selfieBlob, "selfie.jpg");
-      }
-
-      await verificationService.submitFaceVerification(formData);
+      const mediaId = selfieMediaId || (await mediaService.uploadFile(selfieBlob, "kyc_selfie")).mediaId;
+      setSelfieMediaId(mediaId);
+      await verificationService.submitFaceVerification({ selfieMediaId: mediaId });
       setCompletedSteps((prev) => Array.from(new Set([...prev, "face"])));
       setHighestReachedStep((prev) => Math.max(prev, 4));
       toast.success("Face selfie saved!");
@@ -299,9 +297,6 @@ const useVerification = () => {
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Failed to verify face selfie.";
       toast.error(msg);
-      setCompletedSteps((prev) => Array.from(new Set([...prev, "face"])));
-      setHighestReachedStep((prev) => Math.max(prev, 4));
-      setView(VERIFICATION_VIEWS.PAYMENT);
       return false;
     } finally {
       setIsLoading(false);
@@ -373,8 +368,6 @@ const useVerification = () => {
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Failed to save payment info.";
       toast.error(msg);
-      setCompletedSteps((prev) => Array.from(new Set([...prev, "payment"])));
-      setView(VERIFICATION_VIEWS.REVIEW);
       return false;
     } finally {
       setIsLoading(false);
@@ -391,7 +384,6 @@ const useVerification = () => {
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Failed to submit verification.";
       toast.error(msg);
-      setShowSuccess(true); // Still show success modal in fallback
     } finally {
       setIsLoading(false);
     }
@@ -415,6 +407,7 @@ const useVerification = () => {
     setSelfieCaptured,
     selfieBlob,
     setSelfieBlob,
+    setSelfieMediaId,
     selfiePreviewUrl,
     setSelfiePreviewUrl,
 

@@ -1,6 +1,8 @@
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 
+const dataOf = (response) => response.data?.data ?? response.data;
+
 export const profileService = {
   getMyProfile: async () => {
     try {
@@ -32,6 +34,24 @@ export const profileService = {
     }
   },
 
+  setAvatar: async (mediaId) => dataOf(await axiosInstance.post(API_PATHS.PROFILE.AVATAR, { mediaId })),
+  clearAvatar: async () => axiosInstance.delete(API_PATHS.PROFILE.AVATAR),
+  setCover: async (mediaId) => dataOf(await axiosInstance.post(API_PATHS.PROFILE.COVER, { mediaId })),
+  clearCover: async () => axiosInstance.delete(API_PATHS.PROFILE.COVER),
+
+  getPublicProfileBySlug: async (slug) => {
+    const response = await axiosInstance.get(API_PATHS.PROFILE.GET_PUBLIC_PROFILE(slug));
+    const data = response.data?.data?.profile || response.data?.data || response.data;
+    return data || null;
+  },
+
+  checkSlugAvailability: async (slug) => {
+    const response = await axiosInstance.get(API_PATHS.PROFILE.CHECK_SLUG_AVAILABILITY, {
+      params: { slug },
+    });
+    return response.data?.data || response.data;
+  },
+
   getCertifications: async (userId) => {
     try {
       if (!userId) return [];
@@ -57,6 +77,7 @@ export const profileService = {
       throw error;
     }
   },
+  getCertificationDocumentUrl: async (certificationId) => dataOf(await axiosInstance.get(API_PATHS.CERTIFICATIONS.DOCUMENT(certificationId))).url,
 
   getPortfolio: async (userId) => {
     try {
@@ -83,6 +104,8 @@ export const profileService = {
       throw error;
     }
   },
+  addPortfolioMedia: async (portfolioItemId, mediaId, sortOrder = 0) => dataOf(await axiosInstance.post(API_PATHS.PORTFOLIO.ADD_MEDIA(portfolioItemId), { mediaId, sortOrder })),
+  deletePortfolioMedia: async (portfolioItemId, mediaId) => axiosInstance.delete(API_PATHS.PORTFOLIO.DELETE_MEDIA(portfolioItemId, mediaId)),
 
   // Catalog of standard system skills with fallback UUIDs
   DEFAULT_SKILLS: [

@@ -35,6 +35,10 @@ export const API_PATHS = {
     DELETE_MY_PROFILE: "/api/profiles/me",
     GET_PROFILE_BY_USER_ID: (userId) => `/api/profiles/${userId}`,
     GET_DETAILED_PROFILE: (userId) => `/api/profiles/${userId}/detailed`,
+    AVATAR: "/api/profiles/me/avatar",
+    COVER: "/api/profiles/me/cover",
+    GET_PUBLIC_PROFILE: (slug) => `/api/profiles/public/${encodeURIComponent(slug)}`,
+    CHECK_SLUG_AVAILABILITY: "/api/profiles/slug-availability",
   },
 
   CERTIFICATIONS: {
@@ -42,6 +46,7 @@ export const API_PATHS = {
     ADD_CERTIFICATION: "/api/profiles/me/certifications",
     UPDATE_CERTIFICATION: (certificationId) => `/api/profiles/me/certifications/${certificationId}`,
     DELETE_CERTIFICATION: (certificationId) => `/api/profiles/me/certifications/${certificationId}`,
+    DOCUMENT: (certificationId) => `/api/profiles/me/certifications/${certificationId}/document`,
   },
 
   PORTFOLIO: {
@@ -49,6 +54,8 @@ export const API_PATHS = {
     ADD_PORTFOLIO_ITEM: "/api/profiles/me/portfolio",
     UPDATE_PORTFOLIO_ITEM: (portfolioItemId) => `/api/profiles/me/portfolio/${portfolioItemId}`,
     DELETE_PORTFOLIO_ITEM: (portfolioItemId) => `/api/profiles/me/portfolio/${portfolioItemId}`,
+    ADD_MEDIA: (portfolioItemId) => `/api/profiles/me/portfolio/${portfolioItemId}/media`,
+    DELETE_MEDIA: (portfolioItemId, mediaId) => `/api/profiles/me/portfolio/${portfolioItemId}/media/${mediaId}`,
   },
 
   SKILLS: {
@@ -238,6 +245,13 @@ export const API_PATHS = {
       APPROVE: (id) => `/api/admin/verifications/${id}/approve`,
       REJECT: (id) => `/api/admin/verifications/${id}/reject`,
     },
+  },
+
+  MEDIA: {
+    UPLOAD_INTENTS: "/api/media/upload-intents",
+    COMPLETE: (mediaId) => `/api/media/${mediaId}/complete`,
+    URL: (mediaId) => `/api/media/${mediaId}/url`,
+    DELETE: (mediaId) => `/api/media/${mediaId}`,
   },
 
   WAITLIST: "/api/waitlist",

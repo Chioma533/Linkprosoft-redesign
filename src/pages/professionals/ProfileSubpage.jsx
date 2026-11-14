@@ -7,6 +7,9 @@ import coverImg from "../../assets/images/IMG-20260704-WA0194.jpg";
 import avatarImg from "../../assets/images/handyman.jfif";
 import { toast } from "react-hot-toast";
 import VerificationBadge from "../../components/common/VerificationBadge";
+import PublicProfileUrlCard from "../../components/professional/PublicProfileUrlCard";
+import MediaUploader from "../../components/common/MediaUploader";
+import mediaService from "../../api/services/mediaService";
 
 const ProfileSubpage = () => {
   const { user } = useAuthStore();
@@ -26,6 +29,11 @@ const ProfileSubpage = () => {
   // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
+  const [isCertificationModalOpen, setIsCertificationModalOpen] = useState(false);
+  const [isAvatarActionsOpen, setIsAvatarActionsOpen] = useState(false);
+  const [portfolioForm, setPortfolioForm] = useState({ title: "", description: "", linkUrl: "", coverMediaId: null });
+  const [certificationForm, setCertificationForm] = useState({ title: "", issuer: "", credentialMediaId: null });
   const [editForm, setEditForm] = useState({
     bio: user?.bio || "",
     profession: user?.profession || "",
@@ -49,7 +57,12 @@ const ProfileSubpage = () => {
         if (isMounted) {
           const profile = profileRes.status === "fulfilled" ? profileRes.value : null;
           if (profile) {
-            setProfileData(profile);
+            const hydratedProfile = { ...profile };
+            try {
+              if (profile.avatarMediaId) hydratedProfile.avatarUrl = await mediaService.getUrl(profile.avatarMediaId);
+              if (profile.coverMediaId) hydratedProfile.coverImageUrl = await mediaService.getUrl(profile.coverMediaId);
+            } catch { /* fallback artwork remains available when storage is unavailable */ }
+            setProfileData(hydratedProfile);
             setEditForm({
               bio: profile.bio || user?.bio || "",
               profession: profile.profession || user?.profession || "",
@@ -66,7 +79,11 @@ const ProfileSubpage = () => {
             setCertifications(certsRes.value);
           }
           if (portfolioRes.status === "fulfilled" && Array.isArray(portfolioRes.value)) {
-            setPortfolio(portfolioRes.value);
+            const hydrated = await Promise.all(portfolioRes.value.map(async (item) => {
+              if (!item.coverMediaId) return item;
+              try { return { ...item, imageUrl: await mediaService.getUrl(item.coverMediaId) }; } catch { return item; }
+            }));
+            setPortfolio(hydrated);
           }
           if (reviewsRes.status === "fulfilled" && Array.isArray(reviewsRes.value)) {
             setReviews(reviewsRes.value);
@@ -115,6 +132,49 @@ const ProfileSubpage = () => {
     }
   };
 
+  const handleAvatarUploaded = async ({ mediaId, file }) => {
+    try {
+      await profileService.setAvatar(mediaId);
+      const url = URL.createObjectURL(file);
+      setProfileData((current) => ({ ...current, avatarMediaId: mediaId, avatarUrl: url }));
+      toast.success("Profile photo updated");
+    } catch (error) { toast.error(error.response?.data?.message || "Could not update profile photo"); }
+  };
+
+  const handleCoverUploaded = async ({ mediaId, file }) => {
+    try {
+      await profileService.setCover(mediaId);
+      const url = URL.createObjectURL(file);
+      setProfileData((current) => ({ ...current, coverMediaId: mediaId, coverImageUrl: url }));
+      toast.success("Cover image updated");
+    } catch (error) { toast.error(error.response?.data?.message || "Could not update cover image"); }
+  };
+
+  const createPortfolio = async (event) => {
+    event.preventDefault();
+    if (!portfolioForm.coverMediaId) return toast.error("Upload a portfolio image first.");
+    try {
+      const item = await profileService.addPortfolioItem(portfolioForm);
+      const imageUrl = await mediaService.getUrl(portfolioForm.coverMediaId);
+      setPortfolio((current) => [{ ...item, imageUrl }, ...current]);
+      setPortfolioForm({ title: "", description: "", linkUrl: "", coverMediaId: null });
+      setIsPortfolioModalOpen(false);
+      toast.success("Portfolio item added");
+    } catch (error) { toast.error(error.response?.data?.message || "Could not add portfolio item"); }
+  };
+
+  const createCertification = async (event) => {
+    event.preventDefault();
+    if (!certificationForm.credentialMediaId) return toast.error("Upload the certificate document first.");
+    try {
+      const item = await profileService.addCertification(certificationForm);
+      setCertifications((current) => [item, ...current]);
+      setCertificationForm({ title: "", issuer: "", credentialMediaId: null });
+      setIsCertificationModalOpen(false);
+      toast.success("Certification added");
+    } catch (error) { toast.error(error.response?.data?.message || "Could not add certification"); }
+  };
+
   const handleSkillAdded = (newSkill) => {
     setSkills((prev) => {
       const exists = prev.some(
@@ -153,8 +213,8 @@ const ProfileSubpage = () => {
   const displayProfession = profileData?.profession || user?.profession || "Skilled Craftsman & Service Professional";
   const displayBio = profileData?.bio || user?.bio || "No biography provided yet. Click 'Edit Profile' to add your professional background, experience, and specialties.";
   const displayLocation = user?.location || profileData?.location || "Nigeria";
-  const displayAvatar = user?.avatarUrl || profileData?.avatarUrl || avatarImg;
-  const displayCover = user?.coverImageUrl || profileData?.coverImageUrl || coverImg;
+  const displayAvatar = profileData?.avatarUrl || user?.avatarUrl || avatarImg;
+  const displayCover = profileData?.coverImageUrl || user?.coverImageUrl || coverImg;
   const displayRating = profileData?.avgRating || profileData?.avg_rating || 5.0;
 
   return (
@@ -164,17 +224,31 @@ const ProfileSubpage = () => {
         <div className="h-48 relative overflow-hidden bg-slate-800">
           <img src={displayCover} className="w-full h-full object-cover opacity-90" alt="Cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+          <div className="absolute right-4 top-4"><MediaUploader compact purpose="cover" label="Change cover" onUploaded={handleCoverUploaded} /></div>
         </div>
 
         {/* Profile Info Container */}
         <div className="px-4 md:px-8 pb-6 md:pb-8 relative">
           {/* Avatar floating */}
           <div className="absolute -top-16 left-4 md:left-8 flex items-end gap-5">
-            <div className="w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] relative overflow-hidden shrink-0 shadow-md">
-              <img src={displayAvatar} className="w-full h-full object-cover" alt="Avatar" />
-              <span className="absolute bottom-1 right-1 w-6 h-6 bg-[#016EA6] rounded-full border-2 border-white flex items-center justify-center" title="Verified Professional">
-                <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />
-              </span>
+            <div className="relative">
+              <button
+                type="button"
+                aria-label="Profile photo actions"
+                aria-expanded={isAvatarActionsOpen}
+                onClick={() => setIsAvatarActionsOpen((open) => !open)}
+                className="relative w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] overflow-hidden shrink-0 shadow-md"
+              >
+                <img src={displayAvatar} className="w-full h-full object-cover" alt="" />
+                <span className="absolute bottom-1 right-1 w-6 h-6 bg-[#016EA6] rounded-full border-2 border-white flex items-center justify-center" title="Verified Professional">
+                  <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />
+                </span>
+              </button>
+              {isAvatarActionsOpen && (
+                <div className="absolute left-full top-1/2 z-20 ml-3 -translate-y-1/2 rounded-xl border border-gray-100 bg-white p-2 shadow-lg">
+                  <MediaUploader compact purpose="avatar" label="Photo" onUploaded={handleAvatarUploaded} />
+                </div>
+              )}
             </div>
           </div>
 
@@ -214,6 +288,11 @@ const ProfileSubpage = () => {
           </div>
         </div>
       </div>
+
+      <PublicProfileUrlCard
+        profile={profileData}
+        onSaved={(savedProfile) => setProfileData((current) => ({ ...current, ...savedProfile }))}
+      />
 
       {/* About Me card */}
       <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-3">
@@ -362,6 +441,7 @@ const ProfileSubpage = () => {
         <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-gray-900">Certifications</h3>
+            <button type="button" onClick={() => setIsCertificationModalOpen(true)} className="text-xs font-bold text-[#016EA6]">Add</button>
           </div>
           {certifications.length > 0 ? (
             <div className="space-y-3">
@@ -391,6 +471,7 @@ const ProfileSubpage = () => {
         <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-gray-900">Portfolio & Case Studies</h3>
+            <button type="button" onClick={() => setIsPortfolioModalOpen(true)} className="text-xs font-bold text-[#016EA6]">Add project</button>
           </div>
 
           {portfolio.length > 0 ? (
@@ -565,9 +646,33 @@ const ProfileSubpage = () => {
         existingSkills={skills}
         onSkillAdded={handleSkillAdded}
       />
+
+      {isPortfolioModalOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <form onSubmit={createPortfolio} className="w-full max-w-md space-y-4 rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between"><h3 className="font-bold text-gray-900">Add portfolio project</h3><button type="button" onClick={() => setIsPortfolioModalOpen(false)}><X className="h-5 w-5" /></button></div>
+            <input required value={portfolioForm.title} onChange={(e) => setPortfolioForm((v) => ({ ...v, title: e.target.value }))} placeholder="Project title" className="w-full rounded-xl border p-3 text-sm" />
+            <textarea value={portfolioForm.description} onChange={(e) => setPortfolioForm((v) => ({ ...v, description: e.target.value }))} placeholder="Brief description" className="w-full rounded-xl border p-3 text-sm" rows={3} />
+            <input value={portfolioForm.linkUrl} onChange={(e) => setPortfolioForm((v) => ({ ...v, linkUrl: e.target.value }))} placeholder="Project link (optional)" className="w-full rounded-xl border p-3 text-sm" />
+            <MediaUploader purpose="portfolio" label="Upload cover image" onUploaded={({ mediaId }) => setPortfolioForm((v) => ({ ...v, coverMediaId: mediaId }))} />
+            <button className="w-full rounded-full bg-[#016EA6] py-3 text-sm font-bold text-white">Save project</button>
+          </form>
+        </div>
+      )}
+
+      {isCertificationModalOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
+          <form onSubmit={createCertification} className="w-full max-w-md space-y-4 rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-center justify-between"><h3 className="font-bold text-gray-900">Add certification</h3><button type="button" onClick={() => setIsCertificationModalOpen(false)}><X className="h-5 w-5" /></button></div>
+            <input required value={certificationForm.title} onChange={(e) => setCertificationForm((v) => ({ ...v, title: e.target.value }))} placeholder="Certification title" className="w-full rounded-xl border p-3 text-sm" />
+            <input value={certificationForm.issuer} onChange={(e) => setCertificationForm((v) => ({ ...v, issuer: e.target.value }))} placeholder="Issuing organization" className="w-full rounded-xl border p-3 text-sm" />
+            <MediaUploader purpose="certificate" acceptDocuments label="Upload certificate" onUploaded={({ mediaId }) => setCertificationForm((v) => ({ ...v, credentialMediaId: mediaId }))} />
+            <button className="w-full rounded-full bg-[#016EA6] py-3 text-sm font-bold text-white">Save certification</button>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
 
 export default ProfileSubpage;
-

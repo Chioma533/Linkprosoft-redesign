@@ -21,7 +21,7 @@ import ManageJobsPage from "./pages/buyer/ManageJobsPage";
 import PaymentScreen from "./pages/buyer/PaymentScreen";
 import VerificationPage from "./pages/verification/VerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
-
+import PublicProfessionalProfile from "./pages/professional/PublicProfessionalProfile";
 const App = () => {
   const { refreshCurrentUser } = useAuthStore();
 
@@ -39,6 +39,7 @@ const App = () => {
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
+
             <Route
               path="/auth/google/callback"
               element={<GoogleCallbackPage />}
@@ -94,6 +95,9 @@ const App = () => {
             <Route element={<PrivateRoutes allowedRoles={["admin"]} />}>
               <Route path="/admin/dashboard" element={<AdminDahboardPage />} />
             </Route>
+
+            {/* Keep this after every fixed route: a public profile owns one path segment. */}
+            <Route path="/:slug" element={<PublicProfessionalProfile />} />
           </Routes>
           <Toaster
             position="top-center"

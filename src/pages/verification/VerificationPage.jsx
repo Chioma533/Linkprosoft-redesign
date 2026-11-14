@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -43,6 +43,7 @@ const VerificationPage = () => {
     selfieCaptured,
     setSelfieCaptured,
     setSelfieBlob,
+    setSelfieMediaId,
     selfiePreviewUrl,
     setSelfiePreviewUrl,
 
@@ -59,12 +60,23 @@ const VerificationPage = () => {
     submitPaymentStep,
     submitFinalVerification,
   } = useVerification();
+  const selfieObjectUrlRef = useRef(null);
+
+  useEffect(() => () => {
+    if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
+  }, []);
 
   const handleSelfieUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) return;
+      if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
+      const previewUrl = URL.createObjectURL(file);
+      selfieObjectUrlRef.current = previewUrl;
       setSelfieBlob(file);
-      setSelfiePreviewUrl(URL.createObjectURL(file));
+      setSelfieMediaId(null);
+      setSelfiePreviewUrl(previewUrl);
       setSelfieCaptured(true);
     }
   };

@@ -13,17 +13,12 @@ export const verificationService = {
     }
   },
 
-  // Step 1: Submit Identity Details & ID Upload (Multipart Form-Data)
-  submitIdentity: async (formData) => {
+  // Step 1: Submit identity details with an already-confirmed private media asset.
+  submitIdentity: async (payload) => {
     try {
       const response = await axiosInstance.post(
         API_PATHS.VERIFICATION.SUBMIT_IDENTITY,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        payload
       );
       return response.data?.data || response.data;
     } catch (error) {
@@ -46,17 +41,12 @@ export const verificationService = {
     }
   },
 
-  // Step 3: Submit Face Selfie & Liveness (Multipart Form-Data or Base64)
-  submitFaceVerification: async (formData) => {
+  // Step 3: Submit a confirmed private selfie media asset.
+  submitFaceVerification: async (payload) => {
     try {
       const response = await axiosInstance.post(
         API_PATHS.VERIFICATION.SUBMIT_FACE,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        payload
       );
       return response.data?.data || response.data;
     } catch (error) {

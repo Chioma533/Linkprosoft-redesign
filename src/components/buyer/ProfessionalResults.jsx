@@ -87,6 +87,7 @@ const ProfessionalResults = ({
                   location={locationName}
                   avatarUrl={
                     pro.avatarUrl ||
+                    pro.user?.avatarUrl ||
                     pro.user?.avatar ||
                     "/professional_avatar.png"
                   }

@@ -24,3 +24,5 @@ dist-ssr
 *.sln
 *.sw?
 docs/*
+!docs/implementation/
+!docs/implementation/public-professional-profiles.md

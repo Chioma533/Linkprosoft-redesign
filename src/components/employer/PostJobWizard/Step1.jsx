@@ -10,11 +10,12 @@ import { jobService } from "../../../api/services/jobService";
 const CATEGORIES = ["Home Services", "Design", "Tech", "Events"];
 const DEFAULT_SKILLS = [
   { id: "25bf49c9-83d6-4869-ad83-a72753b1ecdc", name: "Carpentry" },
-  { id: "plumber-skill-id", name: "Plumbing" },
-  { id: "electrician-skill-id", name: "Electrical" },
-  { id: "painter-skill-id", name: "Painting" },
+  { id: "33f2e7d6-6b29-4267-9222-b78aa2913432", name: "Plumbing" },
+  { id: "614c5981-6c4c-4027-949a-8590d2e02c36", name: "Electrical" },
+  { id: "42ec6987-83d7-4138-ba13-37a20af7d33d", name: "Painting" },
   { id: "mason-skill-id", name: "Masonry" },
   { id: "welder-skill-id", name: "Welding" },
+  { id: "7a67cb09-5a72-4b3f-a64c-fbee17aa9cc6", name: "Web development" },
 ];
 
 const Step1 = ({ data, onChange, onBack, onNext }) => {
@@ -85,11 +86,10 @@ const Step1 = ({ data, onChange, onBack, onNext }) => {
               onClick={() => setIsSkillOpen((open) => !open)}
               aria-haspopup="listbox"
               aria-expanded={isSkillOpen}
-              className={`flex min-w-[140px] items-center justify-between gap-3 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#016EA6]/10 ${
-                isSkillOpen
-                  ? "border-[#016EA6] text-[#016EA6] shadow-sm"
-                  : "border-gray-200 text-gray-600 hover:border-gray-400"
-              }`}
+              className={`flex min-w-[140px] items-center justify-between gap-3 rounded-full border bg-white px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#016EA6]/10 ${isSkillOpen
+                ? "border-[#016EA6] text-[#016EA6] shadow-sm"
+                : "border-gray-200 text-gray-600 hover:border-gray-400"
+                }`}
             >
               <span>{data.skill || "Select skill"}</span>
               <svg
@@ -105,11 +105,10 @@ const Step1 = ({ data, onChange, onBack, onNext }) => {
             <div
               role="listbox"
               aria-label="Select skillset"
-              className={`absolute left-0 top-full z-20 mt-2 w-full min-w-[190px] max-h-56 overflow-y-auto origin-top rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg shadow-gray-200/60 transition-all duration-200 ${
-                isSkillOpen
-                  ? "translate-y-0 opacity-100"
-                  : "pointer-events-none -translate-y-2 opacity-0"
-              }`}
+              className={`absolute left-0 top-full z-20 mt-2 w-full min-w-[190px] max-h-56 overflow-y-auto origin-top rounded-2xl border border-gray-100 bg-white p-1.5 shadow-lg shadow-gray-200/60 transition-all duration-200 ${isSkillOpen
+                ? "translate-y-0 opacity-100"
+                : "pointer-events-none -translate-y-2 opacity-0"
+                }`}
             >
               {skillsCatalog.map((s) => {
                 const sName = s.name || s.title || s;
@@ -125,11 +124,10 @@ const Step1 = ({ data, onChange, onBack, onNext }) => {
                       onChange("skillId", sId);
                       setIsSkillOpen(false);
                     }}
-                    className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-colors cursor-pointer ${
-                      data.skill === sName
-                        ? "bg-[#EEF5F9] font-semibold text-[#016EA6]"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
+                    className={`w-full rounded-xl px-3 py-2 text-left text-sm transition-colors cursor-pointer ${data.skill === sName
+                      ? "bg-[#EEF5F9] font-semibold text-[#016EA6]"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
                   >
                     {sName}
                   </button>

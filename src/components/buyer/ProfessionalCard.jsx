@@ -19,20 +19,33 @@ const ProfessionalCard = ({
   isSelected = false,
   onContact,
   onBookmark,
+  onViewProfile,
   user,
 }) => {
   const [bookmarked, setBookmarked] = useState(isBookmarked);
   const [isContacting, setIsContacting] = useState(false);
 
-  const handleBookmark = () => {
+  const handleBookmark = (event) => {
+    event.stopPropagation();
     setBookmarked(!bookmarked);
     onBookmark?.(!bookmarked);
   };
 
-  const handleContact = async () => {
+  const handleContact = async (event) => {
+    event.stopPropagation();
     setIsContacting(true);
     await onContact?.();
     setTimeout(() => setIsContacting(false), 1000);
+  };
+
+  const handleViewProfile = () => onViewProfile?.();
+
+  const handleCardKeyDown = (event) => {
+    if (event.target !== event.currentTarget || !onViewProfile) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      handleViewProfile();
+    }
   };
 
   // Render star rating
@@ -72,7 +85,12 @@ const ProfessionalCard = ({
   return (
     <article
       id={`professional-card-${id}`}
-      className="bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border border-transparent hover:border-[#016EA6]"
+      onClick={onViewProfile ? handleViewProfile : undefined}
+      onKeyDown={handleCardKeyDown}
+      role={onViewProfile ? "button" : undefined}
+      tabIndex={onViewProfile ? 0 : undefined}
+      aria-label={onViewProfile ? `View ${name}'s public profile` : undefined}
+      className={`bg-[#f9f9f9] rounded-2xl transition-all duration-300 flex flex-col overflow-hidden group relative border border-transparent hover:border-[#016EA6] ${onViewProfile ? "cursor-pointer focus:outline-none focus-visible:ring-4 focus-visible:ring-[#016EA6]/25" : ""}`}
     >
       {/* Card body */}
       <div className="p-4 sm:p-6 flex flex-col gap-4 flex-1">

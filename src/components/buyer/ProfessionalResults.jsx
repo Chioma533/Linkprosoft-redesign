@@ -1,6 +1,9 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import ProfessionalCard from "./ProfessionalCard";
 import BuyerPagination from "./BuyerPagination";
+import { getPublicProfilePath } from "../../utils/publicProfilePath";
 
 const ProfessionalResults = ({
   filters,
@@ -11,6 +14,7 @@ const ProfessionalResults = ({
   totalPages,
   onPageChange,
 }) => {
+  const navigate = useNavigate();
   const getSectionTitle = () => {
     if (filters.searchQuery) {
       return (
@@ -62,6 +66,8 @@ const ProfessionalResults = ({
             paginatedProfessionals.map((pro, idx) => {
               const fullName =
                 pro.name ||
+                pro.fullName ||
+                pro.user?.fullName ||
                 `${pro.user?.firstName || ""} ${
                   pro.user?.lastName || ""
                 }`.trim() ||
@@ -98,6 +104,11 @@ const ProfessionalResults = ({
                   user={{ ...pro, ...pro.user }}
                   isBookmarked={false}
                   isSelected={idx === 0 && safeCurrentPage === 1}
+                  onViewProfile={() => {
+                    const profilePath = getPublicProfilePath(pro.publicSlug);
+                    if (profilePath) navigate(profilePath);
+                    else toast("Public profile for this user unavailable");
+                  }}
                   onContact={() => console.log(`Contacting ${fullName}`)}
                   onBookmark={(val) =>
                     console.log(`Bookmarked ${fullName}: ${val}`)

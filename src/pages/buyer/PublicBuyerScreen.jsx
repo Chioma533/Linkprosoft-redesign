@@ -17,6 +17,7 @@ import ProfessionalCard from "../../components/buyer/ProfessionalCard";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 import { searchService } from "../../api/services/searchService";
+import { getPublicProfilePath } from "../../utils/publicProfilePath";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 
 /* ─────────────────────────────────────────────────────────────
@@ -320,7 +321,7 @@ const PublicBuyerScreen = () => {
     return list.filter((pro) => {
       if (!pro) return false;
       const search = searchQuery?.toLowerCase() || "";
-      const name = pro.name || `${pro.user?.firstName || ''} ${pro.user?.lastName || ''}`.trim();
+      const name = pro.name || pro.fullName || pro.user?.fullName || `${pro.user?.firstName || ''} ${pro.user?.lastName || ''}`.trim();
       const proLocation = pro.location || pro.user?.location || "";
       const proRating = pro.rating ?? pro.avgRating ?? 0;
       const proPrice = pro.pricePerDay ?? pro.hourlyRate ?? 0;
@@ -613,6 +614,8 @@ const PublicBuyerScreen = () => {
               paginatedProfessionals.map((pro, idx) => {
                 const fullName =
                   pro.name ||
+                  pro.fullName ||
+                  pro.user?.fullName ||
                   `${pro.user?.firstName || ""} ${pro.user?.lastName || ""}`.trim() ||
                   "Unknown";
                 const roleName =
@@ -639,6 +642,11 @@ const PublicBuyerScreen = () => {
                     user={{ ...pro, ...pro.user }}
                     isBookmarked={false}
                     isSelected={idx === 0 && safeCurrentPage === 1}
+                    onViewProfile={() => {
+                      const profilePath = getPublicProfilePath(pro.publicSlug);
+                      if (profilePath) navigate(profilePath);
+                      else toast("Public profile for this user unavailable");
+                    }}
                     onContact={() => navigate("/login")}
                     onBookmark={() => navigate("/login")}
                   />

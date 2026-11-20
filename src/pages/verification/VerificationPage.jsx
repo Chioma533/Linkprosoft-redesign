@@ -1,14 +1,19 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
   Camera,
   Check,
-  CheckCircle2,
   CreditCard,
   Layers3,
   UserRound,
   X,
+  Award,
+  Star,
+  Building2,
+  Landmark,
+  ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
 
 import selfieImage from "../../assets/images/faceverification_illustration.jpg";
@@ -23,9 +28,19 @@ import VerificationField from "../../components/verification/VerificationField";
 import VerificationPreview from "../../components/verification/VerificationPreview";
 import VerificationActionBar from "../../components/verification/VerificationActionBar";
 import ProfessionalVerification from "../../components/verification/ProfessionalVerification";
+import VerificationBadge from "../../components/common/VerificationBadge";
+import CertificationPathwayModal from "../../components/verification/CertificationPathwayModal";
+import RatingPathwayModal from "../../components/verification/RatingPathwayModal";
+import CompanyVerificationModal from "../../components/verification/CompanyVerificationModal";
+import GovernmentVerificationModal from "../../components/verification/GovernmentVerificationModal";
+import BadgeMaintenanceModal from "../../components/verification/BadgeMaintenanceModal";
+
 import useVerification from "../../hooks/verification/useVerification";
+import { useAuthStore } from "../../store/authStore";
+import { getVerificationBadge, isSubscriptionLapsed } from "../../utils/verificationBadge";
 
 const VerificationPage = () => {
+  const { user } = useAuthStore();
   const {
     view,
     setView,
@@ -60,7 +75,22 @@ const VerificationPage = () => {
     submitPaymentStep,
     submitFinalVerification,
   } = useVerification();
+
   const selfieObjectUrlRef = useRef(null);
+
+  // Modal dialog states
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [isGovernmentModalOpen, setIsGovernmentModalOpen] = useState(false);
+  const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
+
+  // Local user verification state override to reflect immediate pathway submissions
+  const [localUserOverrides, setLocalUserOverrides] = useState({});
+  const activeUser = { ...user, ...localUserOverrides };
+
+  const currentBadge = getVerificationBadge(activeUser);
+  const isLapsed = isSubscriptionLapsed(activeUser);
 
   useEffect(() => () => {
     if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
@@ -99,101 +129,324 @@ const VerificationPage = () => {
 
     return (
       <main className="verification-page verification-overview-page min-h-screen bg-[#f7f7f7] px-4 py-6 text-[#171a1c] sm:px-8 sm:py-12">
-        <section className="verification-shell mx-auto max-w-[960px] rounded-[28px] bg-white px-4 py-7 sm:px-12 sm:py-16">
+        <section className="verification-shell mx-auto max-w-[960px] rounded-[28px] bg-white px-4 py-7 sm:px-12 sm:py-12 space-y-8">
+          {/* Header */}
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:items-start sm:justify-between sm:gap-5">
             <div className="min-w-0">
-              <h1 className="text-[clamp(1.75rem,4vw,2.35rem)] leading-tight">
-                Holla! Let&apos;s Get You Verified
+              <h1 className="text-[clamp(1.75rem,4vw,2.35rem)] leading-tight font-extrabold text-gray-900">
+                LinkProSoft Verification & Trust Badges
               </h1>
 
               <p className="mt-2 max-w-[570px] text-sm leading-relaxed text-[#777b7d]">
-                Complete your verification to unlock more opportunities, build
-                trust with clients, and start receiving verified job requests on
-                Linkprosoft.
+                Distinguish your professional credibility, corporate identity, or government recognition with our three-tier verification system.
               </p>
             </div>
 
             <img
               src={IdentityIllustration}
               alt=""
-              className="w-20 shrink-0 text-[#0879aa] sm:w-[174px]"
+              className="w-20 shrink-0 text-[#0879aa] sm:w-[150px]"
             />
           </div>
 
-          <div className="mt-7 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
-            {[
-              {
-                icon: UserRound,
-                title: "Verify Your Information",
-                description:
-                  "Get your details verified to create a trusted profile and start reaching to clients.",
-                step: "identity",
-                isCompleted: isIdentityCompleted,
-                isLocked: false,
-              },
-              {
-                icon: Layers3,
-                title: "Professional Verification",
-                description:
-                  "Confirm your skills and credentials to strengthen your profile and connect with clients.",
-                step: "professional",
-                isCompleted: isProfessionalCompleted,
-                isLocked: !isIdentityCompleted,
-              },
-              {
-                icon: CreditCard,
-                title: "Payment Verification",
-                description:
-                  "Add and confirm your payment information so we can process your earnings safely and securely.",
-                step: "payment",
-                isCompleted: isPaymentCompleted,
-                isLocked: !isIdentityCompleted || !isProfessionalCompleted,
-              },
-            ].map(({ icon: Icon, title, description, step, isCompleted, isLocked }) => (
-              <article
-                key={title}
-                className={`flex min-h-[230px] min-w-0 flex-col rounded-2xl border p-5 transition sm:min-h-[250px] ${
-                  isLocked
-                    ? "border-[#e7e8e8] bg-[#fafafa] opacity-60"
-                    : "border-[#e7e8e8] bg-white"
-                }`}
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#eef8fc] text-[#0879aa]">
-                  <Icon size={24} />
+          {/* Current Verification Status Panel */}
+          <div className="rounded-2xl border border-gray-150 p-5 bg-gradient-to-br from-gray-50/80 to-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center shadow-xs">
+                {currentBadge ? (
+                  <VerificationBadge user={activeUser} size="lg" />
+                ) : (
+                  <ShieldCheck className="w-6 h-6 text-gray-400" />
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-gray-900">
+                    {currentBadge
+                      ? `Active Badge: ${currentBadge.category.toUpperCase()}`
+                      : "Account Unverified"}
+                  </h3>
+                  <VerificationBadge user={activeUser} size="sm" />
                 </div>
-
-                <span className="mt-7 w-fit rounded-md bg-[#eaf3f6] px-3 py-1 text-[10px] text-[#555b5e]">
-                  Duration: 1 min
-                </span>
-
-                <h2 className="mt-4 text-base">{title}</h2>
-
-                <p className="mt-1 text-xs leading-relaxed text-[#85898b]">
-                  {description}
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {currentBadge
+                    ? `Public display active • Maintained via ${activeUser.role === "government_agency" ? "Institutional Accreditation" : "Subscription"}`
+                    : isLapsed
+                    ? "Verification approved, but badge is temporarily hidden because subscription maintenance has lapsed. Renew to restore display."
+                    : "No verification badge is currently displayed. Choose an eligible pathway below to apply."}
                 </p>
+              </div>
+            </div>
 
-                <div className="mt-auto flex items-center justify-between pt-5 text-xs text-[#85898b]">
-                  <span>
-                    Learn more <ArrowRight size={14} className="ml-1 inline" />
+            <div className="flex items-center gap-2.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsMaintenanceModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-gray-400" />
+                <span>Subscription Status</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Verification Pathways Section */}
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-base font-extrabold text-gray-900">
+                Available Verification Pathways & Categories
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                LinkProSoft enforces three separate verification tiers with strict administrative review.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Pathway A1: Professional - Certification */}
+              <div className="rounded-2xl border border-sky-150 p-5 bg-sky-50/30 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#e6f1f6] text-[#016EA6]">
+                      <Award className="w-3 h-3" />
+                      Blue Badge (#016EA6)
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-400">Pathway 1</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Certified Professional</h3>
+                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                    For professionals with government-issued or recognised trade licenses (plumbers, engineers, electricians).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCertModalOpen(true)}
+                  className="mt-5 w-full rounded-xl bg-[#016EA6] hover:bg-[#061EA6] text-white py-2.5 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Submit Certification</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Pathway A2: Professional - Rating based */}
+              <div className="rounded-2xl border border-sky-150 p-5 bg-sky-50/30 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#e6f1f6] text-[#016EA6]">
+                      <Star className="w-3 h-3 fill-current" />
+                      Blue Badge (#016EA6)
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-400">Pathway 2</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Rating-Based Professional</h3>
+                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                    For professionals without formal certifications. Qualify through average ratings (≥ 4.5) and completed jobs (≥ 10).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsRatingModalOpen(true)}
+                  className="mt-5 w-full rounded-xl bg-white border border-[#016EA6] text-[#016EA6] hover:bg-sky-50 py-2.5 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Check Rating Eligibility</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              {/* Category B: Company / Employer Verified */}
+              <div className="rounded-2xl border border-amber-150 p-5 bg-amber-50/20 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#fdf6e7] text-[#D69A16]">
+                      <Building2 className="w-3 h-3" />
+                      Gold Badge (#D69A16)
+                    </span>
+                    <span className="text-[10px] font-bold text-gray-400">Corporate</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-gray-900">Company & Employer</h3>
+                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                    For registered companies and employers. Verified via CAC certificates and corporate identity evidence.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsCompanyModalOpen(true)}
+                  className="mt-5 w-full rounded-xl bg-[#D69A16] hover:bg-amber-600 text-white py-2.5 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Apply for Company Badge</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Category C: Government Agency Banner */}
+            <div className="rounded-2xl border border-gray-200 p-5 bg-gray-50/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#73777D] text-white flex items-center justify-center shrink-0">
+                  <Landmark className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-gray-900">
+                      Government Institutional Accreditation
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#f1f2f3] text-[#73777D]">
+                      Ash/Grey Badge (#73777D)
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    Official accreditation for ministries, departments, and government bodies. Requires institutional administrative validation.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsGovernmentModalOpen(true)}
+                className="shrink-0 rounded-xl px-4 py-2 text-xs font-bold border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition"
+              >
+                Institutional Verification
+              </button>
+            </div>
+          </div>
+
+          {/* Standard Stepper Cards */}
+          <div className="pt-2">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
+              Core Identity & Financial Enrollment
+            </h3>
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
+              {[
+                {
+                  icon: UserRound,
+                  title: "Verify Your Information",
+                  description:
+                    "Get your personal details and government ID verified to build platform trust.",
+                  step: "identity",
+                  isCompleted: isIdentityCompleted,
+                  isLocked: false,
+                },
+                {
+                  icon: Layers3,
+                  title: "Professional Profile",
+                  description:
+                    "Confirm your trade, experience, and service categories to strengthen your profile.",
+                  step: "professional",
+                  isCompleted: isProfessionalCompleted,
+                  isLocked: !isIdentityCompleted,
+                },
+                {
+                  icon: CreditCard,
+                  title: "Payout Verification",
+                  description:
+                    "Add and confirm your bank account so contract earnings are disbursed safely.",
+                  step: "payment",
+                  isCompleted: isPaymentCompleted,
+                  isLocked: !isIdentityCompleted || !isProfessionalCompleted,
+                },
+              ].map(({ icon: Icon, title, description, step, isCompleted, isLocked }) => (
+                <article
+                  key={title}
+                  className={`flex min-h-[220px] min-w-0 flex-col rounded-2xl border p-5 transition ${
+                    isLocked
+                      ? "border-[#e7e8e8] bg-[#fafafa] opacity-60"
+                      : "border-[#e7e8e8] bg-white"
+                  }`}
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eef8fc] text-[#0879aa]">
+                    <Icon size={22} />
+                  </div>
+
+                  <span className="mt-5 w-fit rounded-md bg-[#eaf3f6] px-2.5 py-0.5 text-[10px] text-[#555b5e]">
+                    Step Duration: 1 min
                   </span>
 
-                  <button
-                    type="button"
-                    disabled={isLocked}
-                    onClick={() => !isLocked && setView(step)}
-                    className={`rounded-full px-4 py-2 text-[10px] text-white transition ${
-                      isLocked
-                        ? "cursor-not-allowed bg-gray-300"
-                        : "bg-[#0879aa] hover:bg-[#076b97] cursor-pointer"
-                    }`}
-                  >
-                    {isCompleted ? "Edit Step" : isLocked ? "Locked" : "Start Verification"}
-                  </button>
-                </div>
-              </article>
-            ))}
+                  <h4 className="mt-3 text-sm font-bold text-gray-900">{title}</h4>
+
+                  <p className="mt-1 text-xs leading-relaxed text-[#85898b]">
+                    {description}
+                  </p>
+
+                  <div className="mt-auto flex items-center justify-between pt-4 text-xs text-[#85898b]">
+                    <button
+                      type="button"
+                      disabled={isLocked}
+                      onClick={() => !isLocked && setView(step)}
+                      className={`rounded-full px-4 py-2 text-[10px] text-white transition ${
+                        isLocked
+                          ? "cursor-not-allowed bg-gray-300"
+                          : "bg-[#0879aa] hover:bg-[#076b97] cursor-pointer"
+                      }`}
+                    >
+                      {isCompleted ? "Edit Step" : isLocked ? "Locked" : "Start Step"}
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
+
+        {/* Modals */}
+        <CertificationPathwayModal
+          isOpen={isCertModalOpen}
+          onClose={() => setIsCertModalOpen(false)}
+          onSubmitSuccess={(certData) => {
+            setLocalUserOverrides((prev) => ({
+              ...prev,
+              certification_status: "pending",
+              certification: certData,
+            }));
+          }}
+        />
+
+        <RatingPathwayModal
+          isOpen={isRatingModalOpen}
+          onClose={() => setIsRatingModalOpen(false)}
+          metrics={{
+            rating: activeUser.rating || 4.9,
+            completedJobs: activeUser.completedJobs || 12,
+            totalReviews: activeUser.totalReviews || 8,
+          }}
+          onSubmitSuccess={(ratingData) => {
+            setLocalUserOverrides((prev) => ({
+              ...prev,
+              rating_application: ratingData,
+            }));
+          }}
+        />
+
+        <CompanyVerificationModal
+          isOpen={isCompanyModalOpen}
+          onClose={() => setIsCompanyModalOpen(false)}
+          onSubmitSuccess={(companyData) => {
+            setLocalUserOverrides((prev) => ({
+              ...prev,
+              company_verification: companyData,
+            }));
+          }}
+        />
+
+        <GovernmentVerificationModal
+          isOpen={isGovernmentModalOpen}
+          onClose={() => setIsGovernmentModalOpen(false)}
+          onSubmitSuccess={(govData) => {
+            setLocalUserOverrides((prev) => ({
+              ...prev,
+              government_verification: govData,
+            }));
+          }}
+        />
+
+        <BadgeMaintenanceModal
+          isOpen={isMaintenanceModalOpen}
+          onClose={() => setIsMaintenanceModalOpen(false)}
+          user={activeUser}
+          onRenewSuccess={(renewedUser) => {
+            setLocalUserOverrides((prev) => ({
+              ...prev,
+              ...renewedUser,
+            }));
+          }}
+        />
       </main>
     );
   }
@@ -261,36 +514,19 @@ const VerificationPage = () => {
 
                   <VerificationField
                     label="Nationality"
-                    placeholder="Enter name"
-                    value={profile.nationality || ""}
+                    placeholder="Select nationality"
+                    value={profile.nationality || "Nigerian"}
                     onChange={(e) => updateProfile("nationality", e.target.value)}
                     error={errors.nationality}
                   />
-
-                  <label className="sm:col-span-2 text-xs text-[#44484a]">
-                    Upload ID
-                    <input
-                      type="file"
-                      accept="image/*,application/pdf"
-                      onChange={(event) => {
-                        const file = event.target.files?.[0];
-                        if (file) handleIdentityUpload(file);
-                      }}
-                      className="verification-upload-field mt-2 block h-20 w-full cursor-pointer rounded-xl border border-[#e7e8e8] px-4 py-7 text-xs text-[#85898b] file:hidden"
-                    />
-                    {uploadedFile && (
-                      <span className="mt-1 block text-[10px] text-[#0879aa]">
-                        {uploadedFile}
-                      </span>
-                    )}
-                    {errors.idDocument && (
-                      <span className="mt-1 block text-[10px] text-red-500">
-                        {errors.idDocument}
-                      </span>
-                    )}
-                  </label>
                 </div>
-                <VerificationPreview profile={profile} uploadedFile={uploadedFile} />
+
+                <VerificationPreview
+                  profile={profile}
+                  onUpload={handleIdentityUpload}
+                  uploadedFile={uploadedFile}
+                  error={errors.idDocument}
+                />
               </div>
 
               <VerificationActionBar
@@ -304,8 +540,8 @@ const VerificationPage = () => {
           {view === "professional" && (
             <>
               <VerificationHeader
-                title="Profession Verification."
-                description="Get your details verified to create a trusted profile and start reaching to clients"
+                title="Professional Verification."
+                description="Showcase your professional background and service disciplines"
                 image={ProfessionalIllustration}
               />
 
@@ -313,8 +549,8 @@ const VerificationPage = () => {
                 profile={profile}
                 updateProfile={updateProfile}
                 errors={errors}
-                isLoading={isLoading}
                 uploadedFile={uploadedFile}
+                isLoading={isLoading}
                 onBack={() => setView("identity")}
                 onContinue={submitProfessionalStep}
               />
@@ -325,54 +561,65 @@ const VerificationPage = () => {
             <>
               <VerificationHeader
                 title="Face Verification."
-                description="Kindly take a quick selfie to let us confirm you are not a bot"
-                image={PreviewIllustration}
+                description="Snap a selfie to match your face with the identity document provided"
+                image={selfieImage}
               />
 
-              <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.1fr_.9fr] sm:p-6">
-                <div className="relative flex min-h-[300px] items-center justify-center overflow-hidden rounded-2xl bg-[#dbe5e7] sm:min-h-[380px]">
-                  <img
-                    src={selfiePreviewUrl || selfieImage}
-                    alt="Selfie verification preview"
-                    className="h-full w-full object-cover"
-                  />
+              <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.25fr_.75fr] sm:p-6">
+                <div>
+                  <div className="overflow-hidden rounded-2xl border border-[#e7e8e8] bg-[#f9fbfb] p-6 text-center">
+                    {selfiePreviewUrl ? (
+                      <div className="relative mx-auto h-52 w-52 overflow-hidden rounded-full border-4 border-[#0879aa] shadow-md">
+                        <img
+                          src={selfiePreviewUrl}
+                          alt="Selfie"
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelfieCaptured(false);
+                            setSelfiePreviewUrl(null);
+                            setSelfieBlob(null);
+                          }}
+                          className="absolute bottom-2 right-2 rounded-full bg-rose-500 p-1.5 text-white shadow-md hover:bg-rose-600 transition"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="mx-auto flex h-48 w-48 flex-col items-center justify-center rounded-full border-2 border-dashed border-[#0879aa] bg-[#eef8fc]">
+                        <Camera size={44} className="text-[#0879aa]" />
+                        <span className="mt-2 text-xs font-semibold text-[#0879aa]">
+                          Capture Face
+                        </span>
+                      </div>
+                    )}
 
-                  <div className="absolute inset-x-8 top-1/2 h-32 -translate-y-1/2 rounded-[48%] border-2 border-[#52d6e8]" />
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                      <label className="cursor-pointer rounded-full bg-[#0879aa] px-6 py-2.5 text-xs font-semibold text-white hover:bg-[#076b97] transition">
+                        <span>{selfieCaptured ? "Retake Photo" : "Upload Selfie"}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          capture="user"
+                          onChange={handleSelfieUpload}
+                          className="sr-only"
+                        />
+                      </label>
+                    </div>
 
-                  <label className="verification-camera-button absolute bottom-5 cursor-pointer rounded-full bg-white px-5 py-3 text-xs text-[#242729] shadow-sm hover:bg-gray-50 transition">
-                    <Camera size={15} className="mr-2 inline" />
-                    {selfieCaptured ? "Selfie captured" : "Take Selfie"}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      capture="user"
-                      onChange={handleSelfieUpload}
-                      className="hidden"
-                    />
-                  </label>
+                    {errors.selfie && (
+                      <p className="mt-3 text-xs text-rose-500">{errors.selfie}</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="verification-preview-panel flex min-h-[300px] flex-col rounded-2xl bg-[#fafafa] p-5 sm:min-h-[380px]">
-                  <div className="flex items-center justify-between border-b border-[#ececec] pb-4 text-sm text-[#424648]">
-                    Preview
-                    <X size={16} className="text-[#787d80]" />
-                  </div>
-
-                  <div className="flex flex-1 items-center justify-center py-5">
-                    <img
-                      src={selfiePreviewUrl || selfieImage}
-                      alt="Captured selfie"
-                      className="max-h-[245px] rounded-xl object-cover"
-                    />
-                  </div>
-
-                  {selfieCaptured && (
-                    <p className="text-center text-xs text-[#0879aa]">
-                      <CheckCircle2 size={14} className="mr-1 inline" />
-                      Ready for review
-                    </p>
-                  )}
-                </div>
+                <VerificationPreview
+                  profile={profile}
+                  compact
+                  uploadedFile={uploadedFile}
+                />
               </div>
 
               <VerificationActionBar
@@ -386,86 +633,74 @@ const VerificationPage = () => {
           {view === "payment" && (
             <>
               <VerificationHeader
-                title="Payment Verification"
-                description="Add and confirm your payment information so we can process your earnings safely and securely."
+                title="Payment Setup & Payout Verification."
+                description="Securely link your verified bank details for automated escrow releases"
                 image={PaymentIllustration}
               />
 
               <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.25fr_.75fr] sm:p-6">
-                <div className="grid content-start gap-5 sm:grid-cols-2">
-                  <label className="block text-xs text-[#44484a]">
-                    <span>Bank Name</span>
-                    <input
-                      list="banks-datalist"
-                      placeholder="Enter bank name"
-                      value={profile.bankName || ""}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">
+                      Commercial Bank
+                    </label>
+                    <select
+                      value={profile.bankCode || ""}
                       onChange={(e) => {
-                        const name = e.target.value;
-                        const matching = banks.find((b) => b.name.toLowerCase() === name.toLowerCase());
-                        updateProfile("bankName", name);
-                        if (matching) {
-                          updateProfile("bankCode", matching.code);
-                          if (profile.accountNumber && profile.accountNumber.length === 10) {
-                            resolveBankAccount(matching.code, profile.accountNumber);
-                          }
-                        }
+                        const code = e.target.value;
+                        const b = banks.find((item) => item.code === code);
+                        updateProfile("bankCode", code);
+                        updateProfile("bankName", b?.name || "");
                       }}
-                      className="verification-input mt-2 h-10 w-full rounded-full border border-[#e7e8e8] px-4 text-xs text-[#333] outline-none placeholder:text-[#a5a8aa] focus:border-[#0879aa]"
-                    />
-                    <datalist id="banks-datalist">
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-xs outline-none focus:border-[#0879aa]"
+                    >
+                      <option value="">Select Financial Institution</option>
                       {banks.map((b) => (
-                        <option key={b.code} value={b.name} />
+                        <option key={b.code} value={b.code}>
+                          {b.name}
+                        </option>
                       ))}
-                    </datalist>
+                    </select>
                     {errors.bankName && (
-                      <span className="mt-1 block text-[10px] text-red-500">
-                        {errors.bankName}
-                      </span>
+                      <p className="text-[10px] text-rose-500 mt-1">{errors.bankName}</p>
                     )}
-                  </label>
+                  </div>
 
-                  <VerificationField
-                    label="Account Number"
-                    placeholder="Enter number"
-                    maxLength={10}
-                    value={profile.accountNumber || ""}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "");
-                      updateProfile("accountNumber", val);
-                      if (val.length === 10 && profile.bankCode) {
-                        resolveBankAccount(profile.bankCode, val);
-                      }
-                    }}
-                    error={errors.accountNumber}
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <VerificationField
+                      label="Account Number (10-Digit NUBAN)"
+                      placeholder="0123456789"
+                      value={profile.accountNumber || ""}
+                      onChange={(e) => updateProfile("accountNumber", e.target.value)}
+                      error={errors.accountNumber}
+                    />
 
-                  <VerificationField
-                    label="account_name"
-                    placeholder="Enter account name"
-                    value={profile.account_name || profile.accountName || ""}
-                    onChange={(e) => updateProfile("account_name", e.target.value)}
-                    error={errors.account_name}
-                  />
+                    <VerificationField
+                      label="Resolved Account Name"
+                      placeholder="Account Holder Name"
+                      value={profile.accountName || profile.account_name || ""}
+                      disabled
+                      onChange={() => {}}
+                      error={errors.accountName}
+                    />
+                  </div>
 
-                  <VerificationField
-                    label="Set payment password"
-                    optional
-                    placeholder="Enter password"
-                    type="password"
-                    value={profile.paymentPassword || ""}
-                    onChange={(e) => updateProfile("paymentPassword", e.target.value)}
-                  />
-
-                  <VerificationField
-                    label="BVN"
-                    optional
-                    placeholder="Enter name"
-                    maxLength={11}
-                    value={profile.bvn || ""}
-                    onChange={(e) => updateProfile("bvn", e.target.value)}
-                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => resolveBankAccount(profile.bankCode, profile.accountNumber)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[#eef8fc] text-[#0879aa] hover:bg-sky-100 transition cursor-pointer"
+                    >
+                      Verify Account Number
+                    </button>
+                  </div>
                 </div>
-                <VerificationPreview profile={profile} compact uploadedFile={uploadedFile} />
+
+                <VerificationPreview
+                  profile={profile}
+                  compact
+                  uploadedFile={uploadedFile}
+                />
               </div>
 
               <VerificationActionBar
@@ -479,59 +714,34 @@ const VerificationPage = () => {
           {view === "review" && (
             <>
               <VerificationHeader
-                title="Preview"
-                description="Kindly review the information that you have provided, Meanwhile you can always edit on the profile section."
+                title="Review & Final Confirmation"
+                description="Double-check your submitted dossier before committing to platform compliance review"
                 image={PreviewIllustration}
               />
 
-              <div className="verification-panel mt-6 rounded-2xl border border-[#e7e8e8] p-3 sm:p-5">
-                <div className="verification-preview-panel rounded-2xl bg-[#fafafa] p-5 sm:p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Column 1 */}
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-6 text-xs">
-                      {[
-                        ["First Name", profile.firstName || "Marvellous"],
-                        ["Last Name", profile.lastName || "Oluwaseun"],
-                        ["Phone Number", profile.phone || "+2349066760056"],
-                        ["Date of birth", profile.dateOfBirth || "July 09 2002"],
-                        ["Residential Address", profile.address || "No 2 Aremu olatunbosun"],
-                        ["Nationality", profile.nationality || "Nigerian"],
-                      ].map(([label, value]) => (
-                        <div key={label} className="min-w-0">
-                          <p className="text-[#44484a]">{label}</p>
-                          <p className="mt-1 truncate text-[#85898b]">{value}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Column 2 */}
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-6 text-xs">
-                      {[
-                        ["First Name", profile.firstName || "Marvellous"],
-                        ["Last Name", profile.lastName || "Oluwaseun"],
-                        ["Phone Number", profile.phone || "+2349066760056"],
-                        ["Date of birth", profile.dateOfBirth || "July 09 2002"],
-                        ["Residential Address", profile.address || "No 2 Aremu olatunbosun"],
-                        ["Nationality", profile.nationality || "Nigerian"],
-                      ].map(([label, value]) => (
-                        <div key={`col2-${label}`} className="min-w-0">
-                          <p className="text-[#44484a]">{label}</p>
-                          <p className="mt-1 truncate text-[#85898b]">{value}</p>
-                        </div>
-                      ))}
-                    </div>
+              <div className="mt-6 rounded-2xl border border-gray-200 p-6 bg-white space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase">Identity</h4>
+                    <p className="text-sm font-bold text-gray-800 mt-1">
+                      {profile.firstName} {profile.lastName}
+                    </p>
+                    <p className="text-xs text-gray-500">{profile.phone}</p>
+                    <p className="text-xs text-gray-500">{profile.address}</p>
                   </div>
 
-                  <div className="mt-8 flex gap-3 overflow-hidden">
-                    <div className="verification-document-card verification-document-valid flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#dcecef] bg-[#e9f5ee] text-[9px] font-semibold text-[#43876a]">
-                      {uploadedFile ? "ID ATTACHED" : "NIGERIA ID"}
-                    </div>
-                    <div className="verification-document-card flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
-                      IDENTITY CARD
-                    </div>
-                    <div className="verification-document-card flex h-16 w-24 shrink-0 items-center justify-center rounded-lg border border-[#e5e5df] bg-[#f3f1e7] text-[9px] text-[#67675d]">
-                      IDENTITY CARD
-                    </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase">Trade & Discipline</h4>
+                    <p className="text-sm font-bold text-gray-800 mt-1">{profile.profession || "N/A"}</p>
+                    <p className="text-xs text-gray-500">{profile.category}</p>
+                    <p className="text-xs text-gray-500">{profile.yearsOfExperience} years experience</p>
+                  </div>
+
+                  <div>
+                    <h4 className="text-xs font-bold text-gray-400 uppercase">Payout Bank</h4>
+                    <p className="text-sm font-bold text-gray-800 mt-1">{profile.bankName || "N/A"}</p>
+                    <p className="text-xs text-gray-500">{profile.accountNumber}</p>
+                    <p className="text-xs text-emerald-600 font-semibold">{profile.accountName}</p>
                   </div>
                 </div>
               </div>
@@ -541,7 +751,7 @@ const VerificationPage = () => {
                 onContinue={submitFinalVerification}
                 isLoading={isLoading}
                 backLabel="Go back"
-                continueLabel="Confirm"
+                continueLabel="Confirm & Submit Dossier"
               />
             </>
           )}
@@ -555,18 +765,18 @@ const VerificationPage = () => {
               <Check size={34} />
             </div>
 
-            <h2 className="mt-5 text-xl">Yay!!! You are verified</h2>
+            <h2 className="mt-5 text-xl font-bold">Dossier Submitted!</h2>
 
             <p className="mt-1 text-xs text-[#85898b]">
-              Congratulations, you have completed the verification.
+              Your verification dossier is now in the administrative review queue.
             </p>
 
             <Link
               to="/home"
               id="view-profile-btn"
-              className="mt-6 block rounded-full bg-[#0879aa] py-3 text-xs text-white hover:bg-[#076b97] transition"
+              className="mt-6 block rounded-full bg-[#0879aa] py-3 text-xs text-white hover:bg-[#076b97] transition font-bold"
             >
-              View profile
+              Return to Dashboard
             </Link>
 
             <button
@@ -574,7 +784,7 @@ const VerificationPage = () => {
               onClick={() => setShowSuccess(false)}
               className="mt-2 w-full rounded-full bg-[#fafafa] py-3 text-xs text-[#4d5254] hover:bg-gray-100 transition cursor-pointer"
             >
-              Go back
+              Close
             </button>
           </div>
         </div>

@@ -10,6 +10,7 @@ import ToggleOffIcon from "../../components/icons/ToggleOffIcon";
 import InformationCircleIcon from "../../components/icons/InformationCircleIcon";
 import DatabaseLockedIcon from "../../components/icons/DatabaseLockedIcon";
 import BorderFullIcon from "../../components/icons/BorderFullIcon";
+import VerificationBadge from "../../components/common/VerificationBadge";
 
 const EmployerBrowseProfessionalsSubpage = () => {
   const [professionals, setProfessionals] = useState([]);
@@ -331,19 +332,33 @@ const EmployerBrowseProfessionalsSubpage = () => {
                         ) : (
                           <>{initials}</>
                         )}
-                        <span
-                          className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center"
-                          title="Verified Pro"
-                        >
-                          <FiCheckCircle className="w-3 h-3 text-white fill-current" />
-                        </span>
+                        <VerificationBadge
+                          user={{
+                            ...pro,
+                            verification_status: pro.isVerified || pro.verification_status || pro.verificationStatus,
+                            role: pro.role || "professional",
+                          }}
+                          variant="avatar"
+                          size="sm"
+                          className="absolute -bottom-1 -right-1"
+                        />
                       </div>
 
                       {/* Name and Professional details */}
                       <div className="space-y-0.5">
-                        <h4 className="font-bold text-gray-900 text-sm leading-snug">
-                          {proName}
-                        </h4>
+                        <div className="flex items-center gap-1.5">
+                          <h4 className="font-bold text-gray-900 text-sm leading-snug">
+                            {proName}
+                          </h4>
+                          <VerificationBadge
+                            user={{
+                              ...pro,
+                              verification_status: pro.isVerified || pro.verification_status || pro.verificationStatus,
+                              role: pro.role || "professional",
+                            }}
+                            size="sm"
+                          />
+                        </div>
                         <div className="text-[11px] text-[#016EA6] font-semibold">
                           {pro.profession || pro.role || "Professional"}
                         </div>

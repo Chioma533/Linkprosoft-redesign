@@ -8,15 +8,10 @@ import {
   Layers3,
   UserRound,
   X,
-  Award,
-  Star,
-  Building2,
-  Landmark,
-  ShieldCheck,
-  RefreshCw,
 } from "lucide-react";
 
 import selfieImage from "../../assets/images/faceverification_illustration.jpg";
+import VerificationFormIllustration from "../../assets/images/verification_form_illustration.png";
 import IdentityIllustration from "../../assets/images/identity-verification_illustration.png";
 import ProfessionalIllustration from "../../assets/images/profession-verification_illustration.png";
 import PaymentIllustration from "../../assets/images/payment-verification_illustration.png";
@@ -28,19 +23,10 @@ import VerificationField from "../../components/verification/VerificationField";
 import VerificationPreview from "../../components/verification/VerificationPreview";
 import VerificationActionBar from "../../components/verification/VerificationActionBar";
 import ProfessionalVerification from "../../components/verification/ProfessionalVerification";
-import VerificationBadge from "../../components/common/VerificationBadge";
-import CertificationPathwayModal from "../../components/verification/CertificationPathwayModal";
-import RatingPathwayModal from "../../components/verification/RatingPathwayModal";
-import CompanyVerificationModal from "../../components/verification/CompanyVerificationModal";
-import GovernmentVerificationModal from "../../components/verification/GovernmentVerificationModal";
-import BadgeMaintenanceModal from "../../components/verification/BadgeMaintenanceModal";
 
 import useVerification from "../../hooks/verification/useVerification";
-import { useAuthStore } from "../../store/authStore";
-import { getVerificationBadge, isSubscriptionLapsed } from "../../utils/verificationBadge";
 
 const VerificationPage = () => {
-  const { user } = useAuthStore();
   const {
     view,
     setView,
@@ -77,20 +63,6 @@ const VerificationPage = () => {
   } = useVerification();
 
   const selfieObjectUrlRef = useRef(null);
-
-  // Modal dialog states
-  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
-  const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
-  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
-  const [isGovernmentModalOpen, setIsGovernmentModalOpen] = useState(false);
-  const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false);
-
-  // Local user verification state override to reflect immediate pathway submissions
-  const [localUserOverrides, setLocalUserOverrides] = useState({});
-  const activeUser = { ...user, ...localUserOverrides };
-
-  const currentBadge = getVerificationBadge(activeUser);
-  const isLapsed = isSubscriptionLapsed(activeUser);
 
   useEffect(() => () => {
     if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
@@ -134,192 +106,30 @@ const VerificationPage = () => {
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:items-start sm:justify-between sm:gap-5">
             <div className="min-w-0">
               <h1 className="text-[clamp(1.75rem,4vw,2.35rem)] leading-tight font-extrabold text-gray-900">
-                LinkProSoft Verification & Trust Badges
+                Holla! Let&apos;s Get You Verified
               </h1>
 
               <p className="mt-2 max-w-[570px] text-sm leading-relaxed text-[#777b7d]">
-                Distinguish your professional credibility, corporate identity, or government recognition with our three-tier verification system.
+                Complete your verification to unlock more opportunities, build trust with clients, and start receiving verified job requests on Linkprosoft.
               </p>
             </div>
 
             <img
-              src={IdentityIllustration}
+              src={VerificationFormIllustration}
               alt=""
-              className="w-20 shrink-0 text-[#0879aa] sm:w-[150px]"
+              className="w-20 shrink-0 object-contain sm:w-[150px]"
             />
-          </div>
-
-          {/* Current Verification Status Panel */}
-          <div className="rounded-2xl border border-gray-150 p-5 bg-gradient-to-br from-gray-50/80 to-white flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-12 h-12 rounded-2xl bg-white border border-gray-200 flex items-center justify-center shadow-xs">
-                {currentBadge ? (
-                  <VerificationBadge user={activeUser} size="lg" />
-                ) : (
-                  <ShieldCheck className="w-6 h-6 text-gray-400" />
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-gray-900">
-                    {currentBadge
-                      ? `Active Badge: ${currentBadge.category.toUpperCase()}`
-                      : "Account Unverified"}
-                  </h3>
-                  <VerificationBadge user={activeUser} size="sm" />
-                </div>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {currentBadge
-                    ? `Public display active • Maintained via ${activeUser.role === "government_agency" ? "Institutional Accreditation" : "Subscription"}`
-                    : isLapsed
-                    ? "Verification approved, but badge is temporarily hidden because subscription maintenance has lapsed. Renew to restore display."
-                    : "No verification badge is currently displayed. Choose an eligible pathway below to apply."}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 shrink-0">
-              <button
-                type="button"
-                onClick={() => setIsMaintenanceModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 transition"
-              >
-                <RefreshCw className="w-3.5 h-3.5 text-gray-400" />
-                <span>Subscription Status</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Verification Pathways Section */}
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-base font-extrabold text-gray-900">
-                Available Verification Pathways & Categories
-              </h2>
-              <p className="text-xs text-gray-500 mt-0.5">
-                LinkProSoft enforces three separate verification tiers with strict administrative review.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Pathway A1: Professional - Certification */}
-              <div className="rounded-2xl border border-sky-150 p-5 bg-sky-50/30 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#e6f1f6] text-[#016EA6]">
-                      <Award className="w-3 h-3" />
-                      Blue Badge (#016EA6)
-                    </span>
-                    <span className="text-[10px] font-bold text-gray-400">Pathway 1</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-gray-900">Certified Professional</h3>
-                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                    For professionals with government-issued or recognised trade licenses (plumbers, engineers, electricians).
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsCertModalOpen(true)}
-                  className="mt-5 w-full rounded-xl bg-[#016EA6] hover:bg-[#061EA6] text-white py-2.5 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span>Submit Certification</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* Pathway A2: Professional - Rating based */}
-              <div className="rounded-2xl border border-sky-150 p-5 bg-sky-50/30 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#e6f1f6] text-[#016EA6]">
-                      <Star className="w-3 h-3 fill-current" />
-                      Blue Badge (#016EA6)
-                    </span>
-                    <span className="text-[10px] font-bold text-gray-400">Pathway 2</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-gray-900">Rating-Based Professional</h3>
-                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                    For professionals without formal certifications. Qualify through average ratings (≥ 4.5) and completed jobs (≥ 10).
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsRatingModalOpen(true)}
-                  className="mt-5 w-full rounded-xl bg-white border border-[#016EA6] text-[#016EA6] hover:bg-sky-50 py-2.5 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span>Check Rating Eligibility</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* Category B: Company / Employer Verified */}
-              <div className="rounded-2xl border border-amber-150 p-5 bg-amber-50/20 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-[#fdf6e7] text-[#D69A16]">
-                      <Building2 className="w-3 h-3" />
-                      Gold Badge (#D69A16)
-                    </span>
-                    <span className="text-[10px] font-bold text-gray-400">Corporate</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-gray-900">Company & Employer</h3>
-                  <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
-                    For registered companies and employers. Verified via CAC certificates and corporate identity evidence.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setIsCompanyModalOpen(true)}
-                  className="mt-5 w-full rounded-xl bg-[#D69A16] hover:bg-amber-600 text-white py-2.5 text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <span>Apply for Company Badge</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Category C: Government Agency Banner */}
-            <div className="rounded-2xl border border-gray-200 p-5 bg-gray-50/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#73777D] text-white flex items-center justify-center shrink-0">
-                  <Landmark className="w-5 h-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-gray-900">
-                      Government Institutional Accreditation
-                    </h3>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#f1f2f3] text-[#73777D]">
-                      Ash/Grey Badge (#73777D)
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    Official accreditation for ministries, departments, and government bodies. Requires institutional administrative validation.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsGovernmentModalOpen(true)}
-                className="shrink-0 rounded-xl px-4 py-2 text-xs font-bold border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 transition"
-              >
-                Institutional Verification
-              </button>
-            </div>
           </div>
 
           {/* Standard Stepper Cards */}
           <div className="pt-2">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">
-              Core Identity & Financial Enrollment
-            </h3>
             <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
               {[
                 {
                   icon: UserRound,
                   title: "Verify Your Information",
                   description:
-                    "Get your personal details and government ID verified to build platform trust.",
+                    "Get your details verified to create a trusted profile and start reaching out to clients.",
                   step: "identity",
                   isCompleted: isIdentityCompleted,
                   isLocked: false,
@@ -328,16 +138,16 @@ const VerificationPage = () => {
                   icon: Layers3,
                   title: "Professional Profile",
                   description:
-                    "Confirm your trade, experience, and service categories to strengthen your profile.",
+                    "Confirm your skills and credentials to strengthen your profile and connect with clients.",
                   step: "professional",
                   isCompleted: isProfessionalCompleted,
                   isLocked: !isIdentityCompleted,
                 },
                 {
                   icon: CreditCard,
-                  title: "Payout Verification",
+                  title: "Payment Verification",
                   description:
-                    "Add and confirm your bank account so contract earnings are disbursed safely.",
+                    "Add and confirm your payment information so we can process your earnings safely and securely.",
                   step: "payment",
                   isCompleted: isPaymentCompleted,
                   isLocked: !isIdentityCompleted || !isProfessionalCompleted,
@@ -356,7 +166,7 @@ const VerificationPage = () => {
                   </div>
 
                   <span className="mt-5 w-fit rounded-md bg-[#eaf3f6] px-2.5 py-0.5 text-[10px] text-[#555b5e]">
-                    Step Duration: 1 min
+                    Duration: 1 min
                   </span>
 
                   <h4 className="mt-3 text-sm font-bold text-gray-900">{title}</h4>
@@ -366,6 +176,13 @@ const VerificationPage = () => {
                   </p>
 
                   <div className="mt-auto flex items-center justify-between pt-4 text-xs text-[#85898b]">
+                    <button
+                      type="button"
+                      disabled={isLocked}
+                      className="text-[#85898b] transition hover:text-[#0879aa] disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Learn more&nbsp; &#8250;
+                    </button>
                     <button
                       type="button"
                       disabled={isLocked}
@@ -384,69 +201,6 @@ const VerificationPage = () => {
             </div>
           </div>
         </section>
-
-        {/* Modals */}
-        <CertificationPathwayModal
-          isOpen={isCertModalOpen}
-          onClose={() => setIsCertModalOpen(false)}
-          onSubmitSuccess={(certData) => {
-            setLocalUserOverrides((prev) => ({
-              ...prev,
-              certification_status: "pending",
-              certification: certData,
-            }));
-          }}
-        />
-
-        <RatingPathwayModal
-          isOpen={isRatingModalOpen}
-          onClose={() => setIsRatingModalOpen(false)}
-          metrics={{
-            rating: activeUser.rating || 4.9,
-            completedJobs: activeUser.completedJobs || 12,
-            totalReviews: activeUser.totalReviews || 8,
-          }}
-          onSubmitSuccess={(ratingData) => {
-            setLocalUserOverrides((prev) => ({
-              ...prev,
-              rating_application: ratingData,
-            }));
-          }}
-        />
-
-        <CompanyVerificationModal
-          isOpen={isCompanyModalOpen}
-          onClose={() => setIsCompanyModalOpen(false)}
-          onSubmitSuccess={(companyData) => {
-            setLocalUserOverrides((prev) => ({
-              ...prev,
-              company_verification: companyData,
-            }));
-          }}
-        />
-
-        <GovernmentVerificationModal
-          isOpen={isGovernmentModalOpen}
-          onClose={() => setIsGovernmentModalOpen(false)}
-          onSubmitSuccess={(govData) => {
-            setLocalUserOverrides((prev) => ({
-              ...prev,
-              government_verification: govData,
-            }));
-          }}
-        />
-
-        <BadgeMaintenanceModal
-          isOpen={isMaintenanceModalOpen}
-          onClose={() => setIsMaintenanceModalOpen(false)}
-          user={activeUser}
-          onRenewSuccess={(renewedUser) => {
-            setLocalUserOverrides((prev) => ({
-              ...prev,
-              ...renewedUser,
-            }));
-          }}
-        />
       </main>
     );
   }

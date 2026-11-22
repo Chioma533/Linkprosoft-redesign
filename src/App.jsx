@@ -20,6 +20,7 @@ import CommunityPage from "./pages/CommunityPage";
 import ManageJobsPage from "./pages/buyer/ManageJobsPage";
 import PaymentScreen from "./pages/buyer/PaymentScreen";
 import VerificationPage from "./pages/verification/VerificationPage";
+import BadgeVerificationPage from "./pages/verification/BadgeVerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PublicProfessionalProfile from "./pages/professional/PublicProfessionalProfile";
 const HomeRouteResolver = () => {
@@ -65,6 +66,7 @@ const App = () => {
             <Route path="/payment-screen" element={<PaymentScreen />} />
 
             <Route path="/verification" element={<VerificationPage />} />
+            <Route path="/badge-verification" element={<BadgeVerificationPage />} />
 
             <Route element={<PrivateRoutes />}>
               <Route path="/notifications" element={<NotificationsPage />} />

@@ -1,6 +1,8 @@
 /**
  * Calculate user profile completion percentage and determine missing fields.
  *
+ * Checks profile fields across user, profileData, skills, and portfolio.
+ *
  * @param {Object} params
  * @param {Object} [params.user] - User object from authStore
  * @param {Object} [params.profileData] - Profile object from profileService
@@ -17,13 +19,14 @@ export const calculateProfileCompletion = ({
   const criteria = [
     {
       id: "avatar",
-      label: "Upload a profile photo",
+      label: "Update your profile photo",
       weight: 20,
       completed: Boolean(
         user?.avatarUrl ||
         user?.avatar ||
         profileData?.avatarUrl ||
-        profileData?.avatar
+        profileData?.avatar ||
+        profileData?.avatarMediaId
       ),
     },
     {
@@ -39,7 +42,11 @@ export const calculateProfileCompletion = ({
       id: "skills",
       label: "Register at least one skill",
       weight: 20,
-      completed: Array.isArray(skills) && skills.length > 0,
+      completed: Boolean(
+        (Array.isArray(skills) && skills.length > 0) ||
+        (Array.isArray(profileData?.skills) && profileData.skills.length > 0) ||
+        (Array.isArray(user?.skills) && user.skills.length > 0)
+      ),
     },
     {
       id: "location",
@@ -48,6 +55,7 @@ export const calculateProfileCompletion = ({
       completed: Boolean(
         user?.location ||
         profileData?.location ||
+        profileData?.user?.location ||
         profileData?.city ||
         profileData?.state
       ),
@@ -56,7 +64,12 @@ export const calculateProfileCompletion = ({
       id: "portfolio",
       label: "Add a project to your portfolio",
       weight: 20,
-      completed: Array.isArray(portfolio) && portfolio.length > 0,
+      completed: Boolean(
+        (Array.isArray(portfolio) && portfolio.length > 0) ||
+        (Array.isArray(profileData?.portfolioItems) && profileData.portfolioItems.length > 0) ||
+        (Array.isArray(profileData?.portfolio) && profileData.portfolio.length > 0) ||
+        (Array.isArray(user?.portfolio) && user.portfolio.length > 0)
+      ),
     },
   ];
 

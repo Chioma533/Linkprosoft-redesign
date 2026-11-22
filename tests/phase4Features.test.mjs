@@ -26,6 +26,24 @@ test("calculateProfileCompletion accurately calculates percentage across criteri
   );
 });
 
+test("calculateProfileCompletion supports profileData and avatarMediaId from backend response", () => {
+  const partial = calculateProfileCompletion({
+    user: { id: "user-123" },
+    profileData: {
+      avatarMediaId: "media-uuid",
+      bio: "Master Electrician with 12 years field experience.",
+      skills: [{ skillId: 1, name: "Electrical" }],
+      user: { location: "Abuja, Nigeria" },
+    },
+    portfolio: [],
+  });
+  // avatarMediaId (20) + bio (20) + skills (20) + location (20) = 80%
+  assert.equal(partial.percentage, 80);
+  assert.equal(partial.isComplete, false);
+  assert.equal(partial.missingItems.length, 1);
+  assert.equal(partial.missingItems[0].id, "portfolio");
+});
+
 test("calculateProfileCompletion returns 100% and isComplete when all criteria are met", () => {
   const complete = calculateProfileCompletion({
     user: {
@@ -39,6 +57,14 @@ test("calculateProfileCompletion returns 100% and isComplete when all criteria a
   assert.equal(complete.percentage, 100);
   assert.equal(complete.isComplete, true);
   assert.equal(complete.missingItems.length, 0);
+});
+
+test("missing items correspond to supported profile spotlight section keys", () => {
+  const result = calculateProfileCompletion({});
+  const supportedSectionKeys = ["avatar", "bio", "skills", "location", "portfolio"];
+  result.missingItems.forEach((item) => {
+    assert.ok(supportedSectionKeys.includes(item.id), `Item ${item.id} must be supported`);
+  });
 });
 
 test("EMPLOYER_TOUR_STEPS defines 3 required spotlight highlights", () => {

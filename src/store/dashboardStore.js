@@ -14,6 +14,7 @@ export const useDashboardStore = create((set, get) => ({
   selectedJob: null,
   previousTab: "overview",
   globalSearchQuery: "",
+  highlightSection: null, // avatar, bio, skills, location, portfolio
   isLoading: true,
   error: null,
 
@@ -21,7 +22,8 @@ export const useDashboardStore = create((set, get) => ({
   setSelectedJob: (job) => set({ selectedJob: job }),
   setPreviousTab: (tab) => set({ previousTab: tab }),
   setGlobalSearchQuery: (query) => set({ globalSearchQuery: query }),
-  reset: () => set({ jobs: [], myJobs: [], applications: [], messages: [], notifications: [], metrics: null, schedules: [], selectedJob: null, error: null, isLoading: false }),
+  setHighlightSection: (section) => set({ highlightSection: section }),
+  reset: () => set({ jobs: [], myJobs: [], applications: [], messages: [], notifications: [], metrics: null, schedules: [], selectedJob: null, highlightSection: null, error: null, isLoading: false }),
 
   /**
    * Fetch all dashboard sidebar data EXCEPT browse-jobs.

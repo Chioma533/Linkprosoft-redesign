@@ -100,8 +100,6 @@ const OverviewSubpage = () => {
       {/* Persistent Profile Completion Nudge */}
       <ProfileCompletionBanner
         user={user}
-        skills={user?.skills || []}
-        portfolio={user?.portfolio || []}
         onNavigateToProfile={() => setActiveTab("profile")}
       />
 

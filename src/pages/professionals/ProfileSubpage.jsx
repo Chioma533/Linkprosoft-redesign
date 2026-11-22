@@ -10,9 +10,12 @@ import VerificationBadge from "../../components/common/VerificationBadge";
 import PublicProfileUrlCard from "../../components/professional/PublicProfileUrlCard";
 import MediaUploader from "../../components/common/MediaUploader";
 import mediaService from "../../api/services/mediaService";
+import { useDashboardStore } from "../../store/dashboardStore";
+import SectionSpotlightTooltip from "../../components/common/SectionSpotlightTooltip";
 
 const ProfileSubpage = () => {
   const { user } = useAuthStore();
+  const { highlightSection, setHighlightSection } = useDashboardStore();
   const userId = user?.id || user?.userId || user?.data?.id || user?.data?.userId;
 
   const [profileData, setProfileData] = useState(null);
@@ -228,6 +231,18 @@ const ProfileSubpage = () => {
   const displayCover = profileData?.coverImageUrl || user?.coverImageUrl || coverImg;
   const displayRating = profileData?.avgRating || profileData?.avg_rating || 5.0;
 
+  const handleSpotlightAction = () => {
+    if (highlightSection === "avatar") {
+      setIsAvatarActionsOpen(true);
+    } else if (highlightSection === "bio" || highlightSection === "location") {
+      setIsEditModalOpen(true);
+    } else if (highlightSection === "skills") {
+      setIsAddSkillModalOpen(true);
+    } else if (highlightSection === "portfolio") {
+      setIsPortfolioModalOpen(true);
+    }
+  };
+
   return (
     <div className="space-y-8 animate-fade-in pb-12">
       {/* Cover Banner & Profile Card */}
@@ -245,11 +260,16 @@ const ProfileSubpage = () => {
 <div className="absolute -top-16 left-4 md:left-8 flex items-end gap-5">
   <div className="relative">
     <button
+      id="profile-avatar-section"
       type="button"
       aria-label="Profile photo actions"
       aria-expanded={isAvatarActionsOpen}
       onClick={() => setIsAvatarActionsOpen((open) => !open)}
-      className="relative w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] overflow-hidden shrink-0 shadow-md"
+      className={`relative w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] overflow-hidden shrink-0 shadow-md transition-all duration-300 ${
+        highlightSection === "avatar"
+          ? "ring-4 ring-[#016EA6] ring-offset-2 border-[#016EA6] shadow-xl animate-pulse"
+          : ""
+      }`}
     >
       <img
         src={displayAvatar}
@@ -289,7 +309,14 @@ const ProfileSubpage = () => {
                 {displayProfession}
               </p>
               <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-400 font-semibold mt-3">
-                <span className="flex items-center gap-1">
+                <span
+                  id="profile-location-section"
+                  className={`flex items-center gap-1 px-2 py-0.5 rounded-md transition-all duration-300 ${
+                    highlightSection === "location"
+                      ? "ring-2 ring-[#016EA6] bg-sky-50 text-[#016EA6] font-bold animate-pulse"
+                      : ""
+                  }`}
+                >
                   <MapPin className="w-3.5 h-3.5 text-[#016EA6]" />
                   <span>{displayLocation}</span>
                 </span>
@@ -322,7 +349,14 @@ const ProfileSubpage = () => {
       />
 
       {/* About Me card */}
-      <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-3">
+      <div
+        id="profile-bio-section"
+        className={`bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-3 transition-all duration-300 ${
+          highlightSection === "bio"
+            ? "border-2 border-[#016EA6] ring-4 ring-[#016EA6]/30 shadow-md"
+            : ""
+        }`}
+      >
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-bold text-gray-900">About me</h3>
           <button
@@ -375,7 +409,14 @@ const ProfileSubpage = () => {
         </div>
 
         {/* Skills and Services */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4">
+        <div
+          id="profile-skills-section"
+          className={`bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4 transition-all duration-300 ${
+            highlightSection === "skills"
+              ? "border-2 border-[#016EA6] ring-4 ring-[#016EA6]/30 shadow-md"
+              : ""
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-bold text-gray-900">Skills and Services</h3>
@@ -495,7 +536,14 @@ const ProfileSubpage = () => {
       {/* Portfolio Gallery grid & Reviews section columns */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Gallery */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4">
+        <div
+          id="profile-portfolio-section"
+          className={`lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4 transition-all duration-300 ${
+            highlightSection === "portfolio"
+              ? "border-2 border-[#016EA6] ring-4 ring-[#016EA6]/30 shadow-md"
+              : ""
+          }`}
+        >
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-bold text-gray-900">Portfolio & Case Studies</h3>
             <button type="button" onClick={() => setIsPortfolioModalOpen(true)} className="text-xs font-bold text-[#016EA6]">Add project</button>
@@ -708,6 +756,15 @@ const ProfileSubpage = () => {
             <button className="w-full rounded-full bg-[#016EA6] py-3 text-sm font-bold text-white">Save certification</button>
           </form>
         </div>
+      )}
+      {/* Dynamic Section Spotlight Tooltip */}
+      {highlightSection && (
+        <SectionSpotlightTooltip
+          sectionKey={highlightSection}
+          targetSelector={`#profile-${highlightSection}-section`}
+          onAction={handleSpotlightAction}
+          onDismiss={() => setHighlightSection(null)}
+        />
       )}
     </div>
   );

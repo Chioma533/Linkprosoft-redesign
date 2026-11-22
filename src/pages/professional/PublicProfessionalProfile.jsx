@@ -1,8 +1,9 @@
-import { CalendarDays, Check, MapPin, RefreshCw, MessageSquare } from "lucide-react";
+import { CalendarDays, MapPin, RefreshCw, MessageSquare } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { Navigate, useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { profileService } from "../../api/services/profileService";
+import VerificationBadge from "../../components/common/VerificationBadge";
 import PublicProfileOverview from "../../components/professional/PublicProfileOverview";
 import PublicProfileTopbar from "../../components/professional/PublicProfileTopbar";
 import { useAuthStore } from "../../store/authStore";
@@ -126,15 +127,22 @@ const PublicProfessionalProfile = () => {
                 ) : (
                   <span className="text-4xl font-semibold text-[#016EA6]">{profile.fullName?.charAt(0)?.toUpperCase() || "P"}</span>
                 )}
-                {profile.verificationStatus === "verified" && (
-                  <span className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[#0077ad]">
-                    <Check aria-label="Verified professional" className="h-5 w-5 text-white" strokeWidth={3} />
-                  </span>
-                )}
+                <VerificationBadge
+                  user={{ ...profile, verification_status: profile.verificationStatus, role: profile.role || "professional" }}
+                  variant="avatar"
+                  size="lg"
+                  className="absolute bottom-1 right-1"
+                />
               </div>
             </div>
             <div className="sm:pl-[2.5%]">
-              <h1 className="text-2xl font-medium tracking-tight">{profile.fullName || "Professional"}</h1>
+              <div className="flex items-center gap-2.5">
+                <h1 className="text-2xl font-medium tracking-tight">{profile.fullName || "Professional"}</h1>
+                <VerificationBadge
+                  user={{ ...profile, verification_status: profile.verificationStatus, role: profile.role || "professional" }}
+                  size="md"
+                />
+              </div>
               {profile.profession && <p className="mt-2 text-base text-[#312b27]">{profile.profession}</p>}
               <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#85817e]">
                 {profile.location && <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" />{profile.location}</span>}
@@ -161,6 +169,7 @@ const PublicProfessionalProfile = () => {
       </main>
     </div>
   );
+
 };
 
 export default PublicProfessionalProfile;

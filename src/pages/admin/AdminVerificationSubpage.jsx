@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { adminService } from "../../api/services/adminService";
+import VerificationBadge from "../../components/common/VerificationBadge";
 
 const AdminVerificationSubpage = ({ initialUser = null, onNavigate }) => {
   const [selectedRequest, setSelectedRequest] = useState(null);

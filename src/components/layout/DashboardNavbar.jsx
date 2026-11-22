@@ -114,6 +114,8 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
         { id: "messages", label: "Messages & Chats", icon: FiMessageSquare, keywords: ["messages", "chat", "inbox", "conversations"] },
         { id: "wallet", label: "Wallet & Escrow", icon: FiCreditCard, keywords: ["wallet", "escrow", "funds", "balance", "payments", "money"] },
         { id: "open-dispute", label: "Dispute Center", icon: FiFileText, keywords: ["dispute", "resolution", "help", "claim"] },
+        { id: "profile", label: "Profile", icon: FiUser, keywords: ["profile", "bio", "skills", "account", "settings"] },
+
       ];
     }
     return [
@@ -550,7 +552,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
             <div className="hidden md:block text-left">
               <div className="flex items-center gap-1.5">
                 <p className="text-xs font-semibold text-gray-900 leading-tight">
-                  {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Samuel Owoniyi")}
+                  {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Queen Michael")}
                 </p>
                 <VerificationBadge user={user} />
               </div>
@@ -570,7 +572,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
               <div className="px-4 py-2 border-b border-gray-50">
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-semibold text-gray-900 leading-none">
-                    {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Samuel Owoniyi")}
+                    {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Michael Queen")}
                   </p>
                   <VerificationBadge user={user} />
                 </div>
@@ -581,7 +583,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
               <button
                 onClick={() => {
-                  setActiveTab(role === "employer" ? "overview" : "profile");
+                  setActiveTab(role === "employer" ? "profile" : "profile");
                   setDropdownOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"

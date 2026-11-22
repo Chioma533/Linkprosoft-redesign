@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, ChevronDown, Eye, UserCheck, UserX, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import VerificationBadge from "../../../../components/common/VerificationBadge";
 
 const getUserName = (u) =>
   u?.name ||
@@ -200,20 +201,31 @@ const UsersTable = ({ users = [], onSelectUser, onVerifyUser, onToggleStatus, is
 
                     {/* Verification */}
                     <td className="py-3.5 px-3">
-                      <span
+                      <div
                         onClick={(e) => {
                           e.stopPropagation();
                           if (onVerifyUser) onVerifyUser(user);
                         }}
-                        className="text-[#016EA6] font-bold text-xs hover:underline cursor-pointer"
+                        className="cursor-pointer inline-flex items-center gap-1.5"
                         title="Click to view and review user verification details"
                       >
-                        {user.verified === "verified"
-                          ? "Verified"
-                          : user.verified === "pending"
-                          ? "Pending"
-                          : "Unverified"}
-                      </span>
+                        {user.verified === "verified" ? (
+                          <VerificationBadge
+                            user={{
+                              ...user,
+                              verification_status: "verified",
+                              role: user.role,
+                              is_company_verified: user.role === "company" || user.is_company_verified || user.isCompanyVerified,
+                            }}
+                            size="sm"
+                            showLabel
+                          />
+                        ) : (
+                          <span className={`font-bold text-xs ${user.verified === "pending" ? "text-amber-600 hover:underline" : "text-gray-400 hover:text-gray-600"}`}>
+                            {user.verified === "pending" ? "Pending" : "Unverified"}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     {/* Status */}

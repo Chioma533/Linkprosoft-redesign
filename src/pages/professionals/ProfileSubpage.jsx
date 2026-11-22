@@ -241,27 +241,43 @@ const ProfileSubpage = () => {
         {/* Profile Info Container */}
         <div className="px-4 md:px-8 pb-6 md:pb-8 relative">
           {/* Avatar floating */}
-          <div className="absolute -top-16 left-4 md:left-8 flex items-end gap-5">
-            <div className="relative">
-              <button
-                type="button"
-                aria-label="Profile photo actions"
-                aria-expanded={isAvatarActionsOpen}
-                onClick={() => setIsAvatarActionsOpen((open) => !open)}
-                className="relative w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] overflow-hidden shrink-0 shadow-md"
-              >
-                <img src={displayAvatar} className="w-full h-full object-cover" alt="" />
-                <span className="absolute bottom-1 right-1 w-6 h-6 bg-[#016EA6] rounded-full border-2 border-white flex items-center justify-center" title="Verified Professional">
-                  <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />
-                </span>
-              </button>
-              {isAvatarActionsOpen && (
-                <div className="absolute left-full top-1/2 z-20 ml-3 -translate-y-1/2 rounded-xl border border-gray-100 bg-white p-2 shadow-lg">
-                  <MediaUploader compact purpose="avatar" label="Photo" onUploaded={handleAvatarUploaded} />
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Avatar floating */}
+<div className="absolute -top-16 left-4 md:left-8 flex items-end gap-5">
+  <div className="relative">
+    <button
+      type="button"
+      aria-label="Profile photo actions"
+      aria-expanded={isAvatarActionsOpen}
+      onClick={() => setIsAvatarActionsOpen((open) => !open)}
+      className="relative w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] overflow-hidden shrink-0 shadow-md"
+    >
+      <img
+        src={displayAvatar}
+        className="w-full h-full object-cover"
+        alt=""
+      />
+    </button>
+
+    {/* Floating Verification Badge - dynamic & strictly conditional */}
+    <VerificationBadge
+      user={user}
+      variant="avatar"
+      size="lg"
+      className="absolute bottom-4 right-0 translate-x-1/4 z-10"
+    />
+
+    {isAvatarActionsOpen && (
+      <div className="absolute left-full top-1/2 z-20 ml-3 -translate-y-1/2 rounded-xl border border-gray-100 bg-white p-2 shadow-lg">
+        <MediaUploader
+          compact
+          purpose="avatar"
+          label="Photo"
+          onUploaded={handleAvatarUploaded}
+        />
+      </div>
+    )}
+  </div>
+</div>
 
           <div className="pt-16 flex flex-col md:flex-row md:items-start justify-between gap-4">
             <div>

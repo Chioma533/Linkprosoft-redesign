@@ -7,6 +7,7 @@ import EmployerJobDetailsSubpage from "./EmployerJobDetailsSubpage";
 import EmployerOpenDisputeSubpage from "./EmployerOpenDisputeSubpage";
 import EmployerBrowseProfessionalsSubpage from "./EmployerBrowseProfessionalsSubpage";
 import EmployerMessagesSubpage from "./EmployerMessagesSubpage";
+import EmployerProfileSubpage from "./EmployerProfileSubpage";
 import WalletSubpage from "../professionals/WalletSubpage";
 import { useDashboardStore } from "../../store/dashboardStore";
 
@@ -54,6 +55,9 @@ const EmployerDashboardPage = () => {
 
       case "messages":
         return <EmployerMessagesSubpage />;
+
+      case "profile":
+        return <EmployerProfileSubpage />;
         
       case "browse-professionals":
         return <EmployerBrowseProfessionalsSubpage />;

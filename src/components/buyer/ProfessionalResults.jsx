@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import ProfessionalCard from "./ProfessionalCard";
 import BuyerPagination from "./BuyerPagination";
 import { getPublicProfilePath } from "../../utils/publicProfilePath";
+import { useAuthStore } from "../../store/authStore";
+import { useMessagingStore } from "../../store/messagingStore";
+import { useDashboardStore } from "../../store/dashboardStore";
 
 const ProfessionalResults = ({
   filters,
@@ -15,6 +18,51 @@ const ProfessionalResults = ({
   onPageChange,
 }) => {
   const navigate = useNavigate();
+  const { isAuthenticated, user: currentUser } = useAuthStore();
+  const { startConversation } = useMessagingStore();
+  const { setActiveTab } = useDashboardStore();
+  const [contactingId, setContactingId] = useState(null);
+
+  const handleContactProfessional = async (pro) => {
+    const targetUserId = pro.userId || pro.user?.id || pro.id;
+    if (!isAuthenticated) {
+      toast("Please log in to contact professionals");
+      navigate("/login");
+      return;
+    }
+
+    if (currentUser?.id === targetUserId) {
+      toast("You cannot message your own account");
+      return;
+    }
+
+    try {
+      setContactingId(targetUserId);
+      const contactObj = {
+        id: targetUserId,
+        fullName: pro.fullName || pro.name || pro.user?.fullName || "Professional",
+        avatarUrl: pro.avatarUrl || pro.user?.avatarUrl || null,
+        profession: pro.role || pro.profession || "Professional",
+      };
+
+      await startConversation(contactObj);
+      toast.success(`Connected with ${contactObj.fullName}`);
+
+      if (currentUser?.role === "employer") {
+        setActiveTab("messages");
+        navigate("/employer/dashboard");
+      } else {
+        setActiveTab("chat");
+        navigate("/professional/dashboard");
+      }
+    } catch (error) {
+      console.error("Failed to start conversation:", error);
+      toast.error(error.response?.data?.message || "Unable to start conversation");
+    } finally {
+      setContactingId(null);
+    }
+  };
+
   const getSectionTitle = () => {
     if (filters.searchQuery) {
       return (
@@ -109,7 +157,7 @@ const ProfessionalResults = ({
                     if (profilePath) navigate(profilePath);
                     else toast("Public profile for this user unavailable");
                   }}
-                  onContact={() => console.log(`Contacting ${fullName}`)}
+                  onContact={() => handleContactProfessional(pro)}
                   onBookmark={(val) =>
                     console.log(`Bookmarked ${fullName}: ${val}`)
                   }

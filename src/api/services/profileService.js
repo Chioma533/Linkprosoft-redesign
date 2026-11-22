@@ -104,6 +104,15 @@ export const profileService = {
       throw error;
     }
   },
+  deletePortfolioItem: async (portfolioItemId) => {
+    try {
+      const response = await axiosInstance.delete(API_PATHS.PORTFOLIO.DELETE_PORTFOLIO_ITEM(portfolioItemId));
+      return response.data;
+    } catch (error) {
+      console.warn("Failed to delete portfolio item:", error.message);
+      throw error;
+    }
+  },
   addPortfolioMedia: async (portfolioItemId, mediaId, sortOrder = 0) => dataOf(await axiosInstance.post(API_PATHS.PORTFOLIO.ADD_MEDIA(portfolioItemId), { mediaId, sortOrder })),
   deletePortfolioMedia: async (portfolioItemId, mediaId) => axiosInstance.delete(API_PATHS.PORTFOLIO.DELETE_MEDIA(portfolioItemId, mediaId)),
 

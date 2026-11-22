@@ -85,6 +85,7 @@ const ProfessionalCard = ({
   return (
     <article
       id={`professional-card-${id}`}
+      data-tour="professional-card"
       onClick={onViewProfile ? handleViewProfile : undefined}
       onKeyDown={handleCardKeyDown}
       role={onViewProfile ? "button" : undefined}

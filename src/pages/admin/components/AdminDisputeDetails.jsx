@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
   X, 
   ChevronRight, 
@@ -12,29 +12,89 @@ import {
   Phone,
   Mail,
   MapPin,
-  Briefcase
+  Briefcase,
+  Loader2,
+  FileText,
+  ShieldAlert
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-
-// Progress images from assets
-import progressSink from "../../../assets/images/progress_sink.png";
-import progressWardrobe from "../../../assets/images/progress_wardrobe.png";
-import progressTvWall from "../../../assets/images/progress_tv_wall.png";
-import progressTvStand from "../../../assets/images/progress_tv_stand.png";
+import { adminService } from "../../../api/services/adminService";
+import EvidenceLightbox from "../../../components/common/EvidenceLightbox";
+import DocumentPreview from "../../../components/common/DocumentPreview";
 
 const AdminDisputeDetails = ({ dispute, onBack, onResolve }) => {
   const [activeModal, setActiveModal] = useState(null); // 'release' | 'refund' | 'split' | 'profile' | 'success' | null
   const [selectedUserForProfile, setSelectedUserForProfile] = useState(null);
   const [splitPercentage, setSplitPercentage] = useState(50);
-  const [zoomImage, setZoomImage] = useState(null);
+  const [activeLightboxIdx, setActiveLightboxIdx] = useState(null);
+  const [evidence, setEvidence] = useState([]);
+  const [evidenceLoading, setEvidenceLoading] = useState(true);
+  const [downloadingAll, setDownloadingAll] = useState(false);
 
-  // Evidence pictures matching project deliverables
-  const uploadedWorks = [
-    { id: 1, label: "Sink Repair Evidence 1", img: progressSink },
-    { id: 2, label: "Sink Repair Evidence 2", img: progressWardrobe },
-    { id: 3, label: "Cabinet Leakage 1", img: progressTvWall },
-    { id: 4, label: "Cabinet Leakage 2", img: progressTvStand },
-  ];
+  const cleanDisputeId = dispute?.rawId || dispute?.id?.replace?.(/^#/, "") || dispute?.id;
+
+  const fetchEvidence = useCallback(async () => {
+    if (!cleanDisputeId) return;
+    setEvidenceLoading(true);
+    try {
+      const res = await adminService.getDisputeEvidence(cleanDisputeId);
+      const items = res?.data || res?.items || res || [];
+      if (Array.isArray(items) && items.length > 0) {
+        setEvidence(items);
+      } else if (Array.isArray(dispute?.evidence) && dispute.evidence.length > 0) {
+        setEvidence(dispute.evidence);
+      } else {
+        setEvidence([]);
+      }
+    } catch (err) {
+      console.warn("[AdminDisputeDetails] Error fetching dispute evidence:", err);
+      if (Array.isArray(dispute?.evidence) && dispute.evidence.length > 0) {
+        setEvidence(dispute.evidence);
+      } else {
+        setEvidence([]);
+      }
+    } finally {
+      setEvidenceLoading(false);
+    }
+  }, [cleanDisputeId, dispute?.evidence]);
+
+  useEffect(() => {
+    fetchEvidence();
+  }, [fetchEvidence]);
+
+  const handleDownloadAll = async () => {
+    if (!evidence.length) {
+      toast.error("No evidence files available to download");
+      return;
+    }
+    setDownloadingAll(true);
+    toast.loading("Generating audited download links...", { id: "dl-all" });
+    try {
+      for (const item of evidence) {
+        try {
+          const res = await adminService.downloadEvidence(cleanDisputeId, item.media_id || item.id);
+          const dlUrl = res?.data?.downloadUrl || res?.downloadUrl || item.deliveryUrl;
+          if (dlUrl) {
+            const link = document.createElement("a");
+            link.href = dlUrl;
+            link.download = item.original_filename || `evidence-${item.id}`;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }
+        } catch (itemErr) {
+          console.warn("Error downloading item:", itemErr);
+        }
+      }
+      toast.success("Download links triggered and logged to audit trail", { id: "dl-all" });
+    } catch (err) {
+      toast.error("Failed to download some evidence files", { id: "dl-all" });
+    } finally {
+      setDownloadingAll(false);
+    }
+  };
 
   const handleActionConfirm = (actionType) => {
     setActiveModal(null);
@@ -108,35 +168,111 @@ const AdminDisputeDetails = ({ dispute, onBack, onResolve }) => {
           {/* Card 3: Evidence Gallery Card */}
           <div className="bg-white rounded-3xl p-5 sm:p-6 border-none shadow-xs space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-extrabold text-gray-900 text-base sm:text-lg tracking-tight">
-                Evidence Gallery
-              </h3>
-              <button 
-                onClick={() => toast.success("Downloading all evidence files...")}
-                className="text-xs font-bold text-[#016EA6] hover:underline cursor-pointer border-none bg-transparent"
-              >
-                Downloaded All
-              </button>
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-gray-900 text-base sm:text-lg tracking-tight">
+                  Evidence Gallery
+                </h3>
+                {evidence.length > 0 && (
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-[#016EA6]">
+                    {evidence.length} {evidence.length === 1 ? "file" : "files"}
+                  </span>
+                )}
+              </div>
+              {evidence.length > 0 && (
+                <button 
+                  type="button"
+                  onClick={handleDownloadAll}
+                  disabled={downloadingAll}
+                  className="text-xs font-bold text-[#016EA6] hover:underline cursor-pointer border-none bg-transparent inline-flex items-center gap-1 disabled:opacity-50"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{downloadingAll ? "Downloading..." : "Download All (Audited)"}</span>
+                </button>
+              )}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {uploadedWorks.map((work) => (
-                <div
-                  key={work.id}
-                  onClick={() => setZoomImage(work.img)}
-                  className="rounded-2xl overflow-hidden shadow-xs cursor-pointer group relative h-32 sm:h-40 bg-gray-100 border-none"
-                >
-                  <img
-                    src={work.img}
-                    alt={work.label}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
-                    Preview
-                  </div>
-                </div>
-              ))}
-            </div>
+            {evidenceLoading ? (
+              <div className="py-12 flex flex-col items-center justify-center text-gray-400 gap-2">
+                <Loader2 className="w-6 h-6 animate-spin text-[#016EA6]" />
+                <span className="text-xs font-medium">Loading verified evidence...</span>
+              </div>
+            ) : evidence.length === 0 ? (
+              <div className="py-10 text-center bg-gray-50/60 rounded-2xl border border-dashed border-gray-200">
+                <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                <p className="text-xs font-bold text-gray-700">No evidence submitted yet</p>
+                <p className="text-[11px] text-gray-400 mt-0.5">
+                  Neither party has uploaded photos, documents, or reference files for this dispute.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                {evidence.map((item, idx) => {
+                  const isPdf =
+                    item.content_type === "application/pdf" ||
+                    item.original_filename?.toLowerCase().endsWith(".pdf");
+
+                  return (
+                    <div
+                      key={item.id || idx}
+                      className="relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group transition-all hover:shadow-sm"
+                    >
+                      {/* Evidence Type & Moderation Status Badges */}
+                      <div className="absolute top-2 left-2 z-10 flex items-center gap-1">
+                        <span
+                          className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full shadow-xs ${
+                            item.evidence_type === "assignment_ref"
+                              ? "bg-purple-100 text-purple-700"
+                              : item.evidence_type === "chat_ref"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-emerald-100 text-emerald-700"
+                          }`}
+                        >
+                          {item.evidence_type === "assignment_ref"
+                            ? "Assignment Asset"
+                            : item.evidence_type === "chat_ref"
+                            ? "Chat Attachment"
+                            : "Direct Upload"}
+                        </span>
+                        {item.moderation_status && item.moderation_status !== "pending" && (
+                          <span
+                            className={`text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-full shadow-xs ${
+                              item.moderation_status === "approved"
+                                ? "bg-emerald-600 text-white"
+                                : item.moderation_status === "flagged"
+                                ? "bg-amber-500 text-white"
+                                : "bg-rose-600 text-white"
+                            }`}
+                          >
+                            {item.moderation_status}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Document / Media Preview */}
+                      <DocumentPreview
+                        url={item.deliveryUrl}
+                        contentType={item.content_type || ""}
+                        filename={item.original_filename || `Evidence #${idx + 1}`}
+                        caption={item.caption}
+                        className="h-36 sm:h-44 w-full"
+                        onClick={() => setActiveLightboxIdx(idx)}
+                        onDownload={() => {
+                          adminService
+                            .downloadEvidence(cleanDisputeId, item.media_id || item.id)
+                            .then((res) => {
+                              const url = res?.data?.downloadUrl || res?.downloadUrl || item.deliveryUrl;
+                              if (url) window.open(url, "_blank");
+                            })
+                            .catch(() => {
+                              if (item.deliveryUrl) window.open(item.deliveryUrl, "_blank");
+                            });
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
 
@@ -291,16 +427,16 @@ const AdminDisputeDetails = ({ dispute, onBack, onResolve }) => {
         </div>
       </div>
 
-      {/* Lightbox Zoom Image Modal */}
-      {zoomImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs" onClick={() => setZoomImage(null)}>
-          <div className="relative max-w-4xl w-full max-h-[90vh] flex items-center justify-center">
-            <img src={zoomImage} alt="Evidence preview" className="max-w-full max-h-[85vh] rounded-2xl object-contain" />
-            <button onClick={() => setZoomImage(null)} className="absolute -top-12 right-0 p-2 text-white hover:text-gray-300 border-none">
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-        </div>
+      {/* Admin Evidence Lightbox with Audited Expiring Download Links */}
+      {activeLightboxIdx !== null && evidence.length > 0 && (
+        <EvidenceLightbox
+          evidenceList={evidence}
+          currentIndex={activeLightboxIdx}
+          disputeId={cleanDisputeId}
+          onClose={() => setActiveLightboxIdx(null)}
+          onNavigate={(newIdx) => setActiveLightboxIdx(newIdx)}
+          onEvidenceUpdated={fetchEvidence}
+        />
       )}
 
       {/* MODAL 1: Release Escrow Modal Overlay */}

@@ -382,6 +382,54 @@ export const adminService = {
     }
   },
 
+  /**
+   * Fetch all evidence submitted for a dispute with secure signed URLs
+   * GET /api/admin/disputes/:id/evidence
+   * @param {string} id
+   */
+  getDisputeEvidence: async (id) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.DISPUTE_EVIDENCE(id));
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getDisputeEvidence error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Moderate dispute evidence (approve, flag, redact)
+   * PATCH /api/admin/disputes/:id/evidence/:mediaId/moderate
+   * @param {string} id
+   * @param {string} mediaId
+   * @param {Object} payload - { status, notes }
+   */
+  moderateEvidence: async (id, mediaId, payload) => {
+    try {
+      const response = await axiosInstance.patch(API_PATHS.ADMIN.MODERATE_EVIDENCE(id, mediaId), payload);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] moderateEvidence error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Get an expiring signed download URL for dispute evidence with audit logging
+   * GET /api/admin/disputes/:id/evidence/:mediaId/download
+   * @param {string} id
+   * @param {string} mediaId
+   */
+  downloadEvidence: async (id, mediaId) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.DISPUTE_EVIDENCE_DOWNLOAD(id, mediaId));
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] downloadEvidence error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   // ==========================================
   // SCREEN 5: FINANCE & PAYMENTS
   // ==========================================

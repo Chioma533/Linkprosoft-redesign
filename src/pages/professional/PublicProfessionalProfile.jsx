@@ -1,9 +1,13 @@
-import { CalendarDays, Check, MapPin, RefreshCw } from "lucide-react";
+import { CalendarDays, Check, MapPin, RefreshCw, MessageSquare } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useParams, useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 import { profileService } from "../../api/services/profileService";
 import PublicProfileOverview from "../../components/professional/PublicProfileOverview";
 import PublicProfileTopbar from "../../components/professional/PublicProfileTopbar";
+import { useAuthStore } from "../../store/authStore";
+import { useMessagingStore } from "../../store/messagingStore";
+import { useDashboardStore } from "../../store/dashboardStore";
 
 const getStatus = (error) => error?.response?.status;
 const publicUrl = (profile) => profile?.canonicalUrl || profile?.publicUrl || (profile?.slug ? `${window.location.origin}/${profile.slug}` : window.location.href);
@@ -24,9 +28,51 @@ const ProfileState = ({ title, children, retry }) => <div className="min-h-scree
 
 const PublicProfessionalProfile = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
+  const { isAuthenticated, user: currentUser } = useAuthStore();
+  const { startConversation } = useMessagingStore();
+  const { setActiveTab } = useDashboardStore();
+
   const [state, setState] = useState({ status: "loading", profile: null });
   const [showDetails, setShowDetails] = useState(false);
+  const [isContacting, setIsContacting] = useState(false);
   const canonicalSlug = state.profile?.canonicalSlug || state.profile?.slug;
+
+  const handleContact = async () => {
+    if (!state.profile) return;
+    const targetUserId = state.profile.userId || state.profile.id;
+    if (!isAuthenticated) {
+      toast("Please log in to contact this professional");
+      navigate("/login");
+      return;
+    }
+    if (currentUser?.id === targetUserId) {
+      toast("You cannot message your own account");
+      return;
+    }
+    try {
+      setIsContacting(true);
+      const contactObj = {
+        id: targetUserId,
+        fullName: state.profile.fullName || "Professional",
+        avatarUrl: state.profile.avatarUrl || null,
+        profession: state.profile.profession || "Professional",
+      };
+      await startConversation(contactObj);
+      toast.success(`Connected with ${contactObj.fullName}`);
+      if (currentUser?.role === "employer") {
+        setActiveTab("messages");
+        navigate("/employer/dashboard");
+      } else {
+        setActiveTab("chat");
+        navigate("/professional/dashboard");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Could not start chat thread");
+    } finally {
+      setIsContacting(false);
+    }
+  };
 
   const loadProfile = useCallback(async () => {
     setState({ status: "loading", profile: null });
@@ -64,7 +110,57 @@ const PublicProfessionalProfile = () => {
 
   const profile = state.profile;
   const memberDate = profile.createdAt && new Date(profile.createdAt);
-  return <div className="min-h-screen bg-[#fafafa] font-sans text-[#171717]"><PublicProfileTopbar /><main className="mx-auto max-w-[1240px] px-0 pb-12 pt-[18px] sm:px-5 lg:px-0"><article className="overflow-hidden bg-white pb-16 sm:rounded-[28px]"><div className="relative h-[190px] bg-[#1d2930] sm:h-[220px]">{profile.coverImageUrl && <img src={profile.coverImageUrl} alt="" className="h-full w-full object-cover" />}</div><section className="relative px-5 pb-8 pt-[60px] sm:px-12"><div className="absolute -top-[64px] left-5 sm:left-[7.5%]"><div className="relative flex h-[124px] w-[124px] items-center justify-center overflow-hidden rounded-full bg-[#e6f3f8] ring-4 ring-white">{profile.avatarUrl ? <img src={profile.avatarUrl} alt={profile.fullName || "Professional"} className="h-full w-full object-cover" /> : <span className="text-4xl font-semibold text-[#016EA6]">{profile.fullName?.charAt(0)?.toUpperCase() || "P"}</span>}{profile.verificationStatus === "verified" && <span className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[#0077ad]"><Check aria-label="Verified professional" className="h-5 w-5 text-white" strokeWidth={3} /></span>}</div></div><div className="sm:pl-[2.5%]"><h1 className="text-2xl font-medium tracking-tight">{profile.fullName || "Professional"}</h1>{profile.profession && <p className="mt-2 text-base text-[#312b27]">{profile.profession}</p>}<div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#85817e]">{profile.location && <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" />{profile.location}</span>}{memberDate && !Number.isNaN(memberDate.valueOf()) && <span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4" />Member since {memberDate.getFullYear()}</span>}{profile.availabilityStatus && <span className="capitalize">{profile.availabilityStatus}</span>}</div></div></section><div className="px-0 sm:px-[7%]"><PublicProfileOverview profile={profile} showDetails={showDetails} onToggleDetails={() => setShowDetails((current) => !current)} /></div></article></main></div>;
+  return (
+    <div className="min-h-screen bg-[#fafafa] font-sans text-[#171717]">
+      <PublicProfileTopbar />
+      <main className="mx-auto max-w-[1240px] px-0 pb-12 pt-[18px] sm:px-5 lg:px-0">
+        <article className="overflow-hidden bg-white pb-16 sm:rounded-[28px]">
+          <div className="relative h-[190px] bg-[#1d2930] sm:h-[220px]">
+            {profile.coverImageUrl && <img src={profile.coverImageUrl} alt="" className="h-full w-full object-cover" />}
+          </div>
+          <section className="relative px-5 pb-8 pt-[60px] sm:px-12">
+            <div className="absolute -top-[64px] left-5 sm:left-[7.5%]">
+              <div className="relative flex h-[124px] w-[124px] items-center justify-center overflow-hidden rounded-full bg-[#e6f3f8] ring-4 ring-white">
+                {profile.avatarUrl ? (
+                  <img src={profile.avatarUrl} alt={profile.fullName || "Professional"} className="h-full w-full object-cover" />
+                ) : (
+                  <span className="text-4xl font-semibold text-[#016EA6]">{profile.fullName?.charAt(0)?.toUpperCase() || "P"}</span>
+                )}
+                {profile.verificationStatus === "verified" && (
+                  <span className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-[#0077ad]">
+                    <Check aria-label="Verified professional" className="h-5 w-5 text-white" strokeWidth={3} />
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="sm:pl-[2.5%]">
+              <h1 className="text-2xl font-medium tracking-tight">{profile.fullName || "Professional"}</h1>
+              {profile.profession && <p className="mt-2 text-base text-[#312b27]">{profile.profession}</p>}
+              <div className="mt-3 flex flex-wrap gap-x-6 gap-y-2 text-sm text-[#85817e]">
+                {profile.location && <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4" />{profile.location}</span>}
+                {memberDate && !Number.isNaN(memberDate.valueOf()) && <span className="inline-flex items-center gap-2"><CalendarDays className="h-4 w-4" />Member since {memberDate.getFullYear()}</span>}
+                {profile.availabilityStatus && <span className="capitalize">{profile.availabilityStatus}</span>}
+              </div>
+              <div className="mt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleContact}
+                  disabled={isContacting}
+                  className="inline-flex items-center gap-2 rounded-full bg-[#016EA6] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#015885] transition-all cursor-pointer disabled:opacity-70"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {isContacting ? "Connecting..." : "Message Professional"}
+                </button>
+              </div>
+            </div>
+          </section>
+          <div className="px-0 sm:px-[7%]">
+            <PublicProfileOverview profile={profile} showDetails={showDetails} onToggleDetails={() => setShowDetails((current) => !current)} />
+          </div>
+        </article>
+      </main>
+    </div>
+  );
 };
 
 export default PublicProfessionalProfile;

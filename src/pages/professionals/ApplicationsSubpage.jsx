@@ -7,9 +7,7 @@ import {
   FiClock,
   FiCheckCircle,
   FiXCircle,
-  FiArrowRight,
   FiX,
-  FiDollarSign,
   FiFileText,
 } from "react-icons/fi";
 import { useDashboardStore } from "../../store/dashboardStore";
@@ -23,6 +21,7 @@ import Pagination from "../../components/common/Pagination";
 import { PAGINATION } from "../../constants/pagination";
 import { usePagination } from "../../hooks/usePagination";
 import { formatCurrency } from "../../utils/formatCurrency";
+import EmptyState from "../../components/ui/EmptyState";
 
 const ApplicationsSubpage = () => {
   const { applications = [], setActiveTab } = useDashboardStore();
@@ -308,40 +307,24 @@ const ApplicationsSubpage = () => {
               </div>
             </>
           ) : (
-            /* Modern Empty State */
-            <div className="professional-dashboard-empty-state py-14 px-4 rounded-2xl bg-gradient-to-b from-gray-50/60 to-white border border-dashed border-gray-200 flex flex-col items-center justify-center text-center">
-              <div className="text-[#016EA6] mb-3 flex items-center justify-center">
-                <FiFileText className="w-8 h-8 stroke-[2]" />
-              </div>
-              <h4 className="text-sm font-bold text-gray-900 mb-1">No Applications Found</h4>
-              <p className="text-xs text-gray-400 font-medium max-w-sm mb-5 leading-relaxed">
-                {search || categoryFilter || statusFilter
+            <EmptyState
+              icon={FiFileText}
+              title="No Applications Found"
+              description={
+                search || categoryFilter || statusFilter
                   ? "No proposals match your current filter parameters. Try clearing some filters."
-                  : "You haven't submitted proposals for any jobs yet. Browse open contracts in your area and submit your competitive bid."}
-              </p>
-              <div className="flex items-center gap-3">
-                {search || categoryFilter || statusFilter ? (
-                  <button
-                    onClick={() => {
-                      setSearch("");
-                      setCategoryFilter("");
-                      setStatusFilter("");
-                    }}
-                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-xs font-bold transition-all cursor-pointer"
-                  >
-                    Reset Filters
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setActiveTab("browse-jobs")}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all shadow-sm cursor-pointer active:scale-95"
-                  >
-                    <span>Browse Open Jobs</span>
-                    <FiArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-            </div>
+                  : "You haven't submitted proposals for any jobs yet. Browse open contracts in your area and submit your competitive bid."
+              }
+              actionLabel={search || categoryFilter || statusFilter ? "" : "Browse Open Jobs"}
+              onAction={() => setActiveTab("browse-jobs")}
+              secondaryActionLabel={search || categoryFilter || statusFilter ? "Reset Filters" : ""}
+              onSecondaryAction={() => {
+                setSearch("");
+                setCategoryFilter("");
+                setStatusFilter("");
+              }}
+              className="my-4"
+            />
           )}
         </div>
       </div>

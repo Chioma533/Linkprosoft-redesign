@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useLocation } from "react-router-dom";
 
 import BuyerNavbar from "../../layouts/buyer/BuyerNavbar";
@@ -7,13 +7,15 @@ import ProfessionalResults from "../../components/buyer/ProfessionalResults";
 import BuyerHero from "../../components/buyer/BuyerHero";
 import BuyerBottomNav from "../../components/buyer/BuyerBottomNav";
 import LoadingScreen from "../../components/common/preloader/LoadingScreen";
+import SpotlightTour from "../../components/tour/SpotlightTour";
 
 import useBuyerProfessionals from "../../hooks/useBuyerProfessionals";
+import { useVerificationBanner } from "../../hooks/useVerificationBanner";
 
 const DefaultBuyerScreen = () => {
   const location = useLocation();
 
-  const [verificationDismissed, setVerificationDismissed] = useState(false);
+  const { showBanner: showVerificationBanner, dismissVerification: handleDismissVerification } = useVerificationBanner();
 
   const initialFilters = {
     searchQuery: new URLSearchParams(location.search).get("q") || "",
@@ -36,10 +38,6 @@ const DefaultBuyerScreen = () => {
     handlePageChange,
     fetchProfessionals,
   } = useBuyerProfessionals(initialFilters);
-
-  const handleDismissVerification = () => {
-    setVerificationDismissed(true);
-  };
 
   if (isInitialLoading || !minTimePassed) {
     return <LoadingScreen />;
@@ -69,7 +67,7 @@ const DefaultBuyerScreen = () => {
       <BuyerNavbar activePage="browse" />
 
       <BuyerHero
-        verificationDismissed={verificationDismissed}
+        verificationDismissed={!showVerificationBanner}
         onDismissVerification={handleDismissVerification}
       />
 
@@ -92,6 +90,9 @@ const DefaultBuyerScreen = () => {
         totalPages={totalPages}
         onPageChange={handlePageChange}
       />
+
+      {/* Guided Onboarding Spotlight Tour */}
+      <SpotlightTour />
 
       <BuyerBottomNav activeTab="browse" />
     </div>

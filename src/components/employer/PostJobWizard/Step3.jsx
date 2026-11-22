@@ -2,17 +2,29 @@ import React from "react";
 import StepBar from "../../common/StepBar";
 import ReviewRow from "../../common/ReviewRow";
 import NavButtons from "../../common/NavButtons";
+import { BUDGET_TYPES } from "../../../constants/jobTaxonomy";
 
 const Step3 = ({ data, onBack, onSubmit, onGoToStep, isSubmitting = false }) => {
+  const selectedBudgetType =
+    BUDGET_TYPES.find((t) => t.id === data.budgetType) || BUDGET_TYPES[0];
+
   const formatBudget = () => {
     if (!data.budgetMin && !data.budgetMax) return "—";
     const fmt = (v) => `₦${Number(v).toLocaleString("en-NG")}`;
-    return `${fmt(data.budgetMin)} – ${fmt(data.budgetMax)}`;
+    const range = `${fmt(data.budgetMin)} – ${fmt(data.budgetMax)}`;
+    return `${range} • ${selectedBudgetType.badge}`;
   };
 
   const urgencyLabel = () => {
     if (data.urgency === "Urgent-24hrs") return "Urgent – within 24hrs";
     return data.urgency || "—";
+  };
+
+  const categoryLabel = () => {
+    if (data.category === "Other") {
+      return data.customCategory ? `${data.customCategory} (Other)` : "Other";
+    }
+    return data.category || "—";
   };
 
   return (
@@ -24,25 +36,58 @@ const Step3 = ({ data, onBack, onSubmit, onGoToStep, isSubmitting = false }) => 
 
       <div className="mb-2">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-sm font-semibold text-[#016EA6]">{data.category || "—"}</span>
-          <button type="button" onClick={() => onGoToStep(1)} className="text-sm font-semibold text-[#016EA6] hover:text-[#061EA6] transition-colors cursor-pointer">
+          <span className="text-sm font-semibold text-[#016EA6]">{categoryLabel()}</span>
+          <button
+            type="button"
+            onClick={() => onGoToStep(1)}
+            className="text-sm font-semibold text-[#016EA6] hover:text-[#061EA6] transition-colors cursor-pointer"
+          >
             Edit
           </button>
         </div>
         <h2 className="text-lg font-bold text-gray-900">{data.title || "—"}</h2>
-        {data.description && <p className="text-sm text-gray-400 mt-1 leading-relaxed">{data.description}</p>}
+        {data.description && (
+          <p className="text-sm text-gray-500 mt-1 leading-relaxed">{data.description}</p>
+        )}
       </div>
 
       <div className="border-t border-gray-100 mt-4">
-        <ReviewRow label="Budget" value={formatBudget()} onEdit={() => onGoToStep(2)} />
-        <ReviewRow label="Timeline" value={urgencyLabel()} onEdit={() => onGoToStep(2)} />
-        <ReviewRow label="Location" value={data.location || "—"} onEdit={() => onGoToStep(2)} noBorder />
+        <ReviewRow
+          label="Required Skill"
+          value={data.skill || "General Task"}
+          onEdit={() => onGoToStep(1)}
+        />
+        <ReviewRow
+          label="Budget"
+          value={formatBudget()}
+          onEdit={() => onGoToStep(2)}
+        />
+        <ReviewRow
+          label="Budget Type"
+          value={selectedBudgetType.label}
+          onEdit={() => onGoToStep(2)}
+        />
+        <ReviewRow
+          label="Timeline"
+          value={urgencyLabel()}
+          onEdit={() => onGoToStep(2)}
+        />
+        <ReviewRow
+          label="Location"
+          value={data.location || "—"}
+          onEdit={() => onGoToStep(2)}
+          noBorder
+        />
       </div>
 
-      <NavButtons onBack={onBack} onContinue={onSubmit} continueLabel="Post Job" isSubmitting={isSubmitting} />
+      <NavButtons
+        onBack={onBack}
+        onContinue={onSubmit}
+        continueLabel="Post Job"
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 };
 
 export default Step3;
-

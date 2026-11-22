@@ -9,12 +9,16 @@ import workImg2 from "../../assets/images/IMG-20260704-WA0196.jpg";
 import { toast } from "react-hot-toast";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import DisputeEvidenceUploader from "../../components/common/DisputeEvidenceUploader";
+import mediaService from "../../api/services/mediaService";
+import disputeService from "../../api/services/disputeService";
 
 const ProjectDetailsSubpage = () => {
   const { selectedJob, previousTab, setActiveTab } = useDashboardStore();
   const [activeModal, setActiveModal] = useState(null); // null, 'confirm-submit', 'success-submit', 'confirm-cancel', 'success-cancel'
   const [isDisputeModalOpen, setIsDisputeModalOpen] = useState(false);
   const [disputeReason, setDisputeReason] = useState("");
+  const [disputeEvidence, setDisputeEvidence] = useState([]);
   const [isSubmittingDispute, setIsSubmittingDispute] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [messagesList, setMessagesList] = useState([
@@ -81,14 +85,36 @@ const ProjectDetailsSubpage = () => {
 
     setIsSubmittingDispute(true);
     try {
+      let disputeId = null;
       if (job.id && API_PATHS.ASSIGNMENTS.DISPUTE_SATISFACTION) {
-        await axiosInstance.patch(API_PATHS.ASSIGNMENTS.DISPUTE_SATISFACTION(job.id), {
+        const res = await axiosInstance.patch(API_PATHS.ASSIGNMENTS.DISPUTE_SATISFACTION(job.id), {
           reason: disputeReason,
         });
+        disputeId = res.data?.data?.dispute?.id || res.data?.data?.id;
       }
-      toast.success("Dispute submitted. Our administrative mediation team has been notified.");
+
+      // Upload and link any supporting evidence
+      if (disputeEvidence.length > 0) {
+        for (let i = 0; i < disputeEvidence.length; i++) {
+          try {
+            const { mediaId } = await mediaService.uploadFile(disputeEvidence[i].file, "dispute_evidence");
+            if (disputeId) {
+              await disputeService.submitEvidence(disputeId, {
+                mediaId,
+                caption: disputeEvidence[i].caption,
+                sortOrder: i,
+              });
+            }
+          } catch (evErr) {
+            console.warn("Evidence upload failed:", evErr);
+          }
+        }
+      }
+
+      toast.success("Dispute submitted with supporting evidence. Our administrative mediation team has been notified.");
       setIsDisputeModalOpen(false);
       setDisputeReason("");
+      setDisputeEvidence([]);
     } catch (error) {
       toast.success("Dispute logged successfully for mediation.");
       setIsDisputeModalOpen(false);
@@ -296,6 +322,11 @@ const ProjectDetailsSubpage = () => {
                   placeholder="Explain the issue encountered with the client or scope of work..."
                   className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-amber-500 focus:bg-white font-medium text-gray-800 resize-none leading-relaxed"
                 />
+              </div>
+
+              {/* Supporting Evidence Uploader */}
+              <div className="pt-2 border-t border-gray-100">
+                <DisputeEvidenceUploader onEvidenceChange={setDisputeEvidence} maxFiles={4} />
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-gray-100">

@@ -23,6 +23,7 @@ import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 import VerificationBadge from "../common/VerificationBadge";
 import ThemeSwitcher from "../common/ThemeSwitcher";
+import { Link } from "react-router-dom";
 
 const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   const { user, logout } = useAuthStore();
@@ -49,6 +50,12 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   const mobileSearchInputRef = useRef(null);
 
   const role = user?.role || "professional";
+  const isVerified = Boolean(
+    user?.isVerified ||
+    user?.is_verified ||
+    user?.verificationStatus === "verified" ||
+    user?.verification_status === "verified"
+  );
 
   // Close profile dropdown on click outside
   useEffect(() => {
@@ -513,6 +520,17 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
         {/* Vertical Divider */}
         <div className="w-px h-6 bg-gray-100 hidden sm:block" />
+
+        {!isVerified && (
+          <Link
+            to="/verification"
+            className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 rounded-full text-xs font-semibold transition-colors"
+            title="Your account is not verified yet. Complete verification to unlock all features."
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            <span>Verify Account</span>
+          </Link>
+        )}
 
         <ThemeSwitcher />
 

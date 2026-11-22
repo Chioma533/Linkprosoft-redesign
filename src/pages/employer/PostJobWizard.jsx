@@ -10,11 +10,13 @@ import { jobService } from "../../api/services/jobService";
 const INITIAL_DATA = {
   title: "",
   category: "",
+  customCategory: "",
   skill: "",
   skillId: "",
   description: "",
   budgetMin: "",
   budgetMax: "",
+  budgetType: "workmanship",
   urgency: "",
   location: "",
 };
@@ -43,11 +45,20 @@ const PostJobWizard = ({ onClose, onSuccess }) => {
       else if (data.urgency === "This week") durationDays = 7;
       else if (data.urgency === "Flexible") durationDays = 14;
 
+      const isOther = data.category === "Other";
+      const effectiveCategory = isOther ? data.customCategory?.trim() : data.category;
+
       const payload = {
-        title: data.title,
+        title: data.title.trim(),
+        category: effectiveCategory,
+        isCustomCategory: isOther,
         skillId: data.skillId || undefined,
+        skillName: data.skill || undefined,
         description: data.description,
+        budgetMin: data.budgetMin ? Number(data.budgetMin) : undefined,
+        budgetMax: data.budgetMax ? Number(data.budgetMax) : undefined,
         budget: data.budgetMax ? Number(data.budgetMax) : data.budgetMin ? Number(data.budgetMin) : undefined,
+        budgetType: data.budgetType || "workmanship",
         currency: "NGN",
         durationDays,
         location: data.location || undefined,
@@ -82,7 +93,6 @@ const PostJobWizard = ({ onClose, onSuccess }) => {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-[#F3F4F6] overflow-y-auto flex flex-col">
-
         <div className="flex justify-end px-6 pt-5">
           <button
             type="button"

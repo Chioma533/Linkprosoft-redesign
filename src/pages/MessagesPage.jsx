@@ -77,10 +77,13 @@ const MessagesPage = () => {
     clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(stopTyping, 2000);
   };
-  const submitMessage = async () => {
-    if (!activeThreadId || !messageInput.trim()) return;
+  const submitMessage = async (text, mediaIds = []) => {
+    const content = typeof text === "string" ? text : messageInput;
+    const hasText = Boolean(content && content.trim());
+    const hasMedia = Boolean(mediaIds && mediaIds.length > 0);
+    if (!activeThreadId || (!hasText && !hasMedia)) return;
     stopTyping();
-    await sendMessage(activeThreadId, messageInput);
+    await sendMessage(activeThreadId, content, mediaIds);
   };
   const isOtherTyping = activeThread && Object.entries(typingUsers).some(([key, isTyping]) => isTyping && key.startsWith(`${activeThread.id}:`));
 
@@ -104,7 +107,6 @@ const MessagesPage = () => {
             <div ref={endRef} />
           </div>
           <MessageInput inputText={messageInput} onInputChange={updateInput} onSend={submitMessage}
-            onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submitMessage(); } }}
             sending={sendingMessage} inputRef={null} />
         </> : <EmptyConversationState />}
       </section>

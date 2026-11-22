@@ -164,6 +164,9 @@ export const API_PATHS = {
     DISPUTE_BY_ID: (id) => `/api/admin/disputes/${id}`,
     ASSIGN_DISPUTE: (id) => `/api/admin/disputes/${id}/assign`,
     ARBITRATE_DISPUTE: (id) => `/api/admin/disputes/${id}/arbitrate`,
+    DISPUTE_EVIDENCE: (id) => `/api/admin/disputes/${id}/evidence`,
+    DISPUTE_EVIDENCE_DOWNLOAD: (id, mediaId) => `/api/admin/disputes/${id}/evidence/${mediaId}/download`,
+    MODERATE_EVIDENCE: (id, mediaId) => `/api/admin/disputes/${id}/evidence/${mediaId}/moderate`,
     REVIEWS_LIST: "/api/admin/reviews",
     DELETE_REVIEW: (id) => `/api/admin/reviews/${id}`,
 
@@ -252,6 +255,13 @@ export const API_PATHS = {
     COMPLETE: (mediaId) => `/api/media/${mediaId}/complete`,
     URL: (mediaId) => `/api/media/${mediaId}/url`,
     DELETE: (mediaId) => `/api/media/${mediaId}`,
+  },
+
+  DISPUTES: {
+    EVIDENCE: (id) => `/api/disputes/${id}/evidence`,
+    EVIDENCE_ITEM: (id, mediaId) => `/api/disputes/${id}/evidence/${mediaId}`,
+    EVIDENCE_DOWNLOAD: (id, mediaId) => `/api/disputes/${id}/evidence/${mediaId}/download`,
+    LINK_REFERENCE: (id) => `/api/disputes/${id}/evidence/reference`,
   },
 
   WAITLIST: "/api/waitlist",

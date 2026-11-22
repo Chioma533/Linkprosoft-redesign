@@ -96,6 +96,7 @@ const ProfessionalSearchBar = ({ onApply, initialQuery = "" }) => {
 
   return (
     <form
+      id="tour-search-bar"
       ref={barRef}
       onSubmit={handleSubmit}
       className="relative z-30 flex items-center gap-2 overflow-x-auto sm:overflow-visible flex-nowrap w-full py-1 sm:py-2 hide-scrollbar scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"

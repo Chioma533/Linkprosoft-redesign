@@ -22,6 +22,14 @@ import PaymentScreen from "./pages/buyer/PaymentScreen";
 import VerificationPage from "./pages/verification/VerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PublicProfessionalProfile from "./pages/professional/PublicProfessionalProfile";
+const HomeRouteResolver = () => {
+  const { user } = useAuthStore();
+  if (user?.role === "professional") {
+    return <DefaultProfessionalScreen />;
+  }
+  return <DefaultBuyerScreen />;
+};
+
 const App = () => {
   const { refreshCurrentUser } = useAuthStore();
 
@@ -62,8 +70,11 @@ const App = () => {
               <Route path="/notifications" element={<NotificationsPage />} />
             </Route>
 
+            <Route element={<PrivateRoutes allowedRoles={["employer", "professional"]} />}>
+              <Route path="/home" element={<HomeRouteResolver />} />
+            </Route>
+
             <Route element={<PrivateRoutes allowedRoles={["employer"]} />}>
-              <Route path="/home" element={<DefaultBuyerScreen />} />
               <Route
                 path="/employer/dashboard"
                 element={<EmployerDashboardPage />}

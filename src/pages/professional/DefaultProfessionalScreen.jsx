@@ -11,6 +11,7 @@ import ProfessionalJobResults from "../../components/professional/ProfessionalJo
 import useProfessionalJobs from "../../hooks/professional/useProfessionalJobs";
 import normalizeProfessionalJobs from "../../utils/professional/normalizeProfessionalJobs";
 import useProfessionalJobFilter from "../../hooks/professional/useProfessionalJobFilter";
+import { useVerificationBanner } from "../../hooks/useVerificationBanner";
 
 const DefaultProfessionalScreen = () => {
   const {
@@ -27,7 +28,7 @@ const DefaultProfessionalScreen = () => {
     excludeJobFromFeed,
   } = useProfessionalJobs();
 
-  const [verificationDismissed, setVerificationDismissed] = useState(false);
+  const { showBanner: showVerificationBanner, dismissVerification: handleDismissVerification } = useVerificationBanner();
   const [selectedJob, setSelectedJob] = useState(null);
 
   const normalizedJobs = useMemo(
@@ -54,10 +55,6 @@ const DefaultProfessionalScreen = () => {
     changePage,
   } = useProfessionalJobFilter(normalizedJobs);
 
-  const handleDismissVerification = () => {
-    setVerificationDismissed(true);
-  };
-
   if (isInitialLoading) {
     return <LoadingScreen variant="professional" />;
   }
@@ -68,7 +65,7 @@ const DefaultProfessionalScreen = () => {
       <ProfessionalNavbar activePage="browse-jobs" />
 
       <ProfessionalHero
-        verificationDismissed={verificationDismissed}
+        verificationDismissed={!showVerificationBanner}
         onDismissVerification={handleDismissVerification}
       />
 

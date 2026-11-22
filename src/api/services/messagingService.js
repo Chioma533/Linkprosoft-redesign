@@ -21,8 +21,19 @@ export const messagingService = {
       totalPages: data.totalPages ?? 0,
     };
   },
-  async sendMessage(threadId, content, attachmentUrl = null, attachmentType = null) {
-    return dataOf(await axiosInstance.post(API_PATHS.MESSAGING.THREAD_MESSAGES(threadId), { content, attachmentUrl, attachmentType }));
+  async sendMessage(threadId, content, mediaIds = [], attachmentUrl = null, attachmentType = null) {
+    const payload = { content };
+    if (Array.isArray(mediaIds) && mediaIds.length > 0) {
+      payload.mediaIds = mediaIds;
+    }
+    if (attachmentUrl) {
+      payload.attachmentUrl = attachmentUrl;
+      payload.attachmentType = attachmentType;
+    }
+    return dataOf(await axiosInstance.post(API_PATHS.MESSAGING.THREAD_MESSAGES(threadId), payload));
+  },
+  async deleteAttachment(messageId, mediaId) {
+    return dataOf(await axiosInstance.delete(`/api/chat/messages/${messageId}/attachments/${mediaId}`));
   },
   async markThreadAsRead(threadId) {
     return dataOf(await axiosInstance.patch(API_PATHS.MESSAGING.THREAD_READ(threadId)));

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FiFilter, FiPlus, FiFileText, FiSearch, FiBriefcase, FiClock, FiCheckCircle, FiStar, FiInbox, FiMessageSquare, FiBell, FiArrowRight } from "react-icons/fi";
+import { FiPlus, FiFileText, FiSearch, FiBriefcase, FiClock, FiCheckCircle, FiStar, FiMessageSquare, FiBell, FiArrowRight, FiX } from "react-icons/fi";
 import MobileJobCard from "../../components/ui/MobileJobCard";
 import { useDashboardStore } from "../../store/dashboardStore";
 import WelcomeHeader from "../../components/common/WelcomeHeader";
@@ -9,13 +9,14 @@ import { useExport } from "../../hooks/useExport";
 import PerformanceMetrics from "../../components/ui/PerformanceMetrics";
 import NotificationList from "../../components/ui/NotificationList";
 import MessageList from "../../components/messages/MessageList";
-import { useNavigate } from "react-router-dom";
 import DashboardStats from "../../components/common/DashboardStats";
 import MoneyBag02Icon from "../../components/icons/MoneyBag02Icon";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { useAuthStore } from "../../store/authStore";
+import ProfileCompletionBanner from "../../components/professional/ProfileCompletionBanner";
 
 const OverviewSubpage = () => {
-  const navigate = useNavigate();
+  const { user } = useAuthStore();
   const [jobSearch, setJobSearch] = useState("");
   const [messageFilter, setMessageFilter] = useState("unread");
   const [notificationFilter, setNotificationFilter] = useState("all");
@@ -95,6 +96,14 @@ const OverviewSubpage = () => {
   return (
     <div className="space-y-8 animate-fade-in">
       <WelcomeHeader />
+
+      {/* Persistent Profile Completion Nudge */}
+      <ProfileCompletionBanner
+        user={user}
+        skills={user?.skills || []}
+        portfolio={user?.portfolio || []}
+        onNavigateToProfile={() => setActiveTab("profile")}
+      />
 
       {/* Metrics Row */}
       <DashboardStats stats={stats} />

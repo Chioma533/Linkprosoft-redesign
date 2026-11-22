@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MapPin, Calendar, Edit3, Briefcase, Award, Star, Check, Plus, X, Upload, ExternalLink } from "lucide-react";
+import { MapPin, Calendar, Edit3, Briefcase, Award, Star, Check, Plus, X, Upload, ExternalLink, Trash2 } from "lucide-react";
 import { useAuthStore } from "../../store/authStore";
 import { profileService } from "../../api/services/profileService";
 import AddSkillModal from "../../components/professional/AddSkillModal";
@@ -161,6 +161,17 @@ const ProfileSubpage = () => {
       setIsPortfolioModalOpen(false);
       toast.success("Portfolio item added");
     } catch (error) { toast.error(error.response?.data?.message || "Could not add portfolio item"); }
+  };
+
+  const deletePortfolioItem = async (portfolioItemId) => {
+    if (!window.confirm("Are you sure you want to delete this portfolio project?")) return;
+    try {
+      await profileService.deletePortfolioItem(portfolioItemId);
+      setPortfolio((current) => current.filter((item) => item.id !== portfolioItemId));
+      toast.success("Portfolio project removed");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Could not delete portfolio project");
+    }
   };
 
   const createCertification = async (event) => {
@@ -489,6 +500,17 @@ const ProfileSubpage = () => {
                     />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent z-10" />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deletePortfolioItem(port.id);
+                    }}
+                    title="Delete project"
+                    className="absolute top-2.5 right-2.5 z-30 p-1.5 rounded-full bg-black/50 text-white/80 hover:text-red-400 hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
                   <div className="relative z-20 text-white">
                     <span className="text-[9px] font-bold uppercase tracking-wider text-sky-200">
                       {port.category || "Project"}

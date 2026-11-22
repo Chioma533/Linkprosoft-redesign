@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 import { FiArrowLeft, FiAlertTriangle, FiCheckSquare, FiInfo } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+import DisputeEvidenceUploader from "../../components/common/DisputeEvidenceUploader";
+import mediaService from "../../api/services/mediaService";
+import disputeService from "../../api/services/disputeService";
+import axiosInstance from "../../utils/axiosInstance";
+import { API_PATHS } from "../../utils/apiPaths";
 
 const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
   const [reason, setReason] = useState("");
   const [explanation, setExplanation] = useState("");
   const [refundAmount, setRefundAmount] = useState("");
+  const [stagedEvidence, setStagedEvidence] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!reason) {
       toast.error("Please select a reason for the dispute");
@@ -20,11 +26,55 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      // 1. Upload any staged evidence files first
+      const uploadedMedia = [];
+      for (const item of stagedEvidence) {
+        if (!item.mediaId) {
+          const { mediaId } = await mediaService.uploadFile(item.file, "dispute_evidence");
+          uploadedMedia.push({ mediaId, caption: item.caption });
+        } else {
+          uploadedMedia.push({ mediaId: item.mediaId, caption: item.caption });
+        }
+      }
+
+      // 2. File the dispute request
+      let disputeId = null;
+      if (jobId) {
+        try {
+          const disputeRes = await axiosInstance.patch(API_PATHS.ASSIGNMENTS.DISPUTE_SATISFACTION(jobId), {
+            reason: `${reason}: ${explanation}`,
+            requestedRefund: refundAmount ? Number(refundAmount) : undefined,
+          });
+          disputeId = disputeRes.data?.data?.dispute?.id || disputeRes.data?.data?.id;
+        } catch (apiErr) {
+          console.warn("Dispute assignment API warning:", apiErr);
+        }
+      }
+
+      // 3. Link uploaded evidence to the dispute if disputeId is available
+      if (disputeId && uploadedMedia.length > 0) {
+        for (let i = 0; i < uploadedMedia.length; i++) {
+          try {
+            await disputeService.submitEvidence(disputeId, {
+              mediaId: uploadedMedia[i].mediaId,
+              caption: uploadedMedia[i].caption,
+              sortOrder: i,
+            });
+          } catch (evErr) {
+            console.warn("Evidence link warning:", evErr);
+          }
+        }
+      }
+
+      toast.success("Dispute raised successfully with supporting evidence! Support team will review shortly.");
+      onBack();
+    } catch (err) {
+      console.error("Dispute submission error:", err);
+      toast.error(err.response?.data?.message || "Failed to submit dispute. Please try again.");
+    } finally {
       setIsSubmitting(false);
-      toast.success("Dispute raised successfully! Support team will review shortly.");
-      onBack(); // Go back to details view
-    }, 1500);
+    }
   };
 
   return (
@@ -109,6 +159,11 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
             <span className="text-[9px] text-gray-400 mt-1 block">
               Note: You can request up to the maximum remaining escrow balance (₦350,000).
             </span>
+          </div>
+
+          {/* Dispute Evidence Uploader */}
+          <div className="pt-2 border-t border-gray-100">
+            <DisputeEvidenceUploader onEvidenceChange={setStagedEvidence} maxFiles={6} />
           </div>
 
           {/* Action Buttons */}

@@ -63,14 +63,23 @@ export const useMessagingStore = create((set, get) => ({
       set({ messagesLoading: false, messagesError: error.response?.data?.message ?? "Unable to load messages" });
     }
   },
-  sendMessage: async (threadId, content) => {
-    if (!content.trim()) return;
+  sendMessage: async (threadId, content, mediaIds = []) => {
+    const hasText = Boolean(content && content.trim());
+    const hasMedia = Boolean(mediaIds && mediaIds.length > 0);
+    if (!hasText && !hasMedia) return;
+    const finalContent = hasText ? content.trim() : "Sent attachments";
     set({ sendingMessage: true });
     try {
       if (socketManager.isConnected()) {
-        await new Promise((resolve, reject) => socketManager.emit(SOCKET_EVENTS.SEND_MESSAGE, { threadId, content: content.trim() }, (result) => result?.success ? resolve(result) : reject(new Error("Message could not be sent"))));
+        await new Promise((resolve, reject) =>
+          socketManager.emit(
+            SOCKET_EVENTS.SEND_MESSAGE,
+            { threadId, content: finalContent, mediaIds },
+            (result) => (result?.success ? resolve(result) : reject(new Error("Message could not be sent")))
+          )
+        );
       } else {
-        const message = await messagingService.sendMessage(threadId, content.trim());
+        const message = await messagingService.sendMessage(threadId, finalContent, mediaIds);
         get().handleNewMessage(message);
       }
       set({ messageInput: "", sendingMessage: false });

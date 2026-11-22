@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, MessageSquareText, Search } from "lucide-react";
+import { ChevronLeft, MessageSquareText, Search, Bell, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import NotificationIcon from "../components/icons/NotificationIcon";
 import { notificationService } from "../api/services/notificationService";
 import { useAuthStore } from "../store/authStore";
+import EmptyState from "../components/ui/EmptyState";
 
 const tabLabels = [
   { key: "all", label: "All Notifications" },
@@ -209,9 +210,13 @@ const NotificationsPage = () => {
                     />
                   ))
                 ) : (
-                  <div className="flex h-40 sm:h-60 items-center justify-center px-4 text-center text-[#6b7280]">
-                    No notifications available.
-                  </div>
+                  <EmptyState
+                    icon={Bell}
+                    title="No notifications yet"
+                    description="You're all caught up! New updates regarding your jobs, proposals, and account will appear here."
+                    className="my-6 border-0 bg-transparent"
+                    compact
+                  />
                 )}
               </div>
             </section>
@@ -279,7 +284,15 @@ const NotificationsPage = () => {
                         </div>
                       </div>
                     </div>
-                  )) : <div className="py-10 text-center text-[13px] text-[#6d7681]">No messages available.</div>}
+                  )) : (
+                    <EmptyState
+                      icon={MessageSquare}
+                      title="No conversations yet"
+                      description="Direct messages with clients or professionals will appear here."
+                      className="my-4 border-0 bg-transparent"
+                      compact
+                    />
+                  )}
                 </div>
               </div>
             </aside>

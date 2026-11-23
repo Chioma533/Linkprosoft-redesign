@@ -7,7 +7,7 @@ import {
   CheckSquare,
   X,
   Bell,
-  UserRound,
+  Settings,
 } from "lucide-react";
 import HomeIcon from "../icons/HomeIcon";
 import CaseIcon from "../icons/CaseIcon";
@@ -54,7 +54,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         { id: "browse-professionals", label: "Browse Professionals", keywords: ["browse", "talent", "hire"] },
         { id: "messages", label: "Messages", keywords: ["messages", "chat", "inbox"] },
         { id: "wallet", label: "Wallet & Escrow", keywords: ["wallet", "funds", "balance"] },
-        { id: "profile", label: "Account Overview", keywords: ["profile", "account", "about"] },
+        { id: "settings", label: "Settings", keywords: ["settings", "preferences", "account"] },
       ];
     }
     return [
@@ -64,7 +64,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
       { id: "applications", label: "Applications", keywords: ["applications", "proposals"] },
       { id: "schedule", label: "Schedule", keywords: ["schedule", "calendar"] },
       { id: "wallet", label: "Wallet", keywords: ["wallet", "earnings", "withdraw"] },
-      { id: "profile", label: "Profile", keywords: ["profile", "account", "bio"] },
+      { id: "settings", label: "Settings", keywords: ["settings", "preferences", "account"] },
     ];
   }, [role]);
 
@@ -151,7 +151,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         { id: "browse-professionals", name: "Browse Professionals", icon: TieIcon },
         { id: "messages", name: "Messages", icon: Message02Icon },
         { id: "wallet", name: "Wallet", icon: WalletIcon },
-        { id: "profile", name: "Account Overview", icon: UserRound },
+        { id: "settings", name: "Settings", icon: Settings },
       ];
     }
     return [
@@ -161,13 +161,13 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
       { id: "applications", name: "Applications", icon: FileText },
       { id: "schedule", name: "Schedule", icon: Calendar },
       { id: "wallet", name: "Wallet", icon: WalletIcon },
-      { id: "profile", name: "Profile", icon: UserRound },
+      { id: "settings", name: "Settings", icon: Settings },
     ];
   };
 
   const menuItems = getMenuItems();
-  const activeIndex = Math.max(menuItems.findIndex((item) => item.id === activeTab), 0);
-  const indicatorOffset = 24 + activeIndex * 54;
+  const activeIndex = menuItems.findIndex((item) => item.id === activeTab);
+  const indicatorOffset = 24 + Math.max(activeIndex, 0) * 54;
 
   return (
     <>
@@ -357,13 +357,15 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
           ${role === "professional" && activeTab === "project-details" ? "professional-project-sidebar-nav" : ""}
           ${isOpen ? "px-4" : "px-2"}
         `}>
-          <div
-            className="absolute left-1 right-1 rounded-xl bg-[#016EA6] shadow-md shadow-[#016EA6]/10 transition-all duration-500 ease-out z-0"
-            style={{
-              top: `${indicatorOffset}px`,
-              height: "48px",
-            }}
-          />
+          {activeIndex >= 0 && (
+            <div
+              className="absolute left-1 right-1 rounded-xl bg-[#016EA6] shadow-md shadow-[#016EA6]/10 transition-all duration-500 ease-out z-0"
+              style={{
+                top: `${indicatorOffset}px`,
+                height: "48px",
+              }}
+            />
+          )}
 
           {menuItems.map((item) => {
             const Icon = item.icon;

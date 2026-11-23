@@ -11,6 +11,7 @@ import ProfileSubpage from "./ProfileSubpage";
 import PremiumSubpage from "./PremiumSubpage";
 import ProjectDetailsSubpage from "./ProjectDetailsSubpage";
 import { useDashboardStore } from "../../store/dashboardStore";
+import SettingsSubpage from "../SettingsSubpage";
 
 // Dynamic subpage router mapper
 const DashboardPage = () => {
@@ -34,6 +35,8 @@ const DashboardPage = () => {
         return <ChatSubpage />;
       case "profile":
         return <ProfileSubpage />;
+      case "settings":
+        return <SettingsSubpage />;
       case "premium":
         return <PremiumSubpage />;
       case "project-details":

@@ -11,6 +11,7 @@ import WalletSubpage from "../professionals/WalletSubpage";
 import { useDashboardStore } from "../../store/dashboardStore";
 import { useAuthStore } from "../../store/authStore";
 import EmployerProfileSubpage from "./EmployerProfileSubpage";
+import SettingsSubpage from "../SettingsSubpage";
 
 const EmployerDashboardPage = () => {
   const location = useLocation();
@@ -60,6 +61,8 @@ const EmployerDashboardPage = () => {
 
       case "profile":
         return <EmployerProfileSubpage employerId={user?.id || user?.userId} />;
+      case "settings":
+        return <SettingsSubpage />;
 
       case "browse-professionals":
         return <EmployerBrowseProfessionalsSubpage />;

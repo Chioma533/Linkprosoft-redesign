@@ -7,7 +7,7 @@ import { Home, Search, Briefcase, FileText, Wallet } from "lucide-react";
 import { DashboardContentSkeleton } from "../components/common/preloader/DashboardLoadingScreen";
 
 const DashboardLayout = ({ children }) => {
-  const { activeTab, setActiveTab, fetchDashboardData, isLoading, error } = useDashboardStore();
+  const { activeTab, setActiveTab, setPreviousTab, fetchDashboardData, isLoading, error } = useDashboardStore();
   const { user } = useAuthStore();
   const role = user?.role || "professional";
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -34,6 +34,9 @@ const DashboardLayout = ({ children }) => {
   const shouldShowSkeleton = isLoading || (role !== "professional" && showSkeleton);
 
   const handleTabChange = (tab) => {
+    if (tab === "settings" && activeTab !== "settings") {
+      setPreviousTab(activeTab);
+    }
     setActiveTab(tab);
   };
 
@@ -68,7 +71,7 @@ const DashboardLayout = ({ children }) => {
         <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto max-w-7xl w-full mx-auto pb-24 md:pb-8">
           {shouldShowSkeleton ? (
             <DashboardContentSkeleton subpage={activeTab} />
-          ) : error && role === "professional" && activeTab !== "profile" ? (
+          ) : error && role === "professional" && !["profile", "settings"].includes(activeTab) ? (
             <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center">
               <p className="text-sm font-semibold text-gray-800">We couldn’t load your dashboard.</p>
               <p className="mt-1 text-xs text-gray-500">{error}</p>

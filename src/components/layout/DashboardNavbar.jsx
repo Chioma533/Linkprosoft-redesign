@@ -16,6 +16,7 @@ import {
   FiArrowRight,
   FiFileText,
   FiAward,
+  FiSettings,
 } from "react-icons/fi";
 import MessageIcon from "../icons/Message02Icon";
 import NotificationIcon from "../icons/NotificationIcon";
@@ -35,6 +36,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
     jobs = [],
     myJobs = [],
     setActiveTab,
+    setPreviousTab,
     selectedJob,
     previousTab,
     setSelectedJob,
@@ -116,7 +118,8 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
         { id: "messages", label: "Messages & Chats", icon: FiMessageSquare, keywords: ["messages", "chat", "inbox", "conversations"] },
         { id: "wallet", label: "Wallet & Escrow", icon: FiCreditCard, keywords: ["wallet", "escrow", "funds", "balance", "payments", "money"] },
         { id: "open-dispute", label: "Dispute Center", icon: FiFileText, keywords: ["dispute", "resolution", "help", "claim"] },
-        { id: "profile", label: "Profile", icon: FiUser, keywords: ["profile", "bio", "skills", "account", "settings"] },
+        { id: "profile", label: "Profile", icon: FiUser, keywords: ["profile", "bio", "skills", "account"] },
+        { id: "settings", label: "Settings", icon: FiSettings, keywords: ["settings", "preferences"] },
 
       ];
     }
@@ -128,7 +131,8 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
       { id: "schedule", label: "Schedule", icon: FiCalendar, keywords: ["schedule", "calendar", "calendar view", "upcoming"] },
       { id: "wallet", label: "Wallet & Payouts", icon: FiCreditCard, keywords: ["wallet", "earnings", "withdraw", "balance", "bank"] },
       { id: "chat", label: "Messages & Chat", icon: FiMessageSquare, keywords: ["messages", "chat", "inbox", "clients"] },
-      { id: "profile", label: "Profile", icon: FiUser, keywords: ["profile", "bio", "skills", "account", "settings"] },
+      { id: "profile", label: "Profile", icon: FiUser, keywords: ["profile", "bio", "skills", "account"] },
+      { id: "settings", label: "Settings", icon: FiSettings, keywords: ["settings", "preferences"] },
       { id: "premium", label: "Premium Membership", icon: FiAward, keywords: ["premium", "subscription", "upgrade", "pro"] },
     ];
   }, [role]);
@@ -196,6 +200,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
   // Search Action Execution
   const handleSelectNav = (tabId) => {
+    if (tabId === "settings" && title !== "settings") setPreviousTab(title);
     setActiveTab(tabId);
     setIsSearchFocused(false);
     setMobileSearchOpen(false);
@@ -216,6 +221,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
     if (searchQuery.trim()) {
       setGlobalSearchQuery(searchQuery.trim());
     }
+    if (targetTab === "settings" && title !== "settings") setPreviousTab(title);
     setActiveTab(targetTab);
     setIsSearchFocused(false);
     setMobileSearchOpen(false);
@@ -238,7 +244,16 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
     <header className="dashboard-navbar h-20 bg-[#f9f9f9] border-b-2 border-[#E6F1F6] md:border-b md:border-gray-100 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-40">
       {/* Title / Left controls */}
       <div className="flex items-center gap-2 sm:gap-4">
-        {title === "profile" ? (
+        {title === "settings" ? (
+          <button
+            type="button"
+            onClick={() => setActiveTab(previousTab && previousTab !== "settings" ? previousTab : "overview")}
+            className="flex items-center justify-center rounded-lg bg-[#E6F1F6] p-2 text-gray-600 transition-colors hover:bg-[#D8E6F1]"
+            title="Back"
+          >
+            <FiChevronLeft className="h-4 w-4" />
+          </button>
+        ) : title === "profile" ? (
           <>
             {/* Mobile Back Button */}
             <button
@@ -303,7 +318,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onKeyDown={handleKeyDownInput}
-            placeholder="Search anything (jobs, messages, pages)..."
+            placeholder={title === "settings" ? "Search settings" : "Search anything (jobs, messages, pages)..."}
             className="w-full pl-11 pr-20 py-2.5 bg-white border border-gray-200/80 rounded-full text-sm outline-none focus:border-[#016EA6] focus:ring-2 focus:ring-[#016EA6]/10 transition-all duration-200"
           />
 
@@ -625,7 +640,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDownInput}
-                  placeholder="Search jobs, pages, messages..."
+                  placeholder={title === "settings" ? "Search settings" : "Search jobs, pages, messages..."}
                   className="w-full pl-10 pr-9 py-2.5 bg-gray-50 border border-gray-200 rounded-full text-sm outline-none focus:border-[#016EA6] focus:bg-white text-gray-900 font-medium"
                 />
                 {searchQuery && (

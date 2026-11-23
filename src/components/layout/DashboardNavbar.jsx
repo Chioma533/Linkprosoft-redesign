@@ -23,9 +23,11 @@ import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 import VerificationBadge from "../common/VerificationBadge";
 import ThemeSwitcher from "../common/ThemeSwitcher";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const { user, logout } = useAuthStore();
   const {
     messages = [],
@@ -240,7 +242,13 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
           <>
             {/* Mobile Back Button */}
             <button
-              onClick={() => setActiveTab("overview")}
+              onClick={() => {
+                if (location.pathname.startsWith("/employers/")) {
+                  navigate(-1);
+                } else {
+                  setActiveTab("overview");
+                }
+              }}
               className="p-2 text-gray-500 hover:text-gray-900 bg-sky-50 hover:bg-sky-100 rounded-xl transition-all cursor-pointer flex md:hidden items-center justify-center shrink-0"
               title="Back to Overview"
             >
@@ -583,7 +591,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
               <button
                 onClick={() => {
-                  setActiveTab(role === "employer" ? "overview" : "profile");
+                  setActiveTab("profile");
                   setDropdownOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"

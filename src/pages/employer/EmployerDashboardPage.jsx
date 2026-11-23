@@ -9,10 +9,13 @@ import EmployerBrowseProfessionalsSubpage from "./EmployerBrowseProfessionalsSub
 import EmployerMessagesSubpage from "./EmployerMessagesSubpage";
 import WalletSubpage from "../professionals/WalletSubpage";
 import { useDashboardStore } from "../../store/dashboardStore";
+import { useAuthStore } from "../../store/authStore";
+import EmployerProfileSubpage from "./EmployerProfileSubpage";
 
 const EmployerDashboardPage = () => {
   const location = useLocation();
   const { activeTab, setActiveTab } = useDashboardStore();
+  const { user } = useAuthStore();
   const [selectedJobId, setSelectedJobId] = useState("ORD657783");
 
   // Handle incoming navigation state (e.g. redirected from PaymentScreen with job-details)
@@ -54,6 +57,9 @@ const EmployerDashboardPage = () => {
 
       case "messages":
         return <EmployerMessagesSubpage />;
+
+      case "profile":
+        return <EmployerProfileSubpage employerId={user?.id || user?.userId} />;
 
       case "browse-professionals":
         return <EmployerBrowseProfessionalsSubpage />;

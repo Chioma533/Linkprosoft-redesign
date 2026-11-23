@@ -7,6 +7,7 @@ import {
   CheckSquare,
   X,
   Bell,
+  UserRound,
 } from "lucide-react";
 import HomeIcon from "../icons/HomeIcon";
 import CaseIcon from "../icons/CaseIcon";
@@ -53,6 +54,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         { id: "browse-professionals", label: "Browse Professionals", keywords: ["browse", "talent", "hire"] },
         { id: "messages", label: "Messages", keywords: ["messages", "chat", "inbox"] },
         { id: "wallet", label: "Wallet & Escrow", keywords: ["wallet", "funds", "balance"] },
+        { id: "profile", label: "Account Overview", keywords: ["profile", "account", "about"] },
       ];
     }
     return [
@@ -62,6 +64,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
       { id: "applications", label: "Applications", keywords: ["applications", "proposals"] },
       { id: "schedule", label: "Schedule", keywords: ["schedule", "calendar"] },
       { id: "wallet", label: "Wallet", keywords: ["wallet", "earnings", "withdraw"] },
+      { id: "profile", label: "Profile", keywords: ["profile", "account", "bio"] },
     ];
   }, [role]);
 
@@ -148,6 +151,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
         { id: "browse-professionals", name: "Browse Professionals", icon: TieIcon },
         { id: "messages", name: "Messages", icon: Message02Icon },
         { id: "wallet", name: "Wallet", icon: WalletIcon },
+        { id: "profile", name: "Account Overview", icon: UserRound },
       ];
     }
     return [
@@ -157,6 +161,7 @@ const DashboardSidebar = ({ activeTab, onTabChange, isOpen, onClose }) => {
       { id: "applications", name: "Applications", icon: FileText },
       { id: "schedule", name: "Schedule", icon: Calendar },
       { id: "wallet", name: "Wallet", icon: WalletIcon },
+      { id: "profile", name: "Profile", icon: UserRound },
     ];
   };
 

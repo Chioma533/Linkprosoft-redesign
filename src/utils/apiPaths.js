@@ -38,6 +38,7 @@ export const API_PATHS = {
     AVATAR: "/api/profiles/me/avatar",
     COVER: "/api/profiles/me/cover",
     GET_PUBLIC_PROFILE: (slug) => `/api/profiles/public/${encodeURIComponent(slug)}`,
+    GET_PUBLIC_EMPLOYER_PROFILE: (userId) => `/api/profiles/employers/${encodeURIComponent(userId)}`,
     CHECK_SLUG_AVAILABILITY: "/api/profiles/slug-availability",
   },
 

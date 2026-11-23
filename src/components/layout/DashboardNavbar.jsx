@@ -583,7 +583,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
 
               <button
                 onClick={() => {
-                  setActiveTab(role === "employer" ? "profile" : "profile");
+                  setActiveTab(role === "employer" ? "overview" : "profile");
                   setDropdownOpen(false);
                 }}
                 className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"

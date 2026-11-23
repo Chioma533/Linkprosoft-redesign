@@ -45,6 +45,12 @@ export const profileService = {
     return data || null;
   },
 
+  getPublicEmployerProfile: async (userId) => {
+    const response = await axiosInstance.get(API_PATHS.PROFILE.GET_PUBLIC_EMPLOYER_PROFILE(userId));
+    const data = response.data?.data || response.data;
+    return data || null;
+  },
+
   checkSlugAvailability: async (slug) => {
     const response = await axiosInstance.get(API_PATHS.PROFILE.CHECK_SLUG_AVAILABILITY, {
       params: { slug },

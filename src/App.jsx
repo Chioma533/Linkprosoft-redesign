@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useAuthStore } from "./store/authStore";
 import { Toaster } from "react-hot-toast";
 import EmployerDashboardPage from "./pages/employer/EmployerDashboardPage";
+import EmployerPublicProfilePage from "./pages/employer/EmployerPublicProfilePage";
 import AdminDahboardPage from "./pages/admin/AdminDahboardPage";
 import GoogleCallbackPage from "./pages/auth/GoogleCallbackPage";
 import TestPreloaderPage from "./pages/TestPreloaderPage";
@@ -91,6 +92,10 @@ const App = () => {
             {/* professional routes */}
 
             <Route element={<PrivateRoutes allowedRoles={["professional"]} />}>
+              <Route
+                path="/employers/:employerId"
+                element={<EmployerPublicProfilePage />}
+              />
               <Route
                 path="/professional/home"
                 element={<DefaultProfessionalScreen />}

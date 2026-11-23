@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { FiBookmark, FiCheckCircle, FiZap } from "react-icons/fi";
+import { Link } from "react-router-dom";
 
 const JobCard = ({ job, onApply, onSave, ...rest }) => {
   const currentJob = job || rest;
   const [saved, setSaved] = useState(currentJob?.isBookmarked || false);
   const [isApplying, setIsApplying] = useState(false);
+  const [isEmployerAvatarBroken, setIsEmployerAvatarBroken] = useState(false);
 
   const employerName =
     currentJob?.employerName ||
@@ -20,6 +22,23 @@ const JobCard = ({ job, onApply, onSave, ...rest }) => {
     currentJob?.employer?.avatarUrl ||
     currentJob?.client?.avatarUrl ||
     "/professional_avatar.png";
+  const employerId =
+    currentJob?.employerId ||
+    currentJob?.employer_id ||
+    currentJob?.employer?.id ||
+    currentJob?.client?.id;
+  const employerAvatar = isEmployerAvatarBroken ? (
+    <span className="flex h-full w-full items-center justify-center bg-[#016EA6]/10 text-sm font-bold text-[#016EA6]">
+      {employerName.charAt(0).toUpperCase()}
+    </span>
+  ) : (
+    <img
+      src={employerAvatarUrl}
+      alt={employerName}
+      className="h-full w-full object-cover"
+      onError={() => setIsEmployerAvatarBroken(true)}
+    />
+  );
 
   const title = currentJob?.title || "Job Posting";
   const description = currentJob?.description || "No job description provided.";
@@ -70,19 +89,20 @@ const JobCard = ({ job, onApply, onSave, ...rest }) => {
       <div className="p-5 flex flex-col gap-3 flex-1">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-gray-100 shrink-0 bg-gray-100">
-              <img
-                src={employerAvatarUrl}
-                alt={employerName}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  if (e.target.parentElement) {
-                    e.target.parentElement.innerHTML = `<div class="w-full h-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] font-bold text-sm">${employerName.charAt(0)}</div>`;
-                  }
-                }}
-              />
-            </div>
+            {employerId ? (
+              <Link
+                to={`/employers/${encodeURIComponent(employerId)}`}
+                aria-label={`View ${employerName}'s employer profile`}
+                title={`View ${employerName}'s profile`}
+                className="block w-11 h-11 rounded-full overflow-hidden border-2 border-gray-100 shrink-0 bg-gray-100 focus-visible:outline-2 focus-visible:outline-[#016EA6]"
+              >
+                {employerAvatar}
+              </Link>
+            ) : (
+              <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-gray-100 shrink-0 bg-gray-100">
+                {employerAvatar}
+              </div>
+            )}
 
             <div className="min-w-0 flex-1">
               <h3 className="text-sm font-semibold text-gray-900 leading-tight truncate">

@@ -3,7 +3,6 @@ import {
   FiSearch,
   FiMessageSquare,
   FiChevronDown,
-  FiLogOut,
   FiUser,
   FiMenu,
   FiChevronLeft,
@@ -23,13 +22,12 @@ import NotificationIcon from "../icons/NotificationIcon";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 import VerificationBadge from "../common/VerificationBadge";
-import ThemeSwitcher from "../common/ThemeSwitcher";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const {
     messages = [],
     notifications = [],
@@ -100,10 +98,6 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
       setTimeout(() => mobileSearchInputRef.current?.focus(), 50);
     }
   }, [mobileSearchOpen]);
-
-  const handleLogout = async () => {
-    await logout();
-  };
 
   const unreadMessagesCount = (messages || []).filter((m) => m.unread).length;
   const unreadNotificationsCount = (notifications || []).filter((n) => n.unread || !n.is_read).length;
@@ -557,8 +551,6 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
           </Link>
         )}
 
-        <ThemeSwitcher />
-
         {/* Profile Avatar Dropdown */}
         <div className="relative bg-white rounded-full p-0.6" ref={dropdownRef}>
           <button
@@ -615,13 +607,6 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
                 <span>{role === "employer" ? "Account Overview" : "View Profile"}</span>
               </button>
 
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50/50 transition-colors text-left border-t border-gray-50"
-              >
-                <FiLogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
             </div>
           )}
         </div>

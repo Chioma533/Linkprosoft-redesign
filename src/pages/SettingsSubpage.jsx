@@ -9,13 +9,18 @@ import {
   Link2,
   LogOut,
   Mail,
+  Monitor,
   ShieldCheck,
+  Sun,
+  SunMoon,
+  Moon,
   UserRound,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import { useDashboardStore } from "../store/dashboardStore";
+import { useTheme } from "../context/useTheme";
 
 const SettingRow = ({ icon: Icon, label, onClick, iconClass = "", trailing }) => {
   const contents = (
@@ -86,6 +91,49 @@ const NotificationSwitch = ({ label, enabled, onToggle, icon: Icon, iconClass })
   />
 );
 
+const ThemePreferenceSetting = () => {
+  const { preference, setThemePreference } = useTheme();
+  const options = [
+    { value: "light", label: "Light", Icon: Sun },
+    { value: "dark", label: "Dark", Icon: Moon },
+    { value: "auto", label: "Default", Icon: Monitor },
+  ];
+
+  return (
+    <SettingRow
+      icon={SunMoon}
+      label="Theme"
+      iconClass="bg-[#FFF6E8] text-[#D28A21]"
+      trailing={
+        <div
+          role="group"
+          aria-label="Theme preference"
+          className="flex items-center rounded-full bg-[#F3F4F5] p-0.5"
+        >
+          {options.map(({ value, label, Icon }) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={preference === value}
+              aria-label={`${label} theme`}
+              title={`${label} theme`}
+              onClick={() => setThemePreference(value)}
+              className={`flex items-center gap-1 rounded-full px-2 py-1.5 text-[9px] transition-colors ${
+                preference === value
+                  ? "bg-[#0879A8] text-white"
+                  : "text-[#777] hover:bg-white"
+              }`}
+            >
+              <Icon className="h-3 w-3" />
+              <span>{label}</span>
+            </button>
+          ))}
+        </div>
+      }
+    />
+  );
+};
+
 const SettingsSubpage = () => {
   const { user, logout } = useAuthStore();
   const { setActiveTab } = useDashboardStore();
@@ -107,7 +155,7 @@ const SettingsSubpage = () => {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[466px] space-y-5 pb-8 pt-3">
+    <div className="mx-auto w-full max-w-[900px] space-y-5 pb-8 pt-3">
       <div className="flex min-h-[54px] items-center justify-between gap-3 rounded-xl border border-[#E8E8E8] bg-white px-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E4F1F6] text-[#0879A8]">
@@ -155,6 +203,7 @@ const SettingsSubpage = () => {
           iconClass="bg-[#FFF6E8] text-[#D28A21]"
           onClick={() => showUnavailable("Password change")}
         />
+        <ThemePreferenceSetting />
       </SettingSection>
 
       <SettingSection title="Notification">

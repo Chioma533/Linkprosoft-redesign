@@ -2,20 +2,12 @@ import React, { useState, useRef, useEffect, useMemo } from "react";
 import {
   FiSearch,
   FiMessageSquare,
-  FiChevronDown,
   FiUser,
   FiMenu,
   FiChevronLeft,
   FiChevronRight,
   FiX,
-  FiBriefcase,
-  FiCompass,
-  FiCreditCard,
-  FiCalendar,
   FiArrowRight,
-  FiFileText,
-  FiAward,
-  FiSettings,
 } from "react-icons/fi";
 import MessageIcon from "../icons/Message02Icon";
 import NotificationIcon from "../icons/NotificationIcon";
@@ -23,6 +15,15 @@ import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 import VerificationBadge from "../common/VerificationBadge";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { getDashboardNavigationItems } from "../../constants/dashboardNavigation.js";
+import {
+  getUnreadMessagesCount,
+  getUnreadNotificationsCount,
+  getUserDisplayName,
+  getUserRole,
+  isUserVerified,
+} from "../../utils/dashboardNavbar.js";
+import { searchDashboard } from "../../utils/dashboardNavbarSearch.js";
 
 const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
   const location = useLocation();
@@ -41,30 +42,19 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
     setGlobalSearchQuery,
   } = useDashboardStore();
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
-  const dropdownRef = useRef(null);
   const searchContainerRef = useRef(null);
   const searchInputRef = useRef(null);
   const mobileSearchInputRef = useRef(null);
 
-  const role = user?.role || "professional";
-  const isVerified = Boolean(
-    user?.isVerified ||
-    user?.is_verified ||
-    user?.verificationStatus === "verified" ||
-    user?.verification_status === "verified"
-  );
+  const role = getUserRole(user);
+  const isVerified = isUserVerified(user);
 
-  // Close profile dropdown on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
-      }
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
         setIsSearchFocused(false);
       }
@@ -99,91 +89,13 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
     }
   }, [mobileSearchOpen]);
 
-  const unreadMessagesCount = (messages || []).filter((m) => m.unread).length;
-  const unreadNotificationsCount = (notifications || []).filter((n) => n.unread || !n.is_read).length;
-
-  // Platform subpages definitions for quick navigation
-  const navigationItems = useMemo(() => {
-    if (role === "employer") {
-      return [
-        { id: "overview", label: "Overview", icon: FiCompass, keywords: ["home", "dashboard", "overview", "stats"] },
-        { id: "browse-professionals", label: "Browse Professionals", icon: FiSearch, keywords: ["browse", "find", "professionals", "talent", "hire"] },
-        { id: "manage-jobs", label: "My Jobs", icon: FiBriefcase, keywords: ["my jobs", "manage", "contracts", "orders", "active"] },
-        { id: "messages", label: "Messages & Chats", icon: FiMessageSquare, keywords: ["messages", "chat", "inbox", "conversations"] },
-        { id: "wallet", label: "Wallet & Escrow", icon: FiCreditCard, keywords: ["wallet", "escrow", "funds", "balance", "payments", "money"] },
-        { id: "open-dispute", label: "Dispute Center", icon: FiFileText, keywords: ["dispute", "resolution", "help", "claim"] },
-        { id: "profile", label: "Profile", icon: FiUser, keywords: ["profile", "bio", "skills", "account"] },
-        { id: "settings", label: "Settings", icon: FiSettings, keywords: ["settings", "preferences"] },
-
-      ];
-    }
-    return [
-      { id: "overview", label: "Overview", icon: FiCompass, keywords: ["home", "dashboard", "overview", "stats", "performance"] },
-      { id: "browse-jobs", label: "Browse Jobs", icon: FiSearch, keywords: ["browse", "find jobs", "explore", "open jobs", "market"] },
-      { id: "my-jobs", label: "My Jobs", icon: FiBriefcase, keywords: ["my jobs", "contracts", "orders", "active", "in progress"] },
-      { id: "applications", label: "Applications", icon: FiFileText, keywords: ["applications", "proposals", "applied", "bids"] },
-      { id: "schedule", label: "Schedule", icon: FiCalendar, keywords: ["schedule", "calendar", "calendar view", "upcoming"] },
-      { id: "wallet", label: "Wallet & Payouts", icon: FiCreditCard, keywords: ["wallet", "earnings", "withdraw", "balance", "bank"] },
-      { id: "chat", label: "Messages & Chat", icon: FiMessageSquare, keywords: ["messages", "chat", "inbox", "clients"] },
-      { id: "profile", label: "Profile", icon: FiUser, keywords: ["profile", "bio", "skills", "account"] },
-      { id: "settings", label: "Settings", icon: FiSettings, keywords: ["settings", "preferences"] },
-      { id: "premium", label: "Premium Membership", icon: FiAward, keywords: ["premium", "subscription", "upgrade", "pro"] },
-    ];
-  }, [role]);
+  const unreadMessagesCount = getUnreadMessagesCount(messages);
+  const unreadNotificationsCount = getUnreadNotificationsCount(notifications);
+  const navigationItems = getDashboardNavigationItems(role);
 
   // Compute live search suggestions
   const searchResults = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return { navMatches: [], jobMatches: [], messageMatches: [], notifMatches: [] };
-
-    // 1. Navigation items
-    const navMatches = navigationItems.filter(
-      (item) =>
-        item.label.toLowerCase().includes(q) ||
-        item.id.toLowerCase().includes(q) ||
-        item.keywords.some((k) => k.includes(q))
-    );
-
-    // 2. Jobs and Contracts
-    const combinedJobs = [...(myJobs || []), ...(jobs || [])];
-    const seenJobIds = new Set();
-    const jobMatches = [];
-
-    for (const job of combinedJobs) {
-      const id = String(job.id || job.orderId || "");
-      if (seenJobIds.has(id)) continue;
-
-      const title = (job.title || job.jobTitle || "").toLowerCase();
-      const client = (job.client?.fullName || job.client?.name || job.client || job.employerName || "").toLowerCase();
-      const category = (job.category?.name || job.category || "").toLowerCase();
-      const orderId = String(job.orderId || job.order_id || "").toLowerCase();
-
-      if (title.includes(q) || client.includes(q) || category.includes(q) || orderId.includes(q)) {
-        seenJobIds.add(id);
-        jobMatches.push(job);
-        if (jobMatches.length >= 4) break;
-      }
-    }
-
-    // 3. Messages
-    const messageMatches = (messages || [])
-      .filter((msg) => {
-        const sender = (msg.senderName || msg.sender || "").toLowerCase();
-        const text = (msg.lastMessage || msg.content || msg.text || "").toLowerCase();
-        return sender.includes(q) || text.includes(q);
-      })
-      .slice(0, 2);
-
-    // 4. Notifications
-    const notifMatches = (notifications || [])
-      .filter((n) => {
-        const t = (n.title || n.subject || "").toLowerCase();
-        const msg = (n.message || n.body || "").toLowerCase();
-        return t.includes(q) || msg.includes(q);
-      })
-      .slice(0, 2);
-
-    return { navMatches, jobMatches, messageMatches, notifMatches };
+    return searchDashboard(searchQuery, navigationItems, myJobs, jobs, messages, notifications);
   }, [searchQuery, navigationItems, myJobs, jobs, messages, notifications]);
 
   const hasResults =
@@ -551,12 +463,14 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
           </Link>
         )}
 
-        {/* Profile Avatar Dropdown */}
-        <div className="relative bg-white rounded-full p-0.6" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-3 p-1 rounded-full hover:bg-white transition-all cursor-pointer"
-          >
+        {/* Profile */}
+        <button
+          type="button"
+          aria-label="Go to profile"
+          onClick={() => setActiveTab("profile")}
+          className="relative bg-white rounded-full p-0.6 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#016EA6]"
+        >
+          <div className="flex items-center gap-3 p-1 rounded-full hover:bg-white transition-all">
             <div className="w-9 h-9 rounded-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] overflow-hidden">
               {user?.avatar ? (
                 <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
@@ -567,7 +481,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
             <div className="hidden md:block text-left">
               <div className="flex items-center gap-1.5">
                 <p className="text-xs font-semibold text-gray-900 leading-tight">
-                  {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Queen Michael")}
+                  {getUserDisplayName(user, role)}
                 </p>
                 <VerificationBadge user={user} />
               </div>
@@ -575,41 +489,8 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
                 {role}
               </p>
             </div>
-            <FiChevronDown
-              className={`w-4 h-4 text-gray-400 transition-transform duration-200 hidden md:block ${dropdownOpen ? "rotate-180" : ""
-                }`}
-            />
-          </button>
-
-          {/* Dropdown Menu */}
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50 animate-slide-up">
-              <div className="px-4 py-2 border-b border-gray-50">
-                <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-semibold text-gray-900 leading-none">
-                    {user?.fullName || user?.full_name || (role === "employer" ? "Employer User" : "Michael Queen")}
-                  </p>
-                  <VerificationBadge user={user} />
-                </div>
-                <p className="text-xs text-gray-400 mt-1 truncate">
-                  {user?.email || "user@example.com"}
-                </p>
-              </div>
-
-              <button
-                onClick={() => {
-                  setActiveTab("profile");
-                  setDropdownOpen(false);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
-              >
-                <FiUser className="w-4 h-4" />
-                <span>{role === "employer" ? "Account Overview" : "View Profile"}</span>
-              </button>
-
-            </div>
-          )}
-        </div>
+          </div>
+        </button>
       </div>
 
       {/* ── Mobile Global Search Modal ── */}

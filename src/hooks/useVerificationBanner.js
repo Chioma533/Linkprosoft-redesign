@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useAuthStore } from "../store/authStore";
+import { isUserVerified } from "../utils/dashboardNavbar.js";
 
 const SESSION_STORAGE_KEY = "lps_verification_banner_dismissed";
 
@@ -10,12 +11,7 @@ const SESSION_STORAGE_KEY = "lps_verification_banner_dismissed";
 export const useVerificationBanner = () => {
   const { user } = useAuthStore();
 
-  const isVerified = Boolean(
-    user?.isVerified ||
-    user?.is_verified ||
-    user?.verificationStatus === "verified" ||
-    user?.verification_status === "verified"
-  );
+  const isVerified = isUserVerified(user);
 
   const [isDismissed, setIsDismissed] = useState(() => {
     try {

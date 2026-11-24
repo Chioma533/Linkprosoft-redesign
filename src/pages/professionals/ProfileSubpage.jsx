@@ -7,6 +7,7 @@ import coverImg from "../../assets/images/IMG-20260704-WA0194.jpg";
 import avatarImg from "../../assets/images/handyman.jfif";
 import { toast } from "react-hot-toast";
 import VerificationBadge from "../../components/common/VerificationBadge";
+import Avatar from "../../components/common/Avatar";
 import PublicProfileUrlCard from "../../components/professional/PublicProfileUrlCard";
 import MediaUploader from "../../components/common/MediaUploader";
 import mediaService from "../../api/services/mediaService";
@@ -14,7 +15,7 @@ import { useDashboardStore } from "../../store/dashboardStore";
 import SectionSpotlightTooltip from "../../components/common/SectionSpotlightTooltip";
 
 const ProfileSubpage = () => {
-  const { user } = useAuthStore();
+  const { user, setUserAvatar } = useAuthStore();
   const { highlightSection, setHighlightSection } = useDashboardStore();
   const userId = user?.id || user?.userId || user?.data?.id || user?.data?.userId;
 
@@ -135,10 +136,11 @@ const ProfileSubpage = () => {
     }
   };
 
-  const handleAvatarUploaded = async ({ mediaId, file }) => {
+  const handleAvatarUploaded = async ({ mediaId }) => {
     try {
       await profileService.setAvatar(mediaId);
-      const url = URL.createObjectURL(file);
+      const url = await mediaService.getUrl(mediaId);
+      setUserAvatar({ avatar: url, avatarMediaId: mediaId });
       setProfileData((current) => ({ ...current, avatarMediaId: mediaId, avatarUrl: url }));
       toast.success("Profile photo updated");
     } catch (error) { toast.error(error.response?.data?.message || "Could not update profile photo"); }
@@ -227,7 +229,7 @@ const ProfileSubpage = () => {
   const displayProfession = profileData?.profession || user?.profession || "Skilled Craftsman & Service Professional";
   const displayBio = profileData?.bio || user?.bio || "No biography provided yet. Click 'Edit Profile' to add your professional background, experience, and specialties.";
   const displayLocation = user?.location || profileData?.location || "Nigeria";
-  const displayAvatar = profileData?.avatarUrl || user?.avatarUrl || avatarImg;
+  const displayAvatar = user?.avatar || user?.avatarUrl || profileData?.avatarUrl || avatarImg;
   const displayCover = profileData?.coverImageUrl || user?.coverImageUrl || coverImg;
   const displayRating = profileData?.avgRating || profileData?.avg_rating || 5.0;
 
@@ -271,10 +273,11 @@ const ProfileSubpage = () => {
           : ""
       }`}
     >
-      <img
-        src={displayAvatar}
-        className="w-full h-full object-cover"
-        alt=""
+      <Avatar
+        name={displayName}
+        avatar={displayAvatar}
+        imageClassName="w-full h-full object-cover"
+        fallback={<img src={avatarImg} className="w-full h-full object-cover" alt="" />}
       />
     </button>
 

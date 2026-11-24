@@ -14,6 +14,7 @@ import NotificationIcon from "../icons/NotificationIcon";
 import { useAuthStore } from "../../store/authStore";
 import { useDashboardStore } from "../../store/dashboardStore";
 import VerificationBadge from "../common/VerificationBadge";
+import Avatar from "../common/Avatar";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getDashboardNavigationItems } from "../../constants/dashboardNavigation.js";
 import {
@@ -472,11 +473,12 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
         >
           <div className="flex items-center gap-3 p-1 rounded-full hover:bg-white transition-all">
             <div className="w-9 h-9 rounded-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] overflow-hidden">
-              {user?.avatar ? (
-                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <FiUser className="w-5 h-5" />
-              )}
+              <Avatar
+                name="Avatar"
+                avatar={user?.avatar}
+                imageClassName="w-full h-full object-cover"
+                fallback={<FiUser className="w-5 h-5" />}
+              />
             </div>
             <div className="hidden md:block text-left">
               <div className="flex items-center gap-1.5">

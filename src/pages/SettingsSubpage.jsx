@@ -19,6 +19,7 @@ import {
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import Avatar from "../components/common/Avatar";
 import { useDashboardStore } from "../store/dashboardStore";
 import { useTheme } from "../context/useTheme";
 
@@ -143,7 +144,7 @@ const SettingsSubpage = () => {
   const role = user?.role || "professional";
   const currentMode = role === "employer" ? "Client" : "Professional";
   const name = user?.fullName || user?.full_name || user?.name || "Your account";
-  const avatar = user?.avatarUrl || user?.avatar_url || user?.avatar;
+  const avatar = user?.avatar || user?.avatarUrl || user?.avatar_url;
 
   const showUnavailable = (setting) => {
     toast(`${setting} settings are not available yet.`);
@@ -159,11 +160,12 @@ const SettingsSubpage = () => {
       <div className="flex min-h-[54px] items-center justify-between gap-3 rounded-xl border border-[#E8E8E8] bg-white px-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#E4F1F6] text-[#0879A8]">
-            {avatar ? (
-              <img src={avatar} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <span className="text-sm font-semibold">{name.charAt(0).toUpperCase()}</span>
-            )}
+            <Avatar
+              name={name}
+              avatar={avatar}
+              imageClassName="h-full w-full object-cover"
+              fallback={<span className="text-sm font-semibold">{name.charAt(0).toUpperCase()}</span>}
+            />
           </div>
           <div>
             <p className="text-[9px] text-[#8A8A8A]">Account mode</p>

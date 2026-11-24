@@ -6,6 +6,7 @@ import NotificationIcon from "../../components/icons/NotificationIcon";
 
 import { useAuthStore } from "../../store/authStore";
 import VerificationBadge from "../../components/common/VerificationBadge";
+import Avatar from "../../components/common/Avatar";
 import PostJobWizard from "../../pages/employer/PostJobWizard";
 import ThemeSwitcher from "../../components/common/ThemeSwitcher";
 
@@ -110,11 +111,12 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
                   className="flex items-center gap-2 cursor-pointer p-1 rounded-full hover:bg-gray-50 transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] overflow-hidden border-2 border-[#016EA6]/20 shadow-sm">
-                    {user?.avatar ? (
-                      <img src={user.avatar} alt={userName} className="w-full h-full object-cover" />
-                    ) : (
-                      <FiUser className="w-5 h-5" />
-                    )}
+                    <Avatar
+                      name={userName}
+                      avatar={user?.avatar}
+                      imageClassName="w-full h-full object-cover"
+                      fallback={<FiUser className="w-5 h-5" />}
+                    />
                   </div>
                   <FiChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${profileDropdownOpen ? "rotate-180" : ""}`} />
                 </button>
@@ -189,18 +191,15 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
                   onClick={() => navigate("/employer/dashboard")}
                   className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 shrink-0 cursor-pointer"
                 >
-                  <img
-                    src={user?.avatar || "/professional_avatar.png"}
-                    alt={userName}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                      if (e.target.parentElement) {
-                        e.target.parentElement.className =
-                          "w-8 h-8 rounded-full bg-[#016EA6] text-white flex items-center justify-center text-xs font-bold";
-                        e.target.parentElement.innerHTML = userName.charAt(0);
-                      }
-                    }}
+                  <Avatar
+                    name={userName}
+                    avatar={user?.avatar || "/professional_avatar.png"}
+                    imageClassName="w-full h-full object-cover"
+                    fallback={
+                      <span className="flex h-full w-full items-center justify-center rounded-full bg-[#016EA6] text-xs font-bold text-white">
+                        {userName.charAt(0)}
+                      </span>
+                    }
                   />
                 </button>
                 <ThemeSwitcher />

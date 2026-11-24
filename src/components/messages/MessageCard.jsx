@@ -1,4 +1,4 @@
-import MessageAvatar from "../common/Avatar";
+import Avatar from "../common/Avatar";
 
 const MessageCard = ({ message, onClick }) => {
   return (
@@ -7,7 +7,7 @@ const MessageCard = ({ message, onClick }) => {
       className="flex items-center justify-between p-2 rounded-2xl hover:bg-gray-50 transition-colors cursor-pointer group"
     >
       <div className="flex items-center gap-3 min-w-0">
-        <MessageAvatar name={message.sender} avatar={message.avatar} />
+        <Avatar name={message.sender} avatar={message.avatar} />
 
         <div className="min-w-0">
           <h4 className="text-xs font-bold text-gray-800 leading-snug">

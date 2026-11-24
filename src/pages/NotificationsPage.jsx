@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import NotificationIcon from "../components/icons/NotificationIcon";
 import { notificationService } from "../api/services/notificationService";
 import { useAuthStore } from "../store/authStore";
+import Avatar from "../components/common/Avatar";
 import EmptyState from "../components/ui/EmptyState";
 
 const tabLabels = [
@@ -166,7 +167,12 @@ const NotificationsPage = () => {
             </div>
             <div className="flex min-w-0 items-center gap-2 sm:gap-3 rounded-full border border-[#e4e7eb] bg-white px-1.5 sm:px-2 py-1">
               <div className="flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#f2d4ce] via-[#d7b7a0] to-[#7d8dae] text-[10px] font-bold text-white">
-                {userAvatar ? <img src={userAvatar} alt={userName} className="h-full w-full object-cover" /> : userName.split(" ").slice(0, 2).map((part) => part[0]).join("").toUpperCase()}
+                <Avatar
+                  name={userName}
+                  avatar={userAvatar}
+                  imageClassName="h-full w-full object-cover"
+                  fallback={userName.split(" ").slice(0, 2).map((part) => part[0]).join("").toUpperCase()}
+                />
               </div>
               <span className="mr-1 hidden max-w-36 truncate text-[15px] font-medium text-[#2c3138] sm:block">
                 {userName}

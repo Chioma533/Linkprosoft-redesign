@@ -10,7 +10,7 @@ import Preloader from "../../components/common/preloader/PreLoader";
 
 const GoogleCallbackPage = () => {
   const navigate = useNavigate();
-  const { setAuth } = useAuthStore();
+  const { setAuth, refreshUserAvatar } = useAuthStore();
   const hasVerified = useRef(false);
 
   useEffect(() => {
@@ -20,6 +20,7 @@ const GoogleCallbackPage = () => {
       try {
         const userData = await getCookieSessionUser(fetch, API_BASE_URL);
         setAuth({ user: userData });
+        await refreshUserAvatar();
         debugLog("Google sign-in verified successfully", { userId: userData?.id });
 
         toast.success('Signed in successfully');
@@ -36,7 +37,7 @@ const GoogleCallbackPage = () => {
     };
 
     verifyGoogleSignIn();
-  }, [navigate, setAuth]);
+  }, [navigate, refreshUserAvatar, setAuth]);
 
   return <Preloader />;
 };

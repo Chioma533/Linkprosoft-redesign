@@ -10,6 +10,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { profileService } from "../../api/services/profileService";
+import Avatar from "../../components/common/Avatar";
+import { useAuthStore } from "../../store/authStore";
 
 const formatDate = (value, options = { month: "short", year: "numeric" }) => {
   if (!value) return null;
@@ -59,6 +61,7 @@ const JobRow = ({ job }) => (
 );
 
 const EmployerProfileSubpage = ({ employerId }) => {
+  const { user } = useAuthStore();
   const [profile, setProfile] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -84,6 +87,8 @@ const EmployerProfileSubpage = ({ employerId }) => {
   }, [loadProfile]);
 
   const employer = profile?.employer || {};
+  const isOwnProfile = (user?.id || user?.userId) === employerId;
+  const employerAvatar = isOwnProfile ? user?.avatar || employer.avatarUrl : employer.avatarUrl;
   const stats = profile?.stats || {};
   const jobs = profile?.jobs || [];
   const categories = useMemo(
@@ -141,11 +146,12 @@ const EmployerProfileSubpage = ({ employerId }) => {
         <div className="px-5 pb-8 sm:px-10 lg:px-[7%]">
           <div className="relative flex min-h-[112px] items-end justify-between gap-5 sm:min-h-[120px]">
             <div className="absolute -top-[52px] left-0 flex h-[82px] w-[82px] items-center justify-center rounded-full border-[4px] border-white bg-[#1384A0] text-2xl font-medium text-white sm:-top-[58px] sm:h-[94px] sm:w-[94px] sm:text-3xl">
-              {employer.avatarUrl ? (
-                <img src={employer.avatarUrl} alt={displayName} className="h-full w-full rounded-full object-cover" />
-              ) : (
-                initials || <CircleUserRound className="h-9 w-9" />
-              )}
+              <Avatar
+                name={displayName}
+                avatar={employerAvatar}
+                imageClassName="h-full w-full rounded-full object-cover"
+                fallback={initials || <CircleUserRound className="h-9 w-9" />}
+              />
               {identityVerified && (
                 <span className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full border-[3px] border-white bg-[#087BA8] text-white">
                   <Check className="h-4 w-4" />

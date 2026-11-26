@@ -111,7 +111,10 @@ const {
                 id="nav-avatar-btn"
                 type="button"
                 aria-label="Go to profile"
-                onClick={() => setActiveTab("profile")}
+                onClick={() => {
+                  setActiveTab("profile");
+                  navigate("/professional/dashboard");
+                }}
                 className="relative bg-white rounded-full p-0.6 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#016EA6]"
               >
                 <div className="flex items-center gap-3 p-1 rounded-full hover:bg-white transition-all">

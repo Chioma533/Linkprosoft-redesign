@@ -32,14 +32,17 @@ export const jobService = {
    * List jobs with pagination and filters
    * GET /api/jobs
    */
-  getJobs: async (params = {}) => {
+  getJobs: async (params = {}, options = {}) => {
     try {
       const response = await axiosInstance.get(API_PATHS.JOBS.GET_JOBS, {
         params,
+        signal: options.signal,
       });
       return response.data;
     } catch (error) {
-      console.warn("API getJobs error:", error.response?.data || error.message);
+      if (error.code !== "ERR_CANCELED") {
+        console.warn("API getJobs error:", error.response?.data || error.message);
+      }
       throw error;
     }
   },

@@ -7,7 +7,7 @@
 
 ## 1. Executive Summary
 
-The frontend is feature-rich but not release-ready. The implementation sequence should begin with two P0 blockers: repairing signup OTP navigation and replacing the public professional job mock dataset. Authentication contract verification, reset-code behavior, employer job selection, and backend response consistency follow immediately.
+The frontend is feature-rich but not release-ready. The P0 signup OTP and public professional jobs blockers have been implemented. Authentication contract verification, reset-code behavior, employer job selection, and backend response consistency follow immediately.
 
 The work is split into:
 
@@ -71,7 +71,7 @@ However, release-critical gaps remain:
 | Task ID | Feature | Description | Audit reference | File paths | Category | Priority | Dependencies | Implementation requirements | Acceptance criteria | Responsible party | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | FIX-001 | Signup OTP success | Repair OTP completion navigation and resend behavior. | Executive Summary 1; Section 4 Signup; Section 5 | [src/pages/auth/SignupPage.jsx](./src/pages/auth/SignupPage.jsx:75), [src/api/services/authService.js](./src/api/services/authService.js), [src/context/PreLoaderContext.jsx](./src/context/PreLoaderContext.jsx) | FIX | P0 | AUTH-002 resend contract | Import/use preloader only if needed; navigate using the authenticated verified user/role; call the existing resend OTP service or implement only after backend confirmation. | A valid OTP closes the verification step and navigates to the verified role dashboard; invalid OTP stays on the step with error feedback; resend invokes the backend or is disabled until a confirmed contract exists. | Frontend; backend only for resend | Not started |
-| INT-001 | Public jobs | Replace the 108 generated mock jobs with live public job/search data. | Executive Summary 2; Sections 4, 7 | [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx:21), [src/api/services/searchService.js](./src/api/services/searchService.js), [src/api/services/jobService.js](./src/api/services/jobService.js) | INT | P0 | INT-002 or confirmed public jobs contract | Use one canonical live endpoint, preserve filters and pagination, and normalize response envelopes. | The page contains no generated wardrobe dataset; real or verified test jobs render; filter, pagination, loading, empty, and error states behave correctly. | Frontend + backend contract owner | Not started |
+| INT-001 | Public jobs | Replace generated mock jobs with live public job listings. | Executive Summary 2; Sections 4, 7 | [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx), [src/api/services/jobService.js](./src/api/services/jobService.js), [backend job routes](../umarks/Linprosoft-Backend/src/modules/jobs/jobRoutes.ts) | INT | P0 | Confirmed public jobs contract | Use `GET /api/jobs`, normalize response envelopes, and support server filters/pagination with loading, empty, and error states. The backend route returns only public posted jobs. | Browser smoke test verifies live response rendering, filters, pagination, and error/empty states. | Frontend + backend | Completed (2026-11-26) |
 | INT-002 | Public search contract | Confirm public professional/job search endpoint behavior. | Executive Summary 5; Section 6 | [src/utils/apiPaths.js](./src/utils/apiPaths.js), [src/api/services/searchService.js](./src/api/services/searchService.js), [src/pages/buyer/PublicBuyerScreen.jsx](./src/pages/buyer/PublicBuyerScreen.jsx) | INT | P0 | Backend route confirmation | Document the public endpoint, method, query parameters, response envelope, pagination, and authentication requirements. | A backend-constrained contract table exists and both public search pages use only verified fields and responses. | Backend + frontend | Blocked |
 | AUTH-001 | Reset password | Remove the reset-code `404` success fallback and standardize reset payload/resend behavior. | Executive Summary 4; Sections 4, 6, 9 | [src/api/services/authService.js](./src/api/services/authService.js:81), [src/pages/auth/LoginPage.jsx](./src/pages/auth/LoginPage.jsx) | AUTH | P1 | AUTH-002; backend reset routes | Fail on real `404` or route outage; verify whether resend should call resend OTP or forgot-password; remove or document fallback behavior. | Invalid/unavailable reset code does not advance to password entry; resend uses the approved endpoint; reset payload matches backend. | Frontend + backend | Not started |
 | AUTH-002 | Auth contract | Confirm canonical signup, login, OTP, resend, reset, `/me`, logout, refresh, and Google callback contracts. | Section 6; Section 8 | [src/api/services/authService.js](./src/api/services/authService.js), [src/store/authStore.js](./src/store/authStore.js), [src/utils/cookieSession.js](./src/utils/cookieSession.js), [src/pages/auth/GoogleCallbackPage.jsx](./src/pages/auth/GoogleCallbackPage.jsx) | AUTH | P1 | Backend documentation/runtime verification | Compare payload and response fields, cookie behavior, nonce/state handling, and role values. | Contract matrix for auth is confirmed; valid flows work and invalid/expired sessions are handled consistently. | Backend + frontend | Blocked |
@@ -113,7 +113,6 @@ However, release-critical gaps remain:
 ### P0
 
 - **FIX-001:** Repair signup OTP navigation and resend.
-- **INT-001:** Replace public mock jobs.
 - **INT-002:** Confirm public search endpoint contract.
 - **INT-009:** Complete or explicitly defer real payment/escrow; treat as P0 because it blocks a payment-producing release.
 
@@ -136,7 +135,7 @@ However, release-critical gaps remain:
 3. AUTH-001 — correct reset fallback.
 4. AUTH-003 — verify sessions and roles.
 5. INT-002 — confirm public search contract.
-6. INT-001 — replace public mock jobs.
+6. INT-001 — replace public mock jobs. **Completed 2026-11-26.**
 7. FIX-002 — remove hardcoded employer job ID.
 
 ### Phase 2: Core functionality completion

@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   FiChevronLeft,
@@ -13,26 +13,10 @@ import {
 } from "react-icons/fi";
 import JobSearchBar from "../../components/professional/JobSearchBar";
 import JobCard from "../../components/professional/JobCard";
-import LoadingScreen from "../../components/common/preloader/LoadingScreen";
 import ThemeSwitcher from "../../components/common/ThemeSwitcher";
+import { jobService } from "../../api/services/jobService";
+import { buildPublicJobsParams, normalizePublicJobsResponse } from "../../utils/professional/publicJobs";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
-
-/* ─────────────────────────────────────────────────────────────
-   Mock data — 108 jobs, 9 per page (3×3 grid), 5 pages total display
-   ───────────────────────────────────────────────────────────── */
-const ALL_JOBS = Array.from({ length: 108 }, (_, i) => ({
-  id: i + 1,
-  title: "Wardrobe Installation",
-  employerName: "Jonathan David",
-  employerAvatarUrl: "/professional_avatar.png",
-  postedAgo: "Posted 2 min ago",
-  description:
-    "Hi, I'm looking for an experienced carpenter to build and install a custom wardrobe for my master bedroom. The wardrobe should have sliding doors, multiple shelves, hanging sections, and drawers.",
-  budget: 10000,
-  location: "Lagos",
-  category: "Carpentry",
-  datePostedDays: 0, // 0 = today
-}));
 
 const ITEMS_PER_PAGE = 9;
 
@@ -310,69 +294,46 @@ const PublicBottomNav = () => {
    Main Public Page
    ───────────────────────────────────────────────────────────── */
 const PublicProfessionalScreen = () => {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [filters, setFilters] = useState({});
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [minTimePassed, setMinTimePassed] = useState(false);
+  const [jobs, setJobs] = useState([]);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
   useEffect(() => {
-    const minTimer = setTimeout(() => {
-      setMinTimePassed(true);
-      setIsInitialLoading(false);
-    }, 2500);
-    return () => clearTimeout(minTimer);
-  }, []);
+    const controller = new AbortController();
+    const loadJobs = async () => {
+      setIsLoading(true);
+      setLoadError("");
+      try {
+        const params = buildPublicJobsParams(filters, currentPage, ITEMS_PER_PAGE);
+        const response = await jobService.getJobs(params, { signal: controller.signal });
+        const result = normalizePublicJobsResponse(response, currentPage, ITEMS_PER_PAGE);
+        if (controller.signal.aborted) return;
 
-  /* ── Filtering ─────────────────────────────────────────────── */
-  const filteredJobs = useMemo(() => {
-    return ALL_JOBS.filter((job) => {
-      const search = filters.searchQuery?.toLowerCase() || "";
-      const matchesSearch =
-        !search ||
-        job.title.toLowerCase().includes(search) ||
-        job.description.toLowerCase().includes(search) ||
-        job.category.toLowerCase().includes(search);
+        const pages = Math.max(1, result.pages);
+        setJobs(result.jobs);
+        setTotalJobs(result.total);
+        setTotalPages(pages);
+        if (currentPage > pages) setCurrentPage(pages);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setJobs([]);
+        setTotalJobs(0);
+        setLoadError(error.response?.data?.message || error.message || "Unable to load jobs.");
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    };
 
-      const matchesLocation =
-        !filters.location ||
-        filters.location === "All Locations" ||
-        job.location === filters.location;
-
-      const normalizedBudget = filters.budget?.replace(/–/g, "-") || "";
-      const matchesBudget =
-        !normalizedBudget ||
-        normalizedBudget === "Any Budget" ||
-        (() => {
-          if (normalizedBudget === "Under ₦5,000") return job.budget < 5000;
-          if (normalizedBudget === "₦5,000 - ₦20,000")
-            return job.budget >= 5000 && job.budget <= 20000;
-          if (normalizedBudget === "₦20,000 - ₦50,000")
-            return job.budget >= 20000 && job.budget <= 50000;
-          if (normalizedBudget === "₦50,000+") return job.budget > 50000;
-          return true;
-        })();
-
-      const matchesDate =
-        !filters.datePosted ||
-        filters.datePosted === "Any time" ||
-        (() => {
-          if (filters.datePosted === "Today") return job.datePostedDays === 0;
-          if (filters.datePosted === "This week") return job.datePostedDays <= 7;
-          if (filters.datePosted === "This month") return job.datePostedDays <= 30;
-          if (filters.datePosted === "Last 3 months") return job.datePostedDays <= 90;
-          return true;
-        })();
-
-      return matchesSearch && matchesLocation && matchesBudget && matchesDate;
-    });
-  }, [filters]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / ITEMS_PER_PAGE));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const paginatedJobs = filteredJobs.slice(
-    (safeCurrentPage - 1) * ITEMS_PER_PAGE,
-    safeCurrentPage * ITEMS_PER_PAGE
-  );
+    loadJobs();
+    return () => controller.abort();
+  }, [currentPage, filters, reloadKey]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -383,10 +344,6 @@ const PublicProfessionalScreen = () => {
     setFilters(newFilters);
     setCurrentPage(1);
   };
-
-  if (isInitialLoading || !minTimePassed) {
-    return <LoadingScreen variant="professional" />;
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans pb-24 md:pb-12">
@@ -453,11 +410,12 @@ const PublicProfessionalScreen = () => {
           {/* Section header */}
           <div className="mb-4 sm:mb-6">
             <h2 className="text-base sm:text-lg font-semibold text-gray-900">
-              Related to{" "}
-              <span className="text-gray-700">&ldquo;Carpentry&rdquo;</span>
+              {filters.searchQuery?.trim()
+                ? `Results for "${filters.searchQuery.trim()}"`
+                : "Latest opportunities"}
             </h2>
             <p className="text-xs sm:text-sm text-gray-500 mt-0.5 sm:mt-1">
-              {filteredJobs.length} jobs available
+              {totalJobs} {totalJobs === 1 ? "job" : "jobs"} available
             </p>
           </div>
 
@@ -466,35 +424,51 @@ const PublicProfessionalScreen = () => {
             id="public-jobs-grid"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
           >
-            {paginatedJobs.length > 0 ? (
-              paginatedJobs.map((job) => (
+            {isLoading ? (
+              <div className="col-span-full flex min-h-48 items-center justify-center" role="status">
+                <span className="h-9 w-9 animate-spin rounded-full border-4 border-[#016EA6]/20 border-t-[#016EA6]" />
+                <span className="sr-only">Loading jobs</span>
+              </div>
+            ) : loadError ? (
+              <div className="col-span-full py-16 text-center" role="alert">
+                <p className="text-sm text-red-600">{loadError}</p>
+                <button
+                  type="button"
+                  onClick={() => setReloadKey((key) => key + 1)}
+                  className="mt-4 rounded-full bg-[#016EA6] px-5 py-2 text-sm font-semibold text-white hover:bg-[#015885]"
+                >
+                  Try again
+                </button>
+              </div>
+            ) : jobs.length > 0 ? (
+              jobs.map((job) => (
                 <JobCard
                   key={job.id}
                   {...job}
-                  onApply={() => console.log(`Applying to job: ${job.title}`)}
-                  onSave={(val) =>
-                    console.log(`Saved job ${job.title}: ${val}`)
-                  }
+                  onApply={() => navigate("/login")}
                 />
               ))
             ) : (
               <div className="col-span-full py-20 text-center">
                 <p className="text-sm text-gray-500">
-                  No jobs match your current filters. Try expanding your search
-                  or adjusting the filters.
+                  {Object.values(filters).some(Boolean)
+                    ? "No jobs match your filters. Try changing your search or filters."
+                    : "There are no public jobs available right now."}
                 </p>
               </div>
             )}
           </div>
 
           {/* Pagination */}
-          <div className="mt-8">
-            <ProfessionalPagination
-              currentPage={safeCurrentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
-          </div>
+          {!isLoading && !loadError && totalJobs > 0 && (
+            <div className="mt-8">
+              <ProfessionalPagination
+                currentPage={safeCurrentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </div>
+          )}
         </div>
       </section>
 

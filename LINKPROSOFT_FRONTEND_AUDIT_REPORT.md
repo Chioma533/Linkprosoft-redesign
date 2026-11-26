@@ -21,7 +21,7 @@ The likely readiness is:
 - **Authentication/session foundation:** partially complete.
 - **Professional/employer core journeys:** partially complete and integration-dependent.
 - **Admin journey:** substantial UI coverage, but many actions or data sections need backend confirmation.
-- **Public search/discovery:** mixed; professional discovery is live where implemented, while public job discovery is mock.
+- **Public search/discovery:** mixed; public professional jobs now use the paginated `/api/jobs` feed, while other discovery areas still need verification.
 - **Settings/account management:** incomplete.
 - **Build/runtime verification:** not completed because PowerShell was unavailable in the execution environment.
 
@@ -216,7 +216,7 @@ The public catch-all is registered after fixed routes, so it can consume unknown
 | Reset code | Resend | Call resend/reset-code endpoint | Calls forgot-password | **Partial** | Confirm intended API contract |
 | Reset code | Verify code | Verify code via backend | Falls back to success on `404` | **Broken fallback** | Remove success fallback or flag route outage |
 | Public buyer | Trending link | Route to trending professionals | Links to `/trending`, route absent | **Confirmed missing** | Add route/component or remove link |
-| Public professionals | Job cards/pagination/filter | Live jobs | Uses 108 generated mock jobs | **Confirmed mock** | Replace with live job/search service |
+| Public professionals | Job cards/pagination/filter | Live jobs | Replaced with public `/api/jobs` feed, server pagination, and API-backed filters | **Implemented** | Verify against production data |
 | Settings | Change password | Password update flow | “Not available” toast | **Missing** | Build API-backed password change |
 | Settings | Linked accounts | Link/unlink provider accounts | “Not available” toast | **Missing** | Implement/confirm provider requirements |
 | Settings | Privacy policy | Open or route to policy | “Not available” toast | **Missing** | Add route/document |
@@ -261,7 +261,7 @@ The matrix summarizes frontend-defined integrations. “Unverified” means sour
 | Job applications | `/api/applications...` | GET/POST/PUT/DELETE | Implemented | Duplicate and status responses | Verify |
 | Job matches | `/api/jobs/:id/matches` | GET | Implemented | Candidate shape unverified | Confirm |
 | Assignment lifecycle | `/api/assignments...` | GET/POST/PUT/PATCH | Defined/partial usage | Approval/dispute contracts | Confirm |
-| Search | `/api/search/professionals`, `/filters`, `/skills` | GET/POST | Implemented public/partial | Public job screen bypasses API | Replace mocks |
+| Search | `/api/search/professionals`, `/filters`, `/skills` | GET/POST | Implemented public/partial | Public jobs use `/api/jobs` | Verify remaining discovery contracts |
 | Wallet | `/api/wallet`, history | GET/POST/PUT | Partial | Balance update semantics unverified | Confirm method and amount units |
 | Payments | `/api/payments...` | POST/GET | Partial | `PaymentScreen` cannot be verified live | Confirm initiate/verify contracts |
 | Messaging | `/api/chat/threads...` | GET/POST/PATCH/DELETE | Implemented | Socket and approved contacts | Runtime verify |
@@ -278,7 +278,7 @@ The matrix summarizes frontend-defined integrations. “Unverified” means sour
 
 | File | Description | Status | Backend replacement |
 |---|---|---|---|
-| [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx:21) | 108 generated identical wardrobe jobs | **Confirmed temporary/mock** | Live `/api/search` or `/api/jobs` |
+| [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx) | Public job feed | **Implemented** | Public `/api/jobs` endpoint with server-side filters and pagination |
 | [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx:20) | Default job ID `ORD657783` | **Confirmed bad fallback** | Empty state or selected route job ID |
 | [src/pages/employer/EmployerOpenDisputeSubpage.jsx](./src/pages/employer/EmployerOpenDisputeSubpage.jsx:112) | Default job title and fixed `₦350,000` | **Confirmed placeholder** | Selected job and live escrow balance |
 | [src/pages/admin/AdminSettingsSubpage.jsx](./src/pages/admin/AdminSettingsSubpage.jsx:37) | Static administrator list and local-only settings | **Confirmed fake persistence** | Admin settings/user APIs |
@@ -338,7 +338,7 @@ Legitimate constants include filter options, verification configuration defaults
 ### Visitor → signup → OTP → dashboard
 
 **Status: P0 partial/broken.**  
-Signup API, OTP API, cookie session, and role routing exist, but OTP success handler can throw due to undefined identifiers. Resend is fake.
+Signup API, OTP API, cookie session, and role routing exist. The OTP redirect and resend flow were repaired in LP-F-001.
 
 ### Login → role dashboard
 
@@ -348,7 +348,7 @@ Login response must contain `response.data.user.role`; `getDashboardRoute` must 
 ### Professional browse → view job → apply
 
 **Status: Partial.**  
-Authenticated browse jobs exists; public `/professionals` is mock. Application submission exists through `/api/applications`.
+Authenticated browse jobs exists; public `/professionals` now loads jobs from `/api/jobs`. Application submission exists through `/api/applications`.
 
 ### Professional profile → public profile
 
@@ -464,7 +464,7 @@ The development team must provide or confirm:
 | ID | Feature/page | Outstanding work | Relevant files | Dependencies | Priority | Completion criteria |
 |---|---|---|---|---|---|---|
 | LP-F-001 | Signup OTP | Fix undefined redirect/preloader identifiers and remove fake resend | [src/pages/auth/SignupPage.jsx](./src/pages/auth/SignupPage.jsx:75) | Auth resend backend contract | **P0** | Successful OTP redirects to correct role dashboard; resend calls backend and reports success/error |
-| LP-F-002 | Public professional jobs | Replace 108-item mock dataset with live search/job API | [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx:21) | Canonical public jobs/search endpoint | **P0** | Real jobs render with working filter/pagination/loading/empty/error states |
+| LP-F-002 | Public professional jobs | Replace generated mock listings with the paginated public jobs API | [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx) | Public `/api/jobs` contract | **Completed** | Server-backed jobs, filters, pagination, loading, empty, and error/retry states verified |
 | LP-F-003 | Reset password | Remove `404` success fallback and confirm resend endpoint | [src/api/services/authService.js](./src/api/services/authService.js:81) | Backend reset routes | **P1** | No success is emitted when code route fails |
 | LP-F-004 | Employer dashboard | Remove fallback selected job ID and prevent mismatched job/dispute | [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx:20) | Job navigation state | **P1** | Details always use a real selected job or empty state |
 | LP-F-005 | Settings | Implement change password, linked accounts, legal links | [src/pages/SettingsSubpage.jsx](./src/pages/SettingsSubpage.jsx) | Backend/account requirements | **P1** | No “not available” controls remain if features are in scope |
@@ -488,7 +488,7 @@ The development team must provide or confirm:
 
 1. Fix signup OTP redirect and resend behavior.
 2. Remove reset-code fallback and complete auth contract verification.
-3. Replace public mock jobs and set verified public browse endpoint.
+3. Replace public mock jobs and set verified public browse endpoint. **Completed in LP-F-002.**
 4. Remove employer hardcoded job fallback.
 5. Verify role routing, sessions, Google callback, and logout.
 6. Complete core professional/employer job/application/escrow journeys.
@@ -505,7 +505,7 @@ The development team must provide or confirm:
 The frontend has a strong breadth of implemented screens and a substantial API service layer. However, the presence of a component or API service does not prove end-to-end correctness. Release preparation is blocked until at least:
 
 - The signup OTP P0 defect is fixed.
-- Public professional jobs are live or clearly out of public scope.
+- Public professional jobs now use the live public jobs endpoint.
 - Hardcoded job IDs and admin settings/mock finance/dispute data are removed from release-critical flows.
 - Settings and subscription controls stop presenting simulated success.
 - Reset-code verification and resend behavior are made honest and backend-backed.

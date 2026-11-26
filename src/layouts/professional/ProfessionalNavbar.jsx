@@ -1,20 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  FiMessageSquare,
   FiUser,
-  FiChevronDown,
-  FiLogOut,
   FiGrid,
   FiMenu,
   FiX,
 } from "react-icons/fi";
+import MessageIcon from "../../components/icons/Message02Icon";
+import NotificationIcon from "../../components/icons/NotificationIcon";
 import Logo from "/temp_figma_mockups/linkprosoft-logo.png";
 import { useAuthStore } from "../../store/authStore";
 import VerificationBadge from "../../components/common/VerificationBadge";
 import Avatar from "../../components/common/Avatar";
-import NotificationIcon from "../../components/icons/NotificationIcon";
-import ThemeSwitcher from "../../components/common/ThemeSwitcher";
+import { useDashboardStore } from "../../store/dashboardStore";
+import { getUnreadMessagesCount, getUnreadNotificationsCount, getUserDisplayName, getUserRole, isUserVerified } from "../../utils/dashboardNavbar";
 
 /**
  * ProfessionalNavbar — top nav for the DefaultProfessionalScreen.
@@ -22,36 +21,30 @@ import ThemeSwitcher from "../../components/common/ThemeSwitcher";
  * No "Post a Job" button — professionals don't post jobs.
  */
 const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
+  const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
-
-  const dropdownRef = useRef(null);
   const navigate = useNavigate();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setProfileDropdownOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleLogout = async () => {
-    setProfileDropdownOpen(false);
-    await logout();
-    navigate("/login");
-  };
-
+const {
+  messages = [],
+  notifications = [],
+  setActiveTab,
+  setPreviousTab,
+} = useDashboardStore()
   const navLinks = [
     { id: "browse-jobs", label: "Browse Jobs", path: "/professional/home" },
     { id: "dashboard", label: "My Dashboard", path: "/professional/dashboard" },
     { id: "community", label: "Community", path: "/community" },
   ];
 
+  const role = getUserRole(user);
+  const isVerified = isUserVerified(user);
+
   const userName = user?.fullName || user?.full_name || "Professional";
+
+  const unreadMessagesCount = getUnreadMessagesCount(messages);
+  const unreadNotificationsCount = getUnreadNotificationsCount(notifications);
 
   return (
     <nav className="relative w-full bg-white border-b border-gray-100 sticky top-0 z-40">
@@ -88,80 +81,61 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
           </div>
 
           {/* Desktop Right actions */}
+          {}
           <div className="hidden md:flex items-center gap-3">
             <button
               id="nav-messages-btn"
-              onClick={() => navigate("/professional/dashboard")}
+              onClick={() => setActiveTab(role === "employer" ? "messages" : "chat")}
               className="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all cursor-pointer"
               title="Messages"
             >
-              <FiMessageSquare className="w-5 h-5" />
+              <MessageIcon className="w-5 h-5" />
+                {unreadMessagesCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#016EA6] rounded-full ring-2 ring-white animate-pulse" />
+                )}
             </button>
 
-            <div
-              id="nav-notifications-btn"
-              className="relative flex items-center justify-center p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-all cursor-pointer"
-              title="Notifications"
-            >
-              <NotificationIcon size={20} />
-            </div>
+           {/* Notifications Alert */}
+        <div
+          className="dashboard-notifications-action relative p-2 md:items-center md:justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all cursor-pointer hidden md:flex"
+          title="Notifications"
+        >
+          <NotificationIcon size={20} />
+          {unreadNotificationsCount > 0 && (
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white animate-pulse" />
+          )}
+        </div>
 
-            {/* Avatar + dropdown */}
-            <div className="relative" ref={dropdownRef}>
+            {/* Profile avatar */}
               <button
                 id="nav-avatar-btn"
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 cursor-pointer p-1 rounded-full hover:bg-gray-50 transition-colors"
+                type="button"
+                aria-label="Go to profile"
+                onClick={() => setActiveTab("profile")}
+                className="relative bg-white rounded-full p-0.6 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#016EA6]"
               >
-                <div className="w-9 h-9 rounded-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] overflow-hidden border-2 border-[#016EA6]/20 shadow-sm">
-                  <Avatar
-                    name={userName}
-                    avatar={user?.avatar}
-                    imageClassName="w-full h-full object-cover"
-                    fallback={<FiUser className="w-5 h-5" />}
-                  />
-                </div>
-                <FiChevronDown
-                  className={`w-4 h-4 text-gray-400 transition-transform ${
-                    profileDropdownOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl py-2 z-50">
-                  <div className="px-4 py-2.5 border-b border-gray-50">
+                <div className="flex items-center gap-3 p-1 rounded-full hover:bg-white transition-all">
+                  <div className="w-9 h-9 rounded-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] overflow-hidden border-2 border-[#016EA6]/20 shadow-sm">
+                    <Avatar
+                      name="Avatar"
+                      avatar={user?.avatar}
+                      imageClassName="w-full h-full object-cover"
+                      fallback={<FiUser className="w-5 h-5" />}
+                    />
+                  </div>
+                  <div className="hidden md:block text-left">
                     <div className="flex items-center gap-1.5">
-                      <p className="text-sm font-semibold text-gray-900 leading-none truncate">{userName}</p>
+                      <p className="text-xs font-semibold text-gray-900 leading-tight">
+                        {getUserDisplayName(user, role)}
+                      </p>
                       <VerificationBadge user={user} />
                     </div>
-                    <p className="text-xs text-gray-400 mt-1 capitalize truncate">
-                      Professional
+                    <p className="text-[10px] text-gray-400 capitalize">
+                      {role}
                     </p>
                   </div>
-
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      navigate("/professional/dashboard");
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left"
-                  >
-                    <FiGrid className="w-4 h-4 text-gray-500" />
-                    <span>My Dashboard</span>
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/50 transition-colors text-left border-t border-gray-50"
-                  >
-                    <FiLogOut className="w-4 h-4" />
-                    <span>Logout</span>
-                  </button>
                 </div>
-              )}
-            </div>
-            <ThemeSwitcher />
+              </button>
           </div>
 
           {/* Mobile Navigation Header (Figma Mobile Design: Menu Icon | Browse Jobs | Messages | Avatar) */}
@@ -185,31 +159,38 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
-              <ThemeSwitcher />
               <button
                 id="mobile-messages-btn"
-                onClick={() => navigate("/professional/dashboard")}
+                onClick={() => setActiveTab(role === "employer" ? "messages" : "chat")}
                 className="p-2 text-gray-600 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-50"
                 title="Messages"
               >
-                <FiMessageSquare className="w-5 h-5 text-gray-600" />
+                <MessageIcon className="w-5 h-5" />
+                  {unreadMessagesCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#016EA6] rounded-full ring-2 ring-white animate-pulse" />
+                  )}           
               </button>
 
               <button
                 id="mobile-avatar-btn"
-                onClick={() => navigate("/professional/dashboard")}
-                className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 shrink-0 cursor-pointer"
+                type="button"
+                aria-label="Go to profile"
+                onClick={() => {
+                  setActiveTab("profile");
+                  navigate("/professional/dashboard");
+                }}
+                className="relative bg-white rounded-full p-0.6 cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#016EA6]"
               >
-                <Avatar
-                  name={userName}
-                  avatar={user?.avatar || "/professional_avatar.png"}
-                  imageClassName="w-full h-full object-cover"
-                  fallback={
-                    <span className="flex h-full w-full items-center justify-center rounded-full bg-[#016EA6] text-xs font-bold text-white">
-                      {userName.charAt(0)}
-                    </span>
-                  }
-                />
+                <div className="flex items-center p-1 rounded-full hover:bg-white transition-all">
+                <div className="w-9 h-9 rounded-full bg-[#016EA6]/10 flex items-center justify-center text-[#016EA6] overflow-hidden border-2 border-[#016EA6]/20 shadow-sm">
+              <Avatar
+                name="Avatar"
+                avatar={user?.avatar}
+                imageClassName="w-full h-full object-cover"
+                fallback={<FiUser className="w-5 h-5" />}
+              />
+            </div>
+            </div>
               </button>
             </div>
           </div>
@@ -229,14 +210,7 @@ const ProfessionalNavbar = ({ activePage = "browse-jobs" }) => {
             >
               {link.label}
             </Link>
-          ))}
-          <div className="h-px bg-gray-100 my-1" />
-          <button
-            onClick={handleLogout}
-            className="text-sm text-red-500 font-medium text-left"
-          >
-            Logout
-          </button>
+          ))}         
         </div>
       )}
     </nav>

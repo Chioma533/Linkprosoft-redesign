@@ -480,7 +480,7 @@ const DashboardNavbar = ({ title, isOpen, onMenuClick }) => {
                 fallback={<FiUser className="w-5 h-5" />}
               />
             </div>
-            <div className="hidden md:block text-left">
+            <div className="hidden md:block text-left"> 
               <div className="flex items-center gap-1.5">
                 <p className="text-xs font-semibold text-gray-900 leading-tight">
                   {getUserDisplayName(user, role)}

@@ -22,6 +22,7 @@ const CommunityPage = () => {
   const [profile, setProfile] = useState(null);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState(null);
+  const [feedMode, setFeedMode] = useState("latest");
 
   useEffect(() => {
     let mounted = true;
@@ -148,10 +149,18 @@ const CommunityPage = () => {
             coverUrl={profileCover}
             loading={isSessionLoading || profileLoading}
             error={profileError}
+            activeShortcut={feedMode === "saved" ? "saved" : null}
             onOpenProfile={openProfile}
+            onSelectSaved={() => setFeedMode((m) => (m === "saved" ? "latest" : "saved"))}
           />
 
-          <CommunityFeed />
+          <CommunityFeed
+            currentUserId={user?.id || user?.userId}
+            userAvatar={profileAvatar}
+            userName={profileName}
+            feedMode={feedMode}
+            onChangeFeedMode={setFeedMode}
+          />
 
           <CommunityMessagesSidebar
             threads={messaging.threads}

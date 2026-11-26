@@ -266,4 +266,22 @@ export const API_PATHS = {
   },
 
   WAITLIST: "/api/waitlist",
+
+  COMMUNITY: {
+    POSTS: "/api/community/posts",
+    POST_BY_ID: (postId) => `/api/community/posts/${postId}`,
+    USER_POSTS: (userId) => `/api/community/users/${userId}/posts`,
+    REACTIONS: (postId) => `/api/community/posts/${postId}/reactions`,
+    COMMENTS: (postId) => `/api/community/posts/${postId}/comments`,
+    COMMENT_BY_ID: (commentId) => `/api/community/comments/${commentId}`,
+    COMMENT_LIKE: (commentId) => `/api/community/comments/${commentId}/like`,
+    SAVE_POST: (postId) => `/api/community/posts/${postId}/save`,
+    SAVED_POSTS: "/api/community/saved",
+    TRENDING_HASHTAGS: "/api/community/hashtags/trending",
+    POSTS_BY_HASHTAG: (tag) => `/api/community/hashtags/${encodeURIComponent(tag)}`,
+    FOLLOW_USER: (userId) => `/api/community/users/${userId}/follow`,
+    USER_FOLLOWERS: (userId) => `/api/community/users/${userId}/followers`,
+    USER_FOLLOWING: (userId) => `/api/community/users/${userId}/following`,
+    REPORTS: "/api/community/reports",
+  },
 };

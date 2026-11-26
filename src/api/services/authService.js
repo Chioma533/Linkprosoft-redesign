@@ -56,6 +56,11 @@ export const authService = {
     return response.data;
   },
 
+  resendOtp: async (email) => {
+    const response = await axiosInstance.post(API_PATHS.AUTH.RESEND_OTP, { email });
+    return response.data;
+  },
+
   getCurrentUser: async () => {
     return getCookieSessionUser(fetch, API_BASE_URL);
   },

@@ -24,6 +24,7 @@ import VerificationPage from "./pages/verification/VerificationPage";
 import BadgeVerificationPage from "./pages/verification/BadgeVerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PublicProfessionalProfile from "./pages/professional/PublicProfessionalProfile";
+import EmployerTrendingProfessionalsPage from "./pages/employer/EmployerTrendingProfessionalsPage";
 const HomeRouteResolver = () => {
   const { user } = useAuthStore();
   if (user?.role === "professional") {
@@ -78,6 +79,10 @@ const App = () => {
             </Route>
 
             <Route element={<PrivateRoutes allowedRoles={["employer"]} />}>
+              <Route
+                path="/trending-professionals"
+                element={<EmployerTrendingProfessionalsPage />}
+              />
               <Route
                 path="/employer/dashboard"
                 element={<EmployerDashboardPage />}

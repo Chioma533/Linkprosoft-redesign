@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FiMail } from "react-icons/fi";
 import Button from "../../../components/common/Button";
 
-const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
+const OtpVerification = ({ email, onSubmit, onResend, isLoading, isResending, error }) => {
   const [otp, setOtp] = useState(new Array(6).fill(""));
   const [isResendDisabled, setIsResendDisabled] = useState(false);
   const [countdown, setCountdown] = useState(30);
@@ -92,10 +92,16 @@ const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
     }
   };
 
-  const handleResendClick = () => {
-    if (isResendDisabled) return;
+  const handleResendClick = async () => {
+    if (isResendDisabled || isLoading || isResending) return;
+
+    const wasSent = await onResend();
+    if (wasSent === false) return;
+
+    setOtp(new Array(6).fill(""));
+    inputRefs.current[0]?.focus();
+    setCountdown(30);
     setIsResendDisabled(true);
-    onResend();
   };
 
   const shakeVariants = {
@@ -185,14 +191,15 @@ const OtpVerification = ({ email, onSubmit, onResend, isLoading, error }) => {
         <div className="mt-6 text-sm text-gray-500">
           Didn&apos;t receive a code?{" "}
           <button
+            type="button"
             onClick={handleResendClick}
-            disabled={isResendDisabled || isLoading}
+            disabled={isResendDisabled || isLoading || isResending}
             className={`font-semibold cursor-pointer outline-none ${isResendDisabled
                 ? "text-gray-300 cursor-not-allowed"
                 : "text-[#016EA6] hover:underline"
               }`}
           >
-            {isResendDisabled ? `Resend in ${countdown}s` : "Resend"}
+            {isResending ? "Sending..." : isResendDisabled ? `Resend in ${countdown}s` : "Resend"}
           </button>
         </div>
       </motion.div>

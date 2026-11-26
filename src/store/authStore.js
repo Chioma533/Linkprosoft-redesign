@@ -56,6 +56,7 @@ export const useAuthStore = create((set, get) => ({
   isAuthenticated: false,
   error: null,
   isLoading: false,
+  isResendingOtp: false,
   isSessionLoading: true,
 
   setAuth: ({ user }) => {
@@ -200,6 +201,19 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || "OTP verification failed";
       set({ error: errorMsg, isLoading: false });
+      throw errorMsg;
+    }
+  },
+
+  resendOtp: async (email) => {
+    set({ isResendingOtp: true, error: null });
+    try {
+      const data = await authService.resendOtp(email);
+      set({ isResendingOtp: false });
+      return data;
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || "Failed to resend verification code";
+      set({ error: errorMsg, isResendingOtp: false });
       throw errorMsg;
     }
   },

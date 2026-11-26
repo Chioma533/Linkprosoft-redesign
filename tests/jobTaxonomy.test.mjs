@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   JOB_CATEGORIES,
   BUDGET_TYPES,
+  ALL_DEFAULT_SKILLS,
   getSkillsForCategory,
 } from "../src/constants/jobTaxonomy.js";
 
@@ -29,7 +30,18 @@ test("returns category-specific skills for standard categories", () => {
 test("returns fallback options for 'Other' category", () => {
   const otherSkills = getSkillsForCategory("Other");
   assert.equal(otherSkills.length > 0, true);
-  assert.equal(otherSkills[0].id, "other-skill-general");
+  assert.equal(otherSkills[0].id, "ce12d342-e40b-4f3d-bc23-e0a8ea9de990");
+});
+
+test("all default taxonomy skills have unique UUIDs", () => {
+  const ids = ALL_DEFAULT_SKILLS.map((skill) => skill.id);
+  assert.equal(ids.length, new Set(ids).size);
+  assert.equal(
+    ids.every((id) =>
+      /^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i.test(id),
+    ),
+    true,
+  );
 });
 
 test("includes workmanship as a supported budget type with descriptive explanation", () => {

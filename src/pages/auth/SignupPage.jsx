@@ -8,17 +8,19 @@ import OtpVerification from "../../components/auth/components/OtpVerification";
 import WelcomeSuccess from "../../components/auth/components/WelcomeSuccess";
 import ProfessionalTypeSelection from "../../components/auth/components/ProfessionalTypeSelection";
 import { useAuthStore } from "../../store/authStore";
-import { redirectToDashboard } from "../../utils/getDashboardRoute";
+import { getDashboardRoute, redirectToDashboard } from "../../utils/getDashboardRoute";
+import { usePreloader } from "../../context/PreLoaderContext";
 
 const SignupPage = () => {
   const navigate = useNavigate();
+  const { showPreloader } = usePreloader();
 
   const [step, setStep] = useState("role-selection"); // role-selection, professional-type, signup-form, otp-verification, success
   const [role, setRole] = useState("professional"); // default to professional
   const [professionalType, setProfessionalType] = useState(null); // digital or none-digital
   const [email, setEmail] = useState("");
   const [apiError, setApiError] = useState("");
-  const { googleSignin, signup, verifyOtp, user, isLoading, error } = useAuthStore();
+  const { googleSignin, signup, verifyOtp, resendOtp, user, isLoading, isResendingOtp } = useAuthStore();
 
   const handleNextStep = () => {
     if (step === "role-selection") {
@@ -78,14 +80,18 @@ const SignupPage = () => {
     setApiError("");
     try {
       await verifyOtp(email, code);
+      const verifiedUser = useAuthStore.getState().user;
+      if (!verifiedUser?.role) {
+        throw new Error("Unable to load the verified user's role");
+      }
+
       toast.success("Email verified successfully! Welcome onboard.");
-      
       setStep("success");
-        showPreloader(() => {
-          navigate(getDashboardRoute(response.data.user.role), {
-            replace: true,
-          });
+      showPreloader(() => {
+        navigate(getDashboardRoute(verifiedUser.role), {
+          replace: true,
         });
+      });
     } catch (err) {
       const errMsg = typeof err === "string" ? err : "Verification failed. Invalid code.";
       setApiError(errMsg);
@@ -94,8 +100,17 @@ const SignupPage = () => {
   };
 
   const handleResendCode = async () => {
-    toast.success("A new verification code has been sent to " + email);
-    // Add resend logic if backend supports it. For now, we simulate resend and alert.
+    setApiError("");
+    try {
+      await resendOtp(email);
+      toast.success("A new verification code has been sent to " + email);
+      return true;
+    } catch (err) {
+      const errMsg = typeof err === "string" ? err : "Failed to resend verification code.";
+      setApiError(errMsg);
+      toast.error(errMsg);
+      return false;
+    }
   };
 
   const handleGoogleSignup = async () => {
@@ -191,6 +206,7 @@ const SignupPage = () => {
                 onSubmit={handleOtpSubmit}
                 onResend={handleResendCode}
                 isLoading={isLoading}
+                isResending={isResendingOtp}
                 error={apiError}
               />
             </motion.div>

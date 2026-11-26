@@ -39,7 +39,7 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
     { id: "browse", label: "Browse Professionals", path: "/home" },
     { id: "dashboard", label: "My Dashboard", path: "/employer/dashboard" },
     { id: "community", label: "Community", path: "/community" },
-    { id: "trending", label: "Trending Professionals", path: "/trending" },
+    { id: "trending", label: "Trending Professionals", path: "/trending-professionals" },
   ];
 
   const userName = user?.fullName || user?.full_name || "Employer User";
@@ -172,7 +172,9 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
                   )}
                 </button>
                 <h1 className="text-base font-bold text-gray-900 tracking-tight">
-                  Browse Professionals
+                  {activePage === "trending"
+                    ? "Trending Professionals"
+                    : "Browse Professionals"}
                 </h1>
               </div>
 

@@ -10,11 +10,11 @@ LinkProSoft is a substantial React 19/Vite frontend with separate public, profes
 
 The project is **not release-ready**. The most important blockers found are:
 
-1. **P0 — Signup OTP success navigation contains undefined identifiers and does not import/use the preloader correctly.** `showPreloader` and `response` are referenced in `handleOtpSubmit`, but neither is available in that handler's scope in [src/pages/auth/SignupPage.jsx](./src/pages/auth/SignupPage.jsx:75). This path can fail after a successful OTP verification.
-2. **P0 — Public professional jobs are explicitly backed by generated mock data.** [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx:21) generates 108 identical wardrobe jobs and is not a live job discovery view.
+1. **Resolved P0 — Signup OTP redirect and resend behavior.** [src/pages/auth/SignupPage.jsx](./src/pages/auth/SignupPage.jsx) now routes from the verified user's role and calls the resend endpoint.
+2. **Resolved P0 — Public professional jobs.** [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx) now uses the paginated public jobs API instead of generated mock listings.
 3. **P1 — Several settings and subscription interactions only display success toasts or change local React state.** Platform/admin settings, professional plan selection, password change, linked accounts, legal pages, notification switches, and invite flows are not always persistent or integrated.
-4. **P1 — Several fallback and mock behaviors can make incomplete functionality appear complete.** Examples include `404` fallback verification of reset codes, fake mail resend success, and static admin/dispute/payout/refund data.
-5. **P1 — Backend contract availability could not be fully verified in this pass.** The adjacent backend source exists, but the delegated backend comparison could not complete. Endpoint inventory below is therefore based on the frontend source and API documentation in the workspace, not runtime confirmation.
+4. **P1 — Several fallback and mock behaviors can make incomplete functionality appear complete.** Remaining examples include static admin/dispute/payout/refund data; signup OTP and password-reset resend/verification now use backend routes.
+5. **P1 — Some backend contracts still require confirmation.** The adjacent backend source is available and the signup OTP, reset-password, and public-jobs contracts have been compared; other endpoint entries below may still need runtime confirmation.
 
 The likely readiness is:
 
@@ -125,21 +125,21 @@ The public catch-all is registered after fixed routes, so it can consume unknown
 
 ### Signup
 
-- **Status:** Confirmed P0 defect.
+- **Status:** Implemented in LP-F-001; runtime journey still needs verification.
 - Role selection and professional-type selection exist.
 - Signup and OTP API calls exist.
-- [src/pages/auth/SignupPage.jsx](./src/pages/auth/SignupPage.jsx:75) references `showPreloader` and `response` without visible local scope.
-- OTP resend [simulates success](./src/pages/auth/SignupPage.jsx:96) and does not call `authService.resendOtp`, even though `API_PATHS.AUTH.RESEND_OTP` exists.
+- Successful OTP verification routes using the verified user's role.
+- OTP resend calls the backend and reports success or failure.
 - Google signup redirects and OAuth state handling exist.
 - Payload uses `full_name`, `passwordConfirm`, `role`, and `professional_type`; backend contract compatibility remains unverified.
 
 ### Login and password reset
 
-- **Status:** Mostly implemented with fallback concerns.
+- **Status:** Implemented; reset flow uses the backend contract.
 - [src/pages/auth/LoginPage.jsx](./src/pages/auth/LoginPage.jsx) integrates login and cookie-session state.
 - Forgot-password, reset-code, and reset-password handlers call backend services.
-- [src/api/services/authService.js](./src/api/services/authService.js:81) catches reset-code `404` and returns `{ success: true, fallback: true }`, allowing client-side flow even when the backend route is unavailable. This is a confirmed misleading fallback.
-- Reset resend calls the forgot-password endpoint rather than a dedicated resend endpoint.
+- Reset-code verification calls the backend route directly and surfaces route failures; no client-side success fallback remains.
+- Reset resend uses `POST /api/auth/resend-otp` with `purpose: "password_reset"`.
 - Google login UI appears to hardcode professional role/undefined professional type; employer Google login through the login page may be incomplete.
 
 ### Google callback
@@ -150,10 +150,8 @@ The public catch-all is registered after fixed routes, so it can consume unknown
 
 ### Public professional search
 
-- **Status:** Confirmed mock.
-- [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx:21) generates `108` identical jobs.
-- Search, filters, pagination, cards, mobile menu, and navigation render local mock data.
-- This journey should not be reported as live job discovery.
+- **Status:** Implemented in LP-F-002.
+- [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx) loads public jobs from the paginated API with server-backed filters, loading/empty/error states, and retry.
 
 ### Public buyer/professional search
 
@@ -210,11 +208,11 @@ The public catch-all is registered after fixed routes, so it can consume unknown
 
 | Page/area | Element | Expected behavior | Current implementation | Status | Issue/action |
 |---|---|---|---|---|---|
-| Signup OTP | Resend code | Call resend API | Fake success toast only | **Partial/broken** | Add and call `RESEND_OTP` service |
-| Signup OTP | Continue/complete | Verify OTP and redirect dashboard | Potential undefined `showPreloader`/`response` | **Broken P0** | Fix handler scope and redirect flow |
+| Signup OTP | Resend code | Call resend API | Calls `/api/auth/resend-otp` and reports success/error | **Implemented** | Backend-backed resend |
+| Signup OTP | Continue/complete | Verify OTP and redirect dashboard | Uses verified user role for redirect | **Implemented** | Signup OTP redirect fixed in LP-F-001 |
 | Login Google | Sign in | Role-aware OAuth redirect | Hardcodes professional in login handler | **Suspected** | Define role-aware login behavior or remove employer mismatch |
-| Reset code | Resend | Call resend/reset-code endpoint | Calls forgot-password | **Partial** | Confirm intended API contract |
-| Reset code | Verify code | Verify code via backend | Falls back to success on `404` | **Broken fallback** | Remove success fallback or flag route outage |
+| Reset code | Resend | Call resend/reset-code endpoint | Calls `/api/auth/resend-otp` with password-reset purpose | **Implemented** | Backend endpoint and request contract confirmed |
+| Reset code | Verify code | Verify code via backend | Calls `/api/auth/verify-reset-code`; route failures are surfaced | **Implemented** | Uses `otp_code` and passes the returned reset token to password reset |
 | Public buyer | Trending link | Route to trending professionals | Links to `/trending`, route absent | **Confirmed missing** | Add route/component or remove link |
 | Public professionals | Job cards/pagination/filter | Live jobs | Replaced with public `/api/jobs` feed, server pagination, and API-backed filters | **Implemented** | Verify against production data |
 | Settings | Change password | Password update flow | “Not available” toast | **Missing** | Build API-backed password change |
@@ -245,14 +243,14 @@ The matrix summarizes frontend-defined integrations. “Unverified” means sour
 | Feature | Endpoint | Method | Frontend status | Integration gap | Required action |
 |---|---|---|---|---|---|
 | Signup | `POST /api/auth/signup` | POST | Implemented | Payload and role names unverified | Compare backend validation/response |
-| Email OTP | `POST /api/auth/verify-email` | POST | Partial broken redirect | Redirect handler defects | Fix and test |
-| Resend OTP | `POST /api/auth/resend-otp` | POST | Path defined, handler mocked | Signup does not call | Integrate |
+| Email OTP | `POST /api/auth/verify-email` | POST | Implemented | Runtime journey not smoke-tested | Confirm role-based redirect |
+| Resend OTP | `POST /api/auth/resend-otp` | POST | Implemented | Backend endpoint and email-verification purpose confirmed | Calls API and reports success/error |
 | Login | `POST /api/auth/login` | POST | Implemented | Response shape assumptions | Confirm `data.user` contract |
 | Current session | `GET /api/auth/me` or `/verify` via fetch helper | GET | Implemented | Cookie/auth origin behavior | Verify cross-origin and production cookie settings |
 | Logout | `POST /api/auth/logout` | POST | Implemented fallback | Local logout always succeeds | Verify server cookie clearing |
 | Forgot password | `POST /api/auth/forgot-password` | POST | Implemented | Contract unverified | Confirm response |
-| Verify reset code | `POST /api/auth/verify-reset-code` | POST | Partial with `404` fallback | Misleading fake success | Remove fallback/confirm route |
-| Reset password | `POST /api/auth/reset-password` | POST | Implemented | Payload includes both `password` and `newPassword` | Confirm canonical field |
+| Verify reset code | `POST /api/auth/verify-reset-code` | POST | Implemented | None found; confirmed in backend routes | Sends `email` and `otp_code`; requires returned reset token |
+| Reset password | `POST /api/auth/reset-password` | POST | Implemented | None found; confirmed in backend validation | Sends `reset_token` and `new_password` |
 | Google OAuth | `GET /api/auth/google` + callback | GET | Partial | State/nonce/cookie callback unverified | Verify callback and role assignment |
 | Profiles | `/api/profiles...` | GET/POST/PUT/DELETE | Partially implemented | Response shape variants | Confirm create/update/avatar/cover contract |
 | Skills | `/api/skills...` | GET/POST/DELETE | Implemented/partial | User skill response shape | Verify |
@@ -325,8 +323,8 @@ Legitimate constants include filter options, verification configuration defaults
 
 ### Known gaps
 
-1. Signup OTP resend is simulated.
-2. Reset-code `404` fallback falsely returns success.
+1. Signup OTP resend is backend-backed (LP-F-001).
+2. Reset-code verification and resend are now backend-backed; route failures no longer become success.
 3. [src/pages/admin/AdminSettingsSubpage.jsx](./src/pages/admin/AdminSettingsSubpage.jsx) save/add/delete handlers do not submit.
 4. Premium plan continuation does not submit a transaction.
 5. Several verification modals may only toast success; each must be traced to a backend call.
@@ -337,7 +335,7 @@ Legitimate constants include filter options, verification configuration defaults
 
 ### Visitor → signup → OTP → dashboard
 
-**Status: P0 partial/broken.**  
+**Status: Implemented in code; runtime journey still needs verification.**
 Signup API, OTP API, cookie session, and role routing exist. The OTP redirect and resend flow were repaired in LP-F-001.
 
 ### Login → role dashboard
@@ -401,9 +399,7 @@ Extensive UI and service coverage exist, but static data, local-only settings, a
 
 ### Confirmed actionable issues
 
-- Undefined identifiers in the signup OTP handler.
-- Misleading `404` fallback in reset-code verification.
-- Fake resend behavior in signup.
+- Signup OTP redirect/resend and reset-code verification/resend have been corrected.
 - Hardcoded employer fallback job ID.
 - Local-only admin settings and fake admin lifecycle.
 - Toast-only subscription, invitation, verification, and announcement success paths.
@@ -465,7 +461,7 @@ The development team must provide or confirm:
 |---|---|---|---|---|---|---|
 | LP-F-001 | Signup OTP | Fix undefined redirect/preloader identifiers and remove fake resend | [src/pages/auth/SignupPage.jsx](./src/pages/auth/SignupPage.jsx:75) | Auth resend backend contract | **P0** | Successful OTP redirects to correct role dashboard; resend calls backend and reports success/error |
 | LP-F-002 | Public professional jobs | Replace generated mock listings with the paginated public jobs API | [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx) | Public `/api/jobs` contract | **Completed** | Server-backed jobs, filters, pagination, loading, empty, and error/retry states verified |
-| LP-F-003 | Reset password | Remove `404` success fallback and confirm resend endpoint | [src/api/services/authService.js](./src/api/services/authService.js:81) | Backend reset routes | **P1** | No success is emitted when code route fails |
+| LP-F-003 | Reset password | Remove `404` success fallback and confirm resend endpoint | [src/api/services/authService.js](./src/api/services/authService.js) | Backend reset routes | **Completed** | Reset-code failures surface; resend and token-based reset use confirmed backend contracts |
 | LP-F-004 | Employer dashboard | Remove fallback selected job ID and prevent mismatched job/dispute | [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx:20) | Job navigation state | **P1** | Details always use a real selected job or empty state |
 | LP-F-005 | Settings | Implement change password, linked accounts, legal links | [src/pages/SettingsSubpage.jsx](./src/pages/SettingsSubpage.jsx) | Backend/account requirements | **P1** | No “not available” controls remain if features are in scope |
 | LP-F-006 | Notification settings | Persist push/email preferences | [src/pages/SettingsSubpage.jsx](./src/pages/SettingsSubpage.jsx) | Preference API/schema | **P1** | Preference survives reload and updates backend |
@@ -486,8 +482,8 @@ The development team must provide or confirm:
 
 ## 16. Recommended Implementation Order
 
-1. Fix signup OTP redirect and resend behavior.
-2. Remove reset-code fallback and complete auth contract verification.
+1. Fix signup OTP redirect and resend behavior. **Completed in LP-F-001.**
+2. Remove reset-code fallback and confirm reset resend contract. **Completed in LP-F-003.**
 3. Replace public mock jobs and set verified public browse endpoint. **Completed in LP-F-002.**
 4. Remove employer hardcoded job fallback.
 5. Verify role routing, sessions, Google callback, and logout.
@@ -504,8 +500,7 @@ The development team must provide or confirm:
 
 The frontend has a strong breadth of implemented screens and a substantial API service layer. However, the presence of a component or API service does not prove end-to-end correctness. Release preparation is blocked until at least:
 
-- The signup OTP P0 defect is fixed.
-- Public professional jobs now use the live public jobs endpoint.
+- The signup OTP P0 defect and public professional jobs mock are fixed.
 - Hardcoded job IDs and admin settings/mock finance/dispute data are removed from release-critical flows.
 - Settings and subscription controls stop presenting simulated success.
 - Reset-code verification and resend behavior are made honest and backend-backed.

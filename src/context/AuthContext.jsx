@@ -80,9 +80,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const resetPassword = async (email, code, password) => {
+  const resetPassword = async (resetToken, password) => {
     try {
-      const data = await authService.resetPassword(email, code, password);
+      const data = await authService.resetPassword(resetToken, password);
       return data;
     } catch (error) {
       throw error.response?.data?.message || error.message || "Password reset failed";

@@ -205,10 +205,10 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  resendOtp: async (email) => {
+  resendOtp: async (email, purpose) => {
     set({ isResendingOtp: true, error: null });
     try {
-      const data = await authService.resendOtp(email);
+      const data = await authService.resendOtp(email, purpose);
       set({ isResendingOtp: false });
       return data;
     } catch (error) {
@@ -287,10 +287,10 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  resetPassword: async (email, code, password) => {
+  resetPassword: async (resetToken, password) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await authService.resetPassword(email, code, password);
+      const data = await authService.resetPassword(resetToken, password);
       set({ isLoading: false });
       return data;
     } catch (error) {

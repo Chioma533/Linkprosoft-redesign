@@ -15,16 +15,18 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState("login"); // login, forgot-password, enter-code, create-password, reset-success
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [resetToken, setResetToken] = useState("");
   const [apiError, setApiError] = useState("");
 
   const {
     login,
     googleSignin,
     forgotPassword,
+    resendOtp,
     verifyResetCode,
     resetPassword,
     isLoading,
+    isResendingOtp,
     error,
   } = useAuthStore();
   const { showPreloader } = usePreloader();
@@ -81,13 +83,17 @@ const LoginPage = () => {
   const handleVerifyResetCodeSubmit = async (otpCode) => {
     setApiError("");
     try {
-      await verifyResetCode(email, otpCode);
-      setCode(otpCode);
+      const response = await verifyResetCode(email, otpCode);
+      const verifiedResetToken = response?.data?.resetToken;
+      if (!verifiedResetToken) {
+        throw new Error("Could not start password reset. Please request a new code.");
+      }
+      setResetToken(verifiedResetToken);
       toast.success("Code verified successfully!");
       setStep("create-password");
     } catch (err) {
       const errMsg =
-        typeof err === "string" ? err : "Invalid code. Please try again.";
+        typeof err === "string" ? err : err?.message || "Invalid code. Please try again.";
       setApiError(errMsg);
       toast.error(errMsg);
     }
@@ -96,8 +102,9 @@ const LoginPage = () => {
   const handleResetPasswordSubmit = async (newPassword) => {
     setApiError("");
     try {
-      await resetPassword(email, code, newPassword);
+      await resetPassword(resetToken, newPassword);
       toast.success("Password reset successfully!");
+      setResetToken("");
       setStep("reset-success");
     } catch (err) {
       const errMsg =
@@ -111,16 +118,20 @@ const LoginPage = () => {
 
   const handleResendCode = async () => {
     try {
-      await forgotPassword(email);
-      toast.success("A new reset code has been sent to " + email);
+      await resendOtp(email, "password_reset");
+      toast.success("If the email exists, a new reset code has been sent.");
+      return true;
     } catch (err) {
       const errMsg = typeof err === "string" ? err : "Failed to resend code.";
       toast.error(errMsg);
+      return false;
     }
   };
 
   const handleCloseReset = () => {
     setStep("login");
+    setEmail("");
+    setResetToken("");
     setApiError("");
   };
 
@@ -194,6 +205,7 @@ const LoginPage = () => {
                 onSubmit={handleVerifyResetCodeSubmit}
                 onResend={handleResendCode}
                 isLoading={isLoading}
+                isResending={isResendingOtp}
                 error={apiError}
               />
             </motion.div>

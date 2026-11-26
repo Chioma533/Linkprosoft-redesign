@@ -8,7 +8,7 @@ const CommunityFeed = () => (
         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#1f4d75] via-[#7aa6bd] to-[#dfeaf0] text-white">
           <FiUser className="h-4 w-4" />
         </div>
-        <div className="flex-1 text-sm text-[#7a7a7a]">Post creation unavailable</div>
+        <div className="flex-1 text-sm text-[#7a7a7a]">Create Post</div>
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-1 border-t border-[#e1e5e9] pt-3 text-[10px] text-[#777] sm:gap-2 sm:text-[11px]">

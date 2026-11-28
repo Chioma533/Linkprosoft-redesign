@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "react-hot-toast";
 import { searchService } from "../api/services/searchService";
 
@@ -236,10 +236,10 @@ const useBuyerProfessionals = (initialFilters) => {
     }
   };
 
-  const handleApplyFilters = (newFilters) => {
+  const handleApplyFilters = useCallback((newFilters) => {
     setFilters(newFilters);
     setCurrentPage(1);
-  };
+  }, []);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);

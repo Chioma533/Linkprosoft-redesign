@@ -1,0 +1,26 @@
+- generic [ref=f2e7]:
+  - 'button "Theme preference: auto. Change theme" [ref=f2e10] [cursor=pointer]'
+  - generic [ref=f2e15]:
+    - heading "Sign in to Linkprosoft" [level=2] [ref=f2e22]
+    - generic [ref=f2e23]:
+      - generic [ref=f2e24]:
+        - generic [ref=f2e25]:
+          - text: Email
+          - generic [ref=f2e26]: "*"
+        - textbox "Enter mail" [ref=f2e28]
+      - generic [ref=f2e29]:
+        - generic [ref=f2e30]:
+          - generic [ref=f2e31]:
+            - text: Password
+            - generic [ref=f2e32]: "*"
+          - generic [ref=f2e33]:
+            - textbox "Enter Password" [ref=f2e34]
+            - button [ref=f2e35] [cursor=pointer]
+        - button "Forgot password?" [ref=f2e39] [cursor=pointer]
+      - button "Sign in" [ref=f2e40] [cursor=pointer]
+    - generic [ref=f2e41]: OR
+    - button "Continue with Google" [ref=f2e43] [cursor=pointer]
+    - paragraph [ref=f2e50]:
+      - text: Don't have an Account?
+      - link "Sign up" [ref=f2e51] [cursor=pointer]:
+        - /url: /signup

@@ -217,6 +217,49 @@ export const adminService = {
     }
   },
 
+  getAdminVerifications: async (params = { page: 1, limit: 20, status: "pending_review" }) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.VERIFICATION.ADMIN.LIST, { params });
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.warn("[adminService] getAdminVerifications error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  getAdminVerificationById: async (id) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.VERIFICATION.ADMIN.DETAILS(encodeURIComponent(id)));
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.warn("[adminService] getAdminVerificationById error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  approveAdminVerification: async (id) => {
+    try {
+      const response = await axiosInstance.patch(API_PATHS.VERIFICATION.ADMIN.APPROVE(encodeURIComponent(id)));
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.warn("[adminService] approveAdminVerification error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  rejectAdminVerification: async (id, payload) => {
+    try {
+      const response = await axiosInstance.patch(
+        API_PATHS.VERIFICATION.ADMIN.REJECT(encodeURIComponent(id)),
+        payload
+      );
+      return response.data?.data ?? response.data;
+    } catch (error) {
+      console.warn("[adminService] rejectAdminVerification error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   /**
    * Approve or reject professional KYC verification
    * PATCH /api/admin/users/:id/verification

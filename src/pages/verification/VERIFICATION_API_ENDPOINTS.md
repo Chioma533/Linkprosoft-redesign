@@ -325,6 +325,7 @@ Submits all gathered steps for final verification review and triggers automated 
 #### List Pending Verifications
 - **Method**: `GET`
 - **Route**: `/api/admin/verifications?status=pending_review&page=1&limit=20`
+- The list response contains request and applicant identifiers; use the detail route below to retrieve submitted fields and uploaded media references.
 - **Response `200 OK`**:
 ```json
 {
@@ -346,6 +347,11 @@ Submits all gathered steps for final verification review and triggers automated 
   }
 }
 ```
+
+#### Get Verification Details
+- **Method**: `GET`
+- **Route**: `/api/admin/verifications/:id`
+- Returns applicant details and the submitted verification steps. Identity documents and selfies may be returned as URLs or media IDs (`idDocumentMediaId` and `selfieMediaId`); media IDs can be resolved through `GET /api/media/:mediaId/url`.
 
 #### Approve Verification
 - **Method**: `PATCH`

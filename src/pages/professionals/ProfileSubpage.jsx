@@ -226,7 +226,7 @@ const ProfileSubpage = () => {
   };
 
   const displayName = user?.fullName || user?.full_name || profileData?.user?.fullName || "Professional";
-  const displayProfession = profileData?.profession || user?.profession || "Skilled Craftsman & Service Professional";
+  const displayProfession = profileData?.profession || user?.profession || "";
   const displayBio = profileData?.bio || user?.bio || "No biography provided yet. Click 'Edit Profile' to add your professional background, experience, and specialties.";
   const displayLocation = user?.location || profileData?.location || "Nigeria";
   const displayAvatar = user?.avatar || user?.avatarUrl || profileData?.avatarUrl || avatarImg;

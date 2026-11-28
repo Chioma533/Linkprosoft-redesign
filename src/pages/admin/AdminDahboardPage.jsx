@@ -32,6 +32,7 @@ const AdminDahboardPage = () => {
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("jobs"); // default view tab
+  const [tabParams, setTabParams] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
@@ -114,6 +115,7 @@ const AdminDahboardPage = () => {
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
+    setTabParams(null);
     setIsSidebarOpen(false);
   };
 

@@ -17,7 +17,7 @@ const EmployerDashboardPage = () => {
   const location = useLocation();
   const { activeTab, setActiveTab } = useDashboardStore();
   const { user } = useAuthStore();
-  const [selectedJobId, setSelectedJobId] = useState("ORD657783");
+  const [selectedJobId, setSelectedJobId] = useState(null);
 
   // Handle incoming navigation state (e.g. redirected from PaymentScreen with job-details)
   useEffect(() => {
@@ -30,9 +30,25 @@ const EmployerDashboardPage = () => {
   }, [location.state, setActiveTab]);
 
   const handleViewProject = (jobId) => {
-    setSelectedJobId(jobId);
-    setActiveTab("job-details");
+    if (jobId) {
+      setSelectedJobId(String(jobId));
+      setActiveTab("job-details");
+    }
   };
+
+  const renderMissingJobSelection = (title) => (
+    <div className="mx-auto max-w-xl rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-sm">
+      <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+      <p className="mt-2 text-sm text-gray-500">Select a real project from your jobs before continuing.</p>
+      <button
+        type="button"
+        onClick={() => setActiveTab("manage-jobs")}
+        className="mt-5 rounded-full bg-[#016EA6] px-6 py-2.5 text-xs font-bold text-white"
+      >
+        Go to My Jobs
+      </button>
+    </div>
+  );
 
   const renderActiveSubpage = () => {
     switch (activeTab) {
@@ -41,6 +57,7 @@ const EmployerDashboardPage = () => {
       case "manage-jobs":
         return <EmployerManageJobsSubpage onViewProject={handleViewProject} />;
       case "job-details":
+        if (!selectedJobId) return renderMissingJobSelection("No project selected");
         return (
           <EmployerJobDetailsSubpage
             jobId={selectedJobId}
@@ -49,6 +66,7 @@ const EmployerDashboardPage = () => {
           />
         );
       case "open-dispute":
+        if (!selectedJobId) return renderMissingJobSelection("No project selected");
         return (
           <EmployerOpenDisputeSubpage
             jobId={selectedJobId}

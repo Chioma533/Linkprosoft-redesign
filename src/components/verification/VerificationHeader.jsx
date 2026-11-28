@@ -10,11 +10,13 @@ const VerificationHeader = ({ title, description, image }) => (
       </p>
     </div>
 
-    <img
-      src={image}
-      alt=""
-      className="hidden shrink-0 text-[#0879aa] sm:block"
-    />
+    {image && (
+      <img
+        src={image}
+        alt=""
+        className="hidden shrink-0 text-[#0879aa] sm:block"
+      />
+    )}
   </header>
 );
 

@@ -50,7 +50,7 @@ export const useMessagingStore = create((set, get) => ({
     });
     return thread;
   },
-  loadMessages: async (threadId, page = 1) => {
+  loadMessages: async (threadId, page = 1, currentUserId) => {
     set({ messagesLoading: true, messagesError: null });
     try {
       const result = await messagingService.getMessages(threadId, page, MESSAGE_PAGE_SIZE);
@@ -59,6 +59,16 @@ export const useMessagingStore = create((set, get) => ({
         pagination: { page: result.page, limit: result.limit, total: result.total, totalPages: result.totalPages },
         messagesLoading: false,
       }));
+      if (currentUserId && socketManager.isConnected()) {
+        result.messages
+          .filter((message) => message.senderId !== currentUserId && !message.isRead)
+          .forEach((message) => {
+            socketManager.emit(SOCKET_EVENTS.READ_MESSAGE, {
+              threadId,
+              messageId: message.id,
+            });
+          });
+      }
     } catch (error) {
       set({ messagesLoading: false, messagesError: error.response?.data?.message ?? "Unable to load messages" });
     }
@@ -91,6 +101,16 @@ export const useMessagingStore = create((set, get) => ({
   markThreadAsRead: async (threadId) => {
     await messagingService.markThreadAsRead(threadId);
     set((state) => ({ threads: updateThread(state.threads, threadId, { unreadCount: 0 }) }));
+  },
+  deleteAttachment: async (messageId, mediaId) => {
+    await messagingService.deleteAttachment(messageId, mediaId);
+    set((state) => ({
+      messages: state.messages.map((message) =>
+        message.id === messageId
+          ? { ...message, attachments: (message.attachments || []).filter((attachment) => attachment.mediaId !== mediaId) }
+          : message
+      ),
+    }));
   },
   respondToMessageRequest: async (threadId, decision) => {
     const thread = decision === "accept"

@@ -27,6 +27,7 @@ const useProfessionalJobs = () => {
   const [appliedJobIds, setAppliedJobIds] = useState(() => new Set());
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [jobsError, setJobsError] = useState("");
 
   const fetchMatchedJobs = useCallback(async (skillId) => {
     if (!skillId) {
@@ -36,6 +37,7 @@ const useProfessionalJobs = () => {
     }
 
     setIsLoadingJobs(true);
+    setJobsError("");
 
     try {
       const [jobs, applications] = await Promise.all([
@@ -61,6 +63,7 @@ const useProfessionalJobs = () => {
       );
     } catch (err) {
       console.error("Failed to fetch matched jobs:", err);
+      setJobsError(err?.response?.data?.message || err?.message || "Failed to load matching jobs.");
       setRawJobs([]);
     } finally {
       setIsLoadingJobs(false);
@@ -167,6 +170,7 @@ const useProfessionalJobs = () => {
     appliedJobIds,
     isLoadingJobs,
     isInitialLoading,
+    jobsError,
     fetchMatchedJobs,
     handleSkillChange,
     excludeJobFromFeed,

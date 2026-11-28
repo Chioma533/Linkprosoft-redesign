@@ -62,33 +62,36 @@ export const useDashboardStore = create((set, get) => ({
   fetchJobs: async (params = {}) => {
     try {
       const jobs = await projectService.getJobs(params);
-      set({ jobs });
+      set({ jobs, error: null });
       return jobs;
     } catch (err) {
       console.error("Failed to fetch jobs", err);
-      return [];
+      set({ error: err?.response?.data?.message || err.message || "Failed to fetch jobs" });
+      throw err;
     }
   },
 
   fetchMyJobs: async (params = {}) => {
     try {
       const myJobs = await projectService.getMyJobs(params);
-      set({ myJobs });
+      set({ myJobs, error: null });
       return myJobs;
     } catch (err) {
       console.error("Failed to fetch my jobs", err);
-      return [];
+      set({ error: err?.response?.data?.message || err.message || "Failed to fetch my jobs" });
+      throw err;
     }
   },
 
   fetchApplications: async (params = {}) => {
     try {
       const applications = await projectService.getApplications(params);
-      set({ applications });
+      set({ applications, error: null });
       return applications;
     } catch (err) {
       console.error("Failed to fetch applications", err);
-      return [];
+      set({ error: err?.response?.data?.message || err.message || "Failed to fetch applications" });
+      throw err;
     }
   },
 

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FiMail } from "react-icons/fi";
 import Button from "../../../components/common/Button";
 
-const EnterResetCode = ({ email, onSubmit, onResend, isLoading, error }) => {
+const EnterResetCode = ({ email, onSubmit, onResend, isLoading, isResending, error }) => {
   const [code, setCode] = useState(new Array(6).fill(""));
   const [isResendDisabled, setIsResendDisabled] = useState(true);
   const [countdown, setCountdown] = useState(30);
@@ -91,10 +91,12 @@ const EnterResetCode = ({ email, onSubmit, onResend, isLoading, error }) => {
     }
   };
 
-  const handleResendClick = () => {
-    if (isResendDisabled) return;
-    setIsResendDisabled(true);
-    onResend();
+  const handleResendClick = async () => {
+    if (isResendDisabled || isResending) return;
+    const resent = await onResend();
+    if (resent) {
+      setIsResendDisabled(true);
+    }
   };
 
   const shakeVariants = {
@@ -185,14 +187,14 @@ const EnterResetCode = ({ email, onSubmit, onResend, isLoading, error }) => {
           Didn&apos;t receive a code?{" "}
           <button
             onClick={handleResendClick}
-            disabled={isResendDisabled || isLoading}
+            disabled={isResendDisabled || isLoading || isResending}
             className={`font-semibold cursor-pointer outline-none ${
-              isResendDisabled
+              isResendDisabled || isLoading || isResending
                 ? "text-gray-300 cursor-not-allowed"
                 : "text-[#016EA6] hover:underline hover:bg-transparent"
             }`}
           >
-            {isResendDisabled ? `Resend in ${countdown}s` : "Resend"}
+            {isResending ? "Sending..." : isResendDisabled ? `Resend in ${countdown}s` : "Resend"}
           </button>
         </div>
       </motion.div>

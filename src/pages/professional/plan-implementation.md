@@ -32,14 +32,14 @@ Convert the desktop layout of `DefaultProfessionalScreen.jsx` into a fully respo
    - Apply button: `px-4 py-2 bg-gray-100 hover:bg-gray-200 text-xs font-semibold text-gray-700 rounded-full shrink-0`.
 
 4. **Results Header & Job Cards Grid**:
-   - Headline: `Related to "Carpentry"` (`text-base sm:text-lg font-semibold text-gray-900`).
-   - Count: `108 jobs availabe` (`text-xs text-gray-400 mt-0.5`).
+   - Headline: `Latest opportunities` or the active search query (`text-base sm:text-lg font-semibold text-gray-900`).
+   - Count: total jobs from the public jobs API (`text-xs text-gray-400 mt-0.5`).
    - Card Stack: 1 column on mobile (`grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5`).
    - Cards: White background (`bg-white` or `bg-[#f9f9f9]`), `p-4 sm:p-5`, `rounded-2xl`, border divider above price/apply action area.
    - Apply Button: `bg-[#e6f1f6] text-[#2683b3] font-semibold text-xs rounded-full px-4 py-1.5 hover:bg-[#d5e7ef]`.
 
 5. **Mobile Pagination**:
-   - Text: `Page 1 of 5` (`text-xs text-gray-700 font-medium` on mobile, `Showing page 1 of 5 pages` on desktop).
+   - Text: current page and page count from the public jobs API (`text-xs text-gray-700 font-medium` on mobile, descriptive page count on desktop).
    - Numeric buttons: `1`, `2`, `3`, `...`, `5` (`w-8 h-8 rounded-full`). Active page `1` is blue circle `bg-[#016EA6] text-white font-bold`.
 
 6. **Mobile Bottom Navigation (`ProfessionalBottomNav`)**:

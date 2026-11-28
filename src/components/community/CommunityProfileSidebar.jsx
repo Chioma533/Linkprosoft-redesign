@@ -1,5 +1,6 @@
 import React from "react";
 import { FiBookmark, FiExternalLink, FiMapPin, FiUsers, FiMessageSquare } from "react-icons/fi";
+import { toast } from "react-hot-toast";
 
 const CommunityProfileSidebar = ({
   name,
@@ -10,7 +11,9 @@ const CommunityProfileSidebar = ({
   coverUrl,
   loading,
   error,
+  activeShortcut,
   onOpenProfile,
+  onSelectSaved,
 }) => (
   <aside className="min-w-0 rounded-[22px] border border-[#e1e5e9] bg-[#f8f8f8] p-3 lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden">
     <div className="relative overflow-hidden rounded-[18px] border border-[#e5e7eb] bg-[#f5f5f5] p-2">
@@ -44,7 +47,7 @@ const CommunityProfileSidebar = ({
     <button
       type="button"
       onClick={onOpenProfile}
-      className="mt-3 flex w-full items-center justify-between rounded-2xl border border-transparent bg-[#f2f2f2] px-3 py-3 text-left text-sm text-[#242424]"
+      className="mt-3 flex w-full items-center justify-between rounded-2xl border border-transparent bg-[#f2f2f2] px-3 py-3 text-left text-sm text-[#242424] transition hover:bg-[#e8e8e8]"
     >
       <span className="flex items-center gap-3">
         <FiExternalLink className="h-4 w-4" />
@@ -53,18 +56,34 @@ const CommunityProfileSidebar = ({
     </button>
 
     <div className="mt-3 grid grid-cols-3 gap-2" aria-label="Profile shortcuts">
-      <div className="flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-[#e1e5e9] bg-[#f4f4f4] px-1 text-center text-[10px] text-[#777]">
+      <button
+        type="button"
+        onClick={onSelectSaved}
+        className={`flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border px-1 text-center text-[10px] transition ${
+          activeShortcut === "saved"
+            ? "border-[#0c76c9] bg-[#edf6ff] font-semibold text-[#0c76c9]"
+            : "border-[#e1e5e9] bg-[#f4f4f4] text-[#555] hover:bg-[#eaeaea]"
+        }`}
+      >
         <FiBookmark className="h-4 w-4" />
         <span>Saved items</span>
-      </div>
-      <div className="flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-[#e1e5e9] bg-[#f4f4f4] px-1 text-center text-[10px] text-[#777]">
+      </button>
+      <button
+        type="button"
+        onClick={() => toast("Community Groups are coming soon!", { icon: "👥" })}
+        className="flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-[#e1e5e9] bg-[#f4f4f4] px-1 text-center text-[10px] text-[#555] transition hover:bg-[#eaeaea]"
+      >
         <FiUsers className="h-4 w-4" />
         <span>Groups</span>
-      </div>
-      <div className="flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-[#e1e5e9] bg-[#f4f4f4] px-1 text-center text-[10px] text-[#777]">
+      </button>
+      <button
+        type="button"
+        onClick={() => toast("Community Newsletter is coming soon!", { icon: "📰" })}
+        className="flex min-h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl border border-[#e1e5e9] bg-[#f4f4f4] px-1 text-center text-[10px] text-[#555] transition hover:bg-[#eaeaea]"
+      >
         <FiMessageSquare className="h-4 w-4" />
         <span>Newsletter</span>
-      </div>
+      </button>
     </div>
   </aside>
 );

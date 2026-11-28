@@ -7,6 +7,7 @@ import {
 
 export const VERIFICATION_STEPS = [
   "Identity",
+  "Professional",
   "Face",
   "Payment",
 ];
@@ -14,6 +15,7 @@ export const VERIFICATION_STEPS = [
 export const VERIFICATION_VIEWS = {
   OVERVIEW: "overview",
   IDENTITY: "identity",
+  PROFESSIONAL: "professional",
   FACE: "face",
   PAYMENT: "payment",
   REVIEW: "review",

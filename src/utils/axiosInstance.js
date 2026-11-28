@@ -1,5 +1,6 @@
 import axios from "axios"
 import { API_BASE_URL } from "./apiPaths"
+import { dispatchSessionExpired, shouldHandleSessionExpiry } from "./sessionExpiry"
 
 // Create axios instance
 const axiosInstance = axios.create({
@@ -36,6 +37,10 @@ axiosInstance.interceptors.request.use(
                     console.error("Server error, Please try again later");
                 } else if (error.code === "ECONNABORTED") {
                     console.error("Request timeout, Please try again");
+                }
+
+                if (shouldHandleSessionExpiry(error.response.status, error.config?.url)) {
+                    dispatchSessionExpired();
                 }
             }
             return Promise.reject(error);

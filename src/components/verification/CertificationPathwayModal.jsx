@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-import { X, Award, Upload, Calendar, CheckCircle2, AlertCircle, FileText } from "lucide-react";
+import { X, Award, Upload, AlertCircle, FileText } from "lucide-react";
 import { toast } from "react-hot-toast";
+import mediaService from "../../api/services/mediaService";
+import { profileService } from "../../api/services/profileService";
+import verificationService from "../../api/services/verificationService";
 
 /**
  * Pathway 1: Certification-based verification modal.
@@ -44,8 +47,20 @@ const CertificationPathwayModal = ({ isOpen, onClose, onSubmitSuccess }) => {
     }
 
     setIsSubmitting(true);
-    // Simulate submission to admin queue
-    setTimeout(() => {
+    try {
+      const { mediaId } = await mediaService.uploadFile(selectedFile, "certificate");
+      await profileService.addCertification({
+        title: formData.certificationName,
+        issuer: formData.issuingAuthority,
+        issueDate: formData.issueDate,
+        expiryDate: formData.hasExpiry ? formData.expiryDate : undefined,
+        credentialMediaId: mediaId,
+      });
+      await verificationService.submitBadgeApplication({
+        pathway: "certification",
+        documentMediaId: mediaId,
+        applicationData: { ...formData, documentName: selectedFile.name },
+      });
       setIsSubmitting(false);
       toast.success("Certification submitted successfully! Sent to administrative review.");
       onSubmitSuccess?.({
@@ -55,7 +70,10 @@ const CertificationPathwayModal = ({ isOpen, onClose, onSubmitSuccess }) => {
         submittedAt: new Date().toISOString(),
       });
       onClose();
-    }, 800);
+    } catch (error) {
+      setIsSubmitting(false);
+      toast.error(error?.response?.data?.message || "Failed to submit certification.");
+    }
   };
 
   return (

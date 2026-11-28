@@ -6,6 +6,7 @@ import { clearPersistedAuth } from "../utils/cookieSession";
 import { useDashboardStore } from "./dashboardStore";
 import { profileService } from "../api/services/profileService";
 import mediaService from "../api/services/mediaService";
+import { dispatchSessionExpired, isProtectedRoute } from "../utils/sessionExpiry";
 
 
 const extractUser = (response) => {
@@ -71,8 +72,24 @@ export const useAuthStore = create((set, get) => ({
     });
   },
 
+<<<<<<< HEAD
   updateUser: (updates) =>
     set((state) => state.user ? { user: { ...state.user, ...updates } } : {}),
+=======
+  expireSession: () => {
+    socketManager.disconnect();
+    useMessagingStore.getState().reset();
+    useDashboardStore.getState().reset();
+    clearPersistedAuth();
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isSessionLoading: false,
+      isLoading: false,
+    });
+  },
+>>>>>>> 0d1dc91bb2d26fd3b7d13858cf4bb99a7faf6ed8
 
   setUserAvatar: ({ avatar, avatarMediaId }) =>
     set((state) => {
@@ -130,10 +147,11 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       // A failed cookie refresh means this identity is no longer authoritative.
       if (error.response?.status === 401 || error.status === 401) {
-        clearPersistedAuth();
-        useDashboardStore.getState().reset();
-        useMessagingStore.getState().reset();
-        set({ user: null, token: null, isAuthenticated: false, isSessionLoading: false });
+        if (typeof window !== "undefined" && isProtectedRoute(window.location.pathname)) {
+          dispatchSessionExpired(window);
+        } else {
+          get().expireSession();
+        }
       } else {
         set({ isSessionLoading: false });
       }
@@ -208,10 +226,10 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  resendOtp: async (email) => {
+  resendOtp: async (email, purpose) => {
     set({ isResendingOtp: true, error: null });
     try {
-      const data = await authService.resendOtp(email);
+      const data = await authService.resendOtp(email, purpose);
       set({ isResendingOtp: false });
       return data;
     } catch (error) {
@@ -241,6 +259,23 @@ export const useAuthStore = create((set, get) => ({
       set({ error: errorMsg, isLoading: false });
       throw errorMsg;
     }
+  },
+
+  syncSubscription: (subscription) => {
+    set((state) => {
+      if (!state.user || !subscription) return state;
+      const isActive = Boolean(subscription.isActive ?? subscription.status === "active");
+      return {
+        user: {
+          ...state.user,
+          subscription,
+          subscription_status: subscription.status,
+          subscriptionStatus: subscription.status,
+          has_active_subscription: isActive,
+          is_subscription_active: isActive,
+        },
+      };
+    });
   },
 
   logout: async () => {
@@ -290,14 +325,27 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  resetPassword: async (email, code, password) => {
+  resetPassword: async (resetToken, password) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await authService.resetPassword(email, code, password);
+      const data = await authService.resetPassword(resetToken, password);
       set({ isLoading: false });
       return data;
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || "Reset password failed";
+      set({ error: errorMsg, isLoading: false });
+      throw errorMsg;
+    }
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await authService.changePassword(currentPassword, newPassword);
+      set({ isLoading: false });
+      return data;
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || "Change password failed";
       set({ error: errorMsg, isLoading: false });
       throw errorMsg;
     }

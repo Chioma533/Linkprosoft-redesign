@@ -56,8 +56,8 @@ export const authService = {
     return response.data;
   },
 
-  resendOtp: async (email) => {
-    const response = await axiosInstance.post(API_PATHS.AUTH.RESEND_OTP, { email });
+  resendOtp: async (email, purpose = "email_verification") => {
+    const response = await axiosInstance.post(API_PATHS.AUTH.RESEND_OTP, { email, purpose });
     return response.data;
   },
 
@@ -87,25 +87,38 @@ export const authService = {
   },
 
   verifyResetCode: async (email, code) => {
-    try {
-      const response = await axiosInstance.post(API_PATHS.AUTH.VERIFY_RESET_CODE, { email, code });
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.warn("verify-reset-code route not found. Proceeding with client-side verification flow.");
-        return { success: true, fallback: true };
-      }
-      throw error;
-    }
+    const response = await axiosInstance.post(API_PATHS.AUTH.VERIFY_RESET_CODE, {
+      email,
+      otp_code: code,
+    });
+    return response.data;
   },
 
-  resetPassword: async (email, code, password) => {
+  resetPassword: async (resetToken, password) => {
     const response = await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD, {
-      email,
-      code,
-      password,
-      newPassword: password
+      reset_token: resetToken,
+      new_password: password,
     });
+    return response.data;
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    const response = await axiosInstance.patch(API_PATHS.AUTH.CHANGE_PASSWORD, {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+    return response.data;
+  },
+
+  getLinkedAccounts: async () => {
+    const response = await axiosInstance.get(API_PATHS.AUTH.LINKED_ACCOUNTS);
+    return response.data;
+  },
+
+  unlinkLinkedAccount: async (provider) => {
+    const response = await axiosInstance.delete(
+      `${API_PATHS.AUTH.LINKED_ACCOUNTS}/${encodeURIComponent(provider)}`
+    );
     return response.data;
   }
 };

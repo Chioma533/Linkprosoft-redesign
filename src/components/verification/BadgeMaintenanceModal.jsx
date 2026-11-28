@@ -3,6 +3,7 @@ import { X, ShieldCheck, RefreshCw, AlertCircle, CheckCircle2, Clock, CreditCard
 import { toast } from "react-hot-toast";
 import VerificationBadge from "../common/VerificationBadge";
 import { isSubscriptionLapsed } from "../../utils/verificationBadge";
+import subscriptionService from "../../api/services/subscriptionService";
 
 /**
  * Modal to view and renew verification badge subscription maintenance.
@@ -15,18 +16,24 @@ const BadgeMaintenanceModal = ({ isOpen, onClose, user, onRenewSuccess }) => {
   const isGovernment = (user?.role === "government_agency" || user?.verification_category === "government");
   const isLapsed = !isGovernment && isSubscriptionLapsed(user);
 
-  const handleRenew = () => {
+  const handleRenew = async () => {
     setIsRenewing(true);
-    setTimeout(() => {
-      setIsRenewing(false);
-      toast.success("Verification maintenance subscription successfully renewed! Badge restored.");
-      onRenewSuccess?.({
-        ...user,
-        subscription_status: "active",
-        badge_maintained: true,
+    try {
+      const callbackUrl = `${window.location.origin}${window.location.pathname}`;
+      const res = await subscriptionService.initiateSubscription({
+        plan: "pro",
+        callbackUrl,
       });
-      onClose();
-    }, 1000);
+      if (res?.authorizationUrl) {
+        window.location.href = res.authorizationUrl;
+      } else {
+        toast.error("Payment gateway URL was not returned. Please try again.");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to initialize badge renewal.");
+    } finally {
+      setIsRenewing(false);
+    }
   };
 
   return (

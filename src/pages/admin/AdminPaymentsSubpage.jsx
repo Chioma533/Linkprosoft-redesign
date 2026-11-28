@@ -5,7 +5,8 @@ import {
   ChevronDown, 
   Eye, 
   ArrowUpRight,
-  Loader2
+  Loader2,
+  Download
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { adminService } from "../../api/services/adminService";
@@ -35,12 +36,21 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
   const [transactions, setTransactions] = useState([]);
   const [escrowRecords, setEscrowRecords] = useState([]);
   const [escrowMetrics, setEscrowMetrics] = useState(null);
+  const [isExporting, setIsExporting] = useState(false);
 
   const fetchTabData = useCallback(async () => {
     setIsLoading(true);
     try {
+      const queryParams = {
+        page: 1,
+        limit: 20,
+        ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
+        ...(statusFilter !== "all" ? { status: statusFilter } : {}),
+        ...(typeFilter !== "all" ? { type: typeFilter } : {}),
+      };
+
       if (activeFinanceTab === "transactions") {
-        const res = await adminService.getFinanceTransactions({ page: 1, limit: 20 });
+        const res = await adminService.getFinanceTransactions(queryParams);
         const items = res?.data?.items || res?.data?.transactions || res?.data;
         if (Array.isArray(items) && items.length > 0) {
           const normalized = items.map((t) => {
@@ -106,6 +116,49 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
       fetchTabData();
     }
   }, [activeFinanceTab, fetchTabData]);
+
+  const handleExportTransactions = async () => {
+    setIsExporting(true);
+    try {
+      const params = {
+        ...(searchQuery.trim() ? { search: searchQuery.trim() } : {}),
+        ...(statusFilter !== "all" ? { status: statusFilter } : {}),
+        ...(typeFilter !== "all" ? { type: typeFilter } : {}),
+      };
+      const res = await adminService.exportFinanceTransactions(params);
+      const items = res?.data?.items || res?.data || [];
+      if (!Array.isArray(items) || items.length === 0) {
+        toast.error("No transactions available to export");
+        return;
+      }
+      const headers = ["ID", "User", "Job", "Type", "Amount", "Status", "Date"];
+      const escapeCsv = (val) => `"${String(val ?? "").replace(/"/g, '""')}"`;
+      const rows = items.map((t) => [
+        escapeCsv(t.id || t.transactionReference || ""),
+        escapeCsv(t.user?.name || (typeof t.user === "string" ? t.user : "")),
+        escapeCsv(t.job?.title || (typeof t.job === "string" ? t.job : "")),
+        escapeCsv(t.type || ""),
+        escapeCsv(t.amount ?? ""),
+        escapeCsv(t.status || ""),
+        escapeCsv(t.createdAt ? new Date(t.createdAt).toISOString() : ""),
+      ].join(","));
+      const csvContent = [headers.join(","), ...rows].join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `transactions-export-${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success("Transactions exported successfully");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to export transactions");
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   const formatCurrency = (val) => {
     if (val === undefined || val === null) return null;
@@ -326,8 +379,20 @@ const AdminPaymentsSubpage = ({ onNavigate }) => {
                   <ChevronDown className="w-3.5 h-3.5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
 
-                <button className="bg-[#016EA6] hover:bg-[#015582] text-white font-bold text-xs px-4.5 py-2 rounded-full cursor-pointer transition-all border-none">
+                <button
+                  onClick={fetchTabData}
+                  className="bg-[#016EA6] hover:bg-[#015582] text-white font-bold text-xs px-4.5 py-2 rounded-full cursor-pointer transition-all border-none"
+                >
                   Apply filter
+                </button>
+
+                <button
+                  onClick={handleExportTransactions}
+                  disabled={isExporting}
+                  className="flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs px-4 py-2 rounded-full cursor-pointer transition-all border-none disabled:opacity-60"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{isExporting ? "Exporting..." : "Export CSV"}</span>
                 </button>
               </div>
             </div>

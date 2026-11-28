@@ -8,8 +8,7 @@ import {
 } from "react-icons/fi";
 
 /**
- * JobSearchBar — search bar for DefaultProfessionalScreen.
- * Matches Figma: search input + Location | Date posted | Budget pill dropdowns + Apply button in one row.
+ * JobSearchBar — search bar for the public professional jobs feed.
  */
 const JobSearchBar = ({ onApply }) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -159,14 +158,14 @@ const JobSearchBar = ({ onApply }) => {
         onSelect={setBudget}
       />
 
-      {/* Apply button — hidden on mobile to match the mockup layout */}
+      {/* Keep filters usable on narrow screens as well. */}
       <button
         id="job-filter-apply-btn"
         onClick={() => {
           onApply?.({ searchQuery, location, datePosted, budget });
           setOpenDropdown(null);
         }}
-        className="hidden sm:inline-flex px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs sm:text-sm rounded-full transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 min-h-[36px] sm:min-h-[42px]"
+        className="inline-flex px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs sm:text-sm rounded-full transition-all duration-200 cursor-pointer whitespace-nowrap shrink-0 min-h-[36px] sm:min-h-[42px]"
       >
         Apply
       </button>

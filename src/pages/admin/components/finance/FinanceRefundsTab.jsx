@@ -9,20 +9,6 @@ const FinanceRefundsTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [metrics, setMetrics] = useState(null);
 
-  /*
-  // Seed data fallback
-  const defaultRefunds = [
-    { id: "#REF-9921", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9922", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9923", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9924", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9925", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9926", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9927", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-    { id: "#REF-9928", job: "Wardrobe Installation", client: "Elvis Chimannda", amount: "₦85,000", reason: "Service not delivered", status: "Successful", date: "24 jul 2026" },
-  ];
-  */
-
   const [refunds, setRefunds] = useState([]);
 
   const fetchRefundsData = useCallback(async () => {

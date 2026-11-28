@@ -15,20 +15,6 @@ const FinancePayoutsTab = () => {
   const [isApproving, setIsApproving] = useState(false);
   const [metrics, setMetrics] = useState(null);
 
-  /*
-  // Seed data fallback
-  const defaultPayouts = [
-    { id: "#PAY-9921", rawId: "PAY-9921", job: "Kitchen Plumbing", professional: "Samuel Owoniyi", amount: "₦690,000", bank: "GT Bank", status: "Successful", date: "24 jul 2026" },
-    { id: "#PAY-9922", rawId: "PAY-9922", job: "Wardrobe Installation", professional: "Samuel Owoniyi", amount: "₦85,000", bank: "GT Bank", status: "Pending", date: "24 jul 2026" },
-    { id: "#PAY-9923", rawId: "PAY-9923", job: "Wardrobe Installation", professional: "Samuel Owoniyi", amount: "₦85,000", bank: "GT Bank", status: "Successful", date: "24 jul 2026" },
-    { id: "#PAY-9924", rawId: "PAY-9924", job: "Wardrobe Installation", professional: "Samuel Owoniyi", amount: "₦85,000", bank: "GT Bank", status: "Pending", date: "24 jul 2026" },
-    { id: "#PAY-9925", rawId: "PAY-9925", job: "Wardrobe Installation", professional: "Samuel Owoniyi", amount: "₦85,000", bank: "GT Bank", status: "Pending", date: "24 jul 2026" },
-    { id: "#PAY-9926", rawId: "PAY-9926", job: "Wardrobe Installation", professional: "Samuel Owoniyi", amount: "₦85,000", bank: "GT Bank", status: "Pending", date: "24 jul 2026" },
-    { id: "#PAY-9927", rawId: "PAY-9927", job: "Wardrobe Installation", professional: "Samuel Owoniyi", amount: "₦85,000", bank: "GT Bank", status: "Pending", date: "24 jul 2026" },
-    { id: "#PAY-9928", rawId: "PAY-9928", job: "Wardrobe Installation", professional: "Samuel Owoniyi", amount: "₦85,000", bank: "GT Bank", status: "Pending", date: "24 jul 2026" },
-  ];
-  */
-
   const [payouts, setPayouts] = useState([]);
 
   const fetchPayoutsData = useCallback(async () => {
@@ -112,18 +98,17 @@ const FinancePayoutsTab = () => {
     try {
       await adminService.approvePayout(payoutId);
       toast.success("Payout approved successfully");
-    } catch (err) {
-      console.warn("[FinancePayoutsTab] Backend approve payout:", err);
-      toast.success("Payout approval processed");
-    } finally {
-      setIsApproving(false);
-      // Update local state
-      setPayouts(
-        payouts.map((p) => (p.id === selectedPayout.id ? { ...p, status: "Successful" } : p))
+      setPayouts((prev) =>
+        prev.map((p) => (p.id === selectedPayout.id ? { ...p, status: "Successful" } : p))
       );
       setActivePayoutData(selectedPayout);
       setSelectedPayout(null);
       setShowSuccessModal(true);
+    } catch (err) {
+      console.warn("[FinancePayoutsTab] Backend approve payout:", err);
+      toast.error(err?.response?.data?.message || "Failed to approve payout");
+    } finally {
+      setIsApproving(false);
     }
   };
 

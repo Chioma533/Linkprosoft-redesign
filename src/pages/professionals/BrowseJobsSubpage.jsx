@@ -33,6 +33,7 @@ const BrowseJobsSubpage = () => {
   // ── Local state for matched jobs (strictly skill-matched only) ─────────
   const [matchedJobs, setMatchedJobs] = useState([]);
   const [isLoadingJobs, setIsLoadingJobs] = useState(true);
+  const [jobsError, setJobsError] = useState("");
 
   const [proProfile, setProProfile] = useState(null);
   const [proSkills, setProSkills] = useState([]);
@@ -50,16 +51,19 @@ const BrowseJobsSubpage = () => {
   const fetchMatchedJobs = useCallback(async (params = {}) => {
     if (!params.skillId) {
       setMatchedJobs([]);
+      setJobsError("");
       setIsLoadingJobs(false);
       return;
     }
 
     setIsLoadingJobs(true);
+    setJobsError("");
     try {
       const jobs = await projectService.getJobs(params);
       setMatchedJobs(Array.isArray(jobs) ? jobs : []);
     } catch (err) {
       console.error("Failed to fetch matched jobs:", err);
+      setJobsError(err?.response?.data?.message || err?.message || "Failed to load jobs. Please try again.");
       setMatchedJobs([]);
     } finally {
       setIsLoadingJobs(false);
@@ -365,6 +369,17 @@ const BrowseJobsSubpage = () => {
         {isLoadingJobs ? (
           <div className="col-span-full py-14 text-center text-xs text-gray-400">
             Loading matching jobs for your skillset...
+          </div>
+        ) : jobsError ? (
+          <div className="col-span-full rounded-2xl border border-rose-100 bg-rose-50/70 p-8 text-center space-y-3">
+            <p className="text-xs font-semibold text-rose-700">{jobsError}</p>
+            <button
+              type="button"
+              onClick={() => fetchMatchedJobs({ skillId: selectedSkillId, page: 1, limit: 20 })}
+              className="px-5 py-2 rounded-full bg-[#016EA6] text-white text-xs font-bold cursor-pointer hover:bg-[#015582] transition-colors"
+            >
+              Retry
+            </button>
           </div>
         ) : currentItems.length > 0 ? (
           currentItems.map((job) => (

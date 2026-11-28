@@ -18,8 +18,12 @@ const CreateNewPassword = ({ onSubmit, onClose, isLoading, error }) => {
       setValidationError("Password is required");
       return false;
     }
-    if (password.length < 6) {
-      setValidationError("Password must be at least 6 characters");
+    if (password.length < 8) {
+      setValidationError("Password must be at least 8 characters");
+      return false;
+    }
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password) || !/[^a-zA-Z0-9]/.test(password)) {
+      setValidationError("Password must include an uppercase letter, a number, and a special character");
       return false;
     }
     return true;

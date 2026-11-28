@@ -6,10 +6,10 @@ import SignupPage from "./pages/auth/SignupPage";
 import LoginPage from "./pages/auth/LoginPage";
 import ProfessionalDashboardPage from "./pages/professionals/ProfessionalDashboardPage";
 import PrivateRoutes from "./routes/PrivateRoutes";
-import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { useEffect } from "react";
+import { Route, BrowserRouter as Router, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef } from "react";
 import { useAuthStore } from "./store/authStore";
-import { Toaster } from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import EmployerDashboardPage from "./pages/employer/EmployerDashboardPage";
 import EmployerPublicProfilePage from "./pages/employer/EmployerPublicProfilePage";
 import AdminDahboardPage from "./pages/admin/AdminDahboardPage";
@@ -25,6 +25,42 @@ import BadgeVerificationPage from "./pages/verification/BadgeVerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PublicProfessionalProfile from "./pages/professional/PublicProfessionalProfile";
 import EmployerTrendingProfessionalsPage from "./pages/employer/EmployerTrendingProfessionalsPage";
+import LegalPage from "./pages/LegalPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import { SESSION_EXPIRED_EVENT } from "./utils/sessionExpiry";
+
+const SessionExpiryHandler = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const handlingExpiry = useRef(false);
+
+  useEffect(() => {
+    if (isAuthenticated) handlingExpiry.current = false;
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      if (handlingExpiry.current) return;
+      handlingExpiry.current = true;
+      useAuthStore.getState().expireSession();
+      toast.error("Your session has expired. Please log in again.", {
+        id: "session-expired",
+      });
+      navigate("/login", {
+        replace: true,
+        state: {
+          from: `${location.pathname}${location.search}${location.hash}`,
+        },
+      });
+    };
+
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+  }, [location, navigate]);
+
+  return null;
+};
 const HomeRouteResolver = () => {
   const { user } = useAuthStore();
   if (user?.role === "professional") {
@@ -44,12 +80,15 @@ const App = () => {
 
   return (
     <Router>
+        <SessionExpiryHandler />
         <div className="app-shell min-h-screen bg-white text-gray-900 font-sans">
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/privacy" element={<LegalPage type="privacy" />} />
+            <Route path="/terms" element={<LegalPage type="terms" />} />
 
             <Route
               path="/auth/google/callback"
@@ -80,7 +119,7 @@ const App = () => {
 
             <Route element={<PrivateRoutes allowedRoles={["employer"]} />}>
               <Route
-                path="/trending-professionals"
+                path="/trending"
                 element={<EmployerTrendingProfessionalsPage />}
               />
               <Route
@@ -120,6 +159,7 @@ const App = () => {
             </Route>
 
             {/* Keep this after every fixed route: a public profile owns one path segment. */}
+            <Route path="*" element={<NotFoundPage />} />
             <Route path="/:slug" element={<PublicProfessionalProfile />} />
           </Routes>
           <Toaster

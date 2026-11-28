@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
-  ArrowRight,
   Camera,
   Check,
   CreditCard,
@@ -38,6 +37,7 @@ const VerificationPage = () => {
     updateProfile,
     errors,
 
+    idDocumentFile,
     uploadedFile,
     handleIdentityUpload,
 
@@ -49,7 +49,11 @@ const VerificationPage = () => {
     setSelfiePreviewUrl,
 
     banks,
+    bankError,
     resolveBankAccount,
+    overallStatus,
+    rejectionReason,
+    rejectedStep,
 
     isLoading,
     showSuccess,
@@ -63,24 +67,123 @@ const VerificationPage = () => {
   } = useVerification();
 
   const selfieObjectUrlRef = useRef(null);
+  const selfieStreamRef = useRef(null);
+  const selfieVideoRef = useRef(null);
+  const currentViewRef = useRef(view);
+  const isMountedRef = useRef(true);
+  const [isCameraActive, setIsCameraActive] = useState(false);
+  const [cameraError, setCameraError] = useState("");
+  currentViewRef.current = view;
 
-  useEffect(() => () => {
-    if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      selfieStreamRef.current?.getTracks().forEach((track) => track.stop());
+      if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
+    };
   }, []);
 
-  const handleSelfieUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
-      if (!allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024) return;
-      if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
-      const previewUrl = URL.createObjectURL(file);
-      selfieObjectUrlRef.current = previewUrl;
-      setSelfieBlob(file);
-      setSelfieMediaId(null);
-      setSelfiePreviewUrl(previewUrl);
-      setSelfieCaptured(true);
+  useEffect(() => {
+    const video = selfieVideoRef.current;
+    if (!isCameraActive || !video || !selfieStreamRef.current) return undefined;
+    video.srcObject = selfieStreamRef.current;
+    return () => {
+      video.srcObject = null;
+    };
+  }, [isCameraActive]);
+
+  useEffect(() => {
+    if (view === "face") return;
+    selfieStreamRef.current?.getTracks().forEach((track) => track.stop());
+    selfieStreamRef.current = null;
+    setIsCameraActive(false);
+  }, [view]);
+
+  const stopSelfieCamera = () => {
+    selfieStreamRef.current?.getTracks().forEach((track) => track.stop());
+    selfieStreamRef.current = null;
+    setIsCameraActive(false);
+  };
+
+  const startSelfieCamera = async () => {
+    setCameraError("");
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError("Live camera access requires a supported browser on HTTPS or localhost.");
+      return;
     }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "user" } },
+        audio: false,
+      });
+      if (!isMountedRef.current || currentViewRef.current !== "face") {
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      selfieStreamRef.current = stream;
+      setIsCameraActive(true);
+    } catch (error) {
+      if (!isMountedRef.current || currentViewRef.current !== "face") return;
+      const message = error?.name === "NotAllowedError"
+        ? "Camera access was denied. Allow camera access in your browser settings and try again."
+        : error?.name === "NotFoundError"
+        ? "No camera was found on this device."
+        : "Unable to start the camera. Check your camera connection and permissions.";
+      setCameraError(message);
+    }
+  };
+
+  const captureSelfie = () => {
+    const video = selfieVideoRef.current;
+    if (!video?.videoWidth || !video.videoHeight) {
+      setCameraError("The camera is starting. Please try capturing again in a moment.");
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      setCameraError("This browser could not capture the selfie. Please try again.");
+      return;
+    }
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    try {
+      canvas.toBlob((blob) => {
+        if (!isMountedRef.current || currentViewRef.current !== "face") return;
+        if (!blob) {
+          setCameraError("The selfie could not be captured. Please try again.");
+          return;
+        }
+
+        const file = new File([blob], `selfie-${Date.now()}.jpg`, { type: "image/jpeg" });
+        if (selfieObjectUrlRef.current) URL.revokeObjectURL(selfieObjectUrlRef.current);
+        const previewUrl = URL.createObjectURL(file);
+        selfieObjectUrlRef.current = previewUrl;
+        setSelfieBlob(file);
+        setSelfieMediaId(null);
+        setSelfiePreviewUrl(previewUrl);
+        setSelfieCaptured(true);
+        setCameraError("");
+        stopSelfieCamera();
+      }, "image/jpeg", 0.92);
+    } catch {
+      setCameraError("The selfie could not be captured. Please try again.");
+    }
+  };
+
+  const clearSelfie = () => {
+    if (selfieObjectUrlRef.current) {
+      URL.revokeObjectURL(selfieObjectUrlRef.current);
+      selfieObjectUrlRef.current = null;
+    }
+    setSelfieCaptured(false);
+    setSelfieBlob(null);
+    setSelfieMediaId(null);
+    setSelfiePreviewUrl(null);
   };
 
   const stepNumber =
@@ -93,15 +196,28 @@ const VerificationPage = () => {
       : view === "payment"
       ? 4
       : 1;
+  const isFaceStep = view === "face";
 
   if (view === "overview") {
     const isIdentityCompleted = completedSteps.includes("identity");
     const isProfessionalCompleted = completedSteps.includes("professional");
+    const isFaceCompleted = completedSteps.includes("face");
     const isPaymentCompleted = completedSteps.includes("payment");
 
     return (
       <main className="verification-page verification-overview-page min-h-screen bg-[#f7f7f7] px-4 py-6 text-[#171a1c] sm:px-8 sm:py-12">
         <section className="verification-shell mx-auto max-w-[960px] rounded-[28px] bg-white px-4 py-7 sm:px-12 sm:py-12 space-y-8">
+          {overallStatus === "pending_review" && (
+            <div className="rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm font-semibold text-[#0879aa]">
+              Your verification dossier is pending administrative review.
+            </div>
+          )}
+          {overallStatus === "rejected" && (
+            <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              Verification was rejected{rejectedStep ? ` at the ${rejectedStep} step` : ""}.
+              {rejectionReason ? ` Reason: ${rejectionReason}` : ""}
+            </div>
+          )}
           {/* Header */}
           <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:items-start sm:justify-between sm:gap-5">
             <div className="min-w-0">
@@ -152,52 +268,62 @@ const VerificationPage = () => {
                   isCompleted: isPaymentCompleted,
                   isLocked: !isIdentityCompleted || !isProfessionalCompleted,
                 },
-              ].map(({ icon: Icon, title, description, step, isCompleted, isLocked }) => (
-                <article
-                  key={title}
-                  className={`flex min-h-[220px] min-w-0 flex-col rounded-2xl border p-5 transition ${
-                    isLocked
-                      ? "border-[#e7e8e8] bg-[#fafafa] opacity-60"
-                      : "border-[#e7e8e8] bg-white"
-                  }`}
-                >
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eef8fc] text-[#0879aa]">
-                    <Icon size={22} />
-                  </div>
+              ].map(({ icon: Icon, title, description, step, isCompleted, isLocked }) => {
+                const continueFaceVerification = step === "payment" && !isFaceCompleted;
 
-                  <span className="mt-5 w-fit rounded-md bg-[#eaf3f6] px-2.5 py-0.5 text-[10px] text-[#555b5e]">
-                    Duration: 1 min
-                  </span>
+                return (
+                  <article
+                    key={title}
+                    className={`flex min-h-[220px] min-w-0 flex-col rounded-2xl border p-5 transition ${
+                      isLocked
+                        ? "border-[#e7e8e8] bg-[#fafafa] opacity-60"
+                        : "border-[#e7e8e8] bg-white"
+                    }`}
+                  >
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#eef8fc] text-[#0879aa]">
+                      <Icon size={22} />
+                    </div>
 
-                  <h4 className="mt-3 text-sm font-bold text-gray-900">{title}</h4>
+                    <span className="mt-5 w-fit rounded-md bg-[#eaf3f6] px-2.5 py-0.5 text-[10px] text-[#555b5e]">
+                      Duration: 1 min
+                    </span>
 
-                  <p className="mt-1 text-xs leading-relaxed text-[#85898b]">
-                    {description}
-                  </p>
+                    <h4 className="mt-3 text-sm font-bold text-gray-900">{title}</h4>
 
-                  <div className="mt-auto flex items-center justify-between pt-4 text-xs text-[#85898b]">
-                    <button
-                      type="button"
-                      disabled={isLocked}
-                      className="text-[#85898b] transition hover:text-[#0879aa] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                      Learn more&nbsp; &#8250;
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isLocked}
-                      onClick={() => !isLocked && setView(step)}
-                      className={`rounded-full px-4 py-2 text-[10px] text-white transition ${
-                        isLocked
-                          ? "cursor-not-allowed bg-gray-300"
-                          : "bg-[#0879aa] hover:bg-[#076b97] cursor-pointer"
-                      }`}
-                    >
-                      {isCompleted ? "Edit Step" : isLocked ? "Locked" : "Start Step"}
-                    </button>
-                  </div>
-                </article>
-              ))}
+                    <p className="mt-1 text-xs leading-relaxed text-[#85898b]">
+                      {description}
+                    </p>
+
+                    <div className="mt-auto flex items-center justify-between pt-4 text-xs text-[#85898b]">
+                      <button
+                        type="button"
+                        disabled={isLocked}
+                        className="text-[#85898b] transition hover:text-[#0879aa] disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        Learn more&nbsp; &#8250;
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isLocked}
+                        onClick={() => !isLocked && setView(continueFaceVerification ? "face" : step)}
+                        className={`rounded-full px-4 py-2 text-[10px] text-white transition ${
+                          isLocked
+                            ? "cursor-not-allowed bg-gray-300"
+                            : "bg-[#0879aa] hover:bg-[#076b97] cursor-pointer"
+                        }`}
+                      >
+                        {isCompleted
+                          ? "Edit Step"
+                          : isLocked
+                          ? "Locked"
+                          : continueFaceVerification
+                          ? "Continue Step"
+                          : "Start Step"}
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -206,8 +332,8 @@ const VerificationPage = () => {
   }
 
   return (
-    <main className="verification-page min-h-screen bg-[#f7f7f7] px-3 py-5 sm:px-8 sm:py-12">
-      <section className="verification-shell mx-auto max-w-[960px] rounded-[28px] bg-white px-4 py-7 sm:px-12 sm:py-8">
+    <main className={`verification-page min-h-screen bg-[#f7f7f7] px-3 sm:px-8 ${isFaceStep ? "py-4 sm:py-6" : "py-5 sm:py-12"}`}>
+      <section className={`verification-shell mx-auto max-w-[960px] rounded-[28px] bg-white ${isFaceStep ? "px-4 py-5 sm:px-12 sm:py-6" : "px-4 py-7 sm:px-12 sm:py-8"}`}>
         <VerificationProgress
           activeStep={stepNumber}
           completedSteps={completedSteps}
@@ -215,7 +341,7 @@ const VerificationPage = () => {
           onStepClick={handleStepClick}
         />
 
-        <div className="mt-7">
+        <div className={isFaceStep ? "mt-5" : "mt-7"}>
           {view === "identity" && (
             <>
               <VerificationHeader
@@ -252,9 +378,20 @@ const VerificationPage = () => {
 
                   <VerificationField
                     label="Date of birth"
-                    placeholder="Enter date"
+                    placeholder="DD/MM/YY"
+                    maxLength={8}
+                    inputMode="numeric"
                     value={profile.dateOfBirth || ""}
-                    onChange={(e) => updateProfile("dateOfBirth", e.target.value)}
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                      let formatted = digits;
+                      if (digits.length > 4) {
+                        formatted = `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+                      } else if (digits.length > 2) {
+                        formatted = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+                      }
+                      updateProfile("dateOfBirth", formatted);
+                    }}
                     error={errors.dateOfBirth}
                   />
 
@@ -277,6 +414,7 @@ const VerificationPage = () => {
 
                 <VerificationPreview
                   profile={profile}
+                  documentFile={idDocumentFile}
                   onUpload={handleIdentityUpload}
                   uploadedFile={uploadedFile}
                   error={errors.idDocument}
@@ -316,64 +454,87 @@ const VerificationPage = () => {
               <VerificationHeader
                 title="Face Verification."
                 description="Snap a selfie to match your face with the identity document provided"
-                image={selfieImage}
               />
 
-              <div className="verification-panel mt-6 grid gap-6 rounded-2xl border border-[#e7e8e8] p-4 sm:grid-cols-[1.25fr_.75fr] sm:p-6">
-                <div>
-                  <div className="overflow-hidden rounded-2xl border border-[#e7e8e8] bg-[#f9fbfb] p-6 text-center">
-                    {selfiePreviewUrl ? (
-                      <div className="relative mx-auto h-52 w-52 overflow-hidden rounded-full border-4 border-[#0879aa] shadow-md">
-                        <img
-                          src={selfiePreviewUrl}
-                          alt="Selfie"
-                          className="h-full w-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelfieCaptured(false);
-                            setSelfiePreviewUrl(null);
-                            setSelfieBlob(null);
-                          }}
-                          className="absolute bottom-2 right-2 rounded-full bg-rose-500 p-1.5 text-white shadow-md hover:bg-rose-600 transition"
-                        >
-                          <X size={16} />
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="mx-auto flex h-48 w-48 flex-col items-center justify-center rounded-full border-2 border-dashed border-[#0879aa] bg-[#eef8fc]">
-                        <Camera size={44} className="text-[#0879aa]" />
-                        <span className="mt-2 text-xs font-semibold text-[#0879aa]">
-                          Capture Face
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="mt-6 flex flex-wrap justify-center gap-3">
-                      <label className="cursor-pointer rounded-full bg-[#0879aa] px-6 py-2.5 text-xs font-semibold text-white hover:bg-[#076b97] transition">
-                        <span>{selfieCaptured ? "Retake Photo" : "Upload Selfie"}</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="user"
-                          onChange={handleSelfieUpload}
-                          className="sr-only"
-                        />
-                      </label>
-                    </div>
-
-                    {errors.selfie && (
-                      <p className="mt-3 text-xs text-rose-500">{errors.selfie}</p>
-                    )}
-                  </div>
+              <div className="verification-panel mt-4 grid gap-3 rounded-2xl border border-[#e7e8e8] p-3 sm:h-[clamp(280px,44vh,390px)] sm:grid-cols-[1.2fr_.85fr] sm:gap-4 sm:p-4">
+                <div className="relative h-[220px] overflow-hidden rounded-xl bg-[#f9fbfb] sm:h-full">
+                  {isCameraActive ? (
+                    <video
+                      ref={selfieVideoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      aria-label="Live selfie camera"
+                      className="absolute inset-0 h-full w-full object-cover object-center"
+                    />
+                  ) : (
+                    <img
+                      src={selfieImage}
+                      alt="Face verification camera guide"
+                      className="absolute inset-0 h-full w-full object-cover object-center"
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-slate-900/10" />
+                  <button
+                    type="button"
+                    onClick={isCameraActive ? captureSelfie : startSelfieCamera}
+                    className="absolute left-1/2 top-1/2 inline-flex -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center gap-2 whitespace-nowrap rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-[#171a1c] shadow-md transition hover:bg-[#f1f8fb] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0879aa]"
+                  >
+                    <Camera size={17} className="text-[#0879aa]" />
+                    <span>
+                      {isCameraActive
+                        ? "Capture Selfie"
+                        : selfieCaptured
+                        ? "Retake Selfie"
+                        : "Take Selfie"}
+                    </span>
+                  </button>
+                  {isCameraActive && (
+                    <button
+                      type="button"
+                      onClick={stopSelfieCamera}
+                      aria-label="Close live camera"
+                      className="absolute right-3 top-3 rounded-full bg-white/95 p-2 text-[#424648] shadow transition hover:bg-white"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                  {(cameraError || errors.selfie) && (
+                    <p role="alert" className="absolute bottom-3 left-3 right-3 rounded-lg bg-white/95 px-3 py-2 text-center text-xs text-rose-600">
+                      {cameraError || errors.selfie}
+                    </p>
+                  )}
                 </div>
 
-                <VerificationPreview
-                  profile={profile}
-                  compact
-                  uploadedFile={uploadedFile}
-                />
+                <aside className="flex h-[220px] min-h-0 flex-col rounded-xl bg-[#fafafa] p-3 sm:h-full sm:p-4">
+                  <div className="flex items-center justify-between border-b border-[#ececec] pb-3">
+                    <span className="text-sm text-[#424648]">Preview</span>
+                    {selfiePreviewUrl && (
+                      <button
+                        type="button"
+                        onClick={clearSelfie}
+                        aria-label="Remove selfie"
+                        className="rounded-full p-1 text-[#787d80] transition hover:bg-rose-50 hover:text-rose-600"
+                      >
+                        <X size={16} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="mt-3 flex min-h-0 flex-1 items-center justify-center overflow-hidden rounded-lg bg-white">
+                    {selfiePreviewUrl ? (
+                      <img
+                        src={selfiePreviewUrl}
+                        alt="Selected selfie preview"
+                        className="h-full w-full object-contain"
+                      />
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 px-4 text-center text-[#85898b]">
+                        <Camera size={30} className="text-[#9cbac7]" />
+                        <p className="text-xs">Your selfie preview will appear here</p>
+                      </div>
+                    )}
+                  </div>
+                </aside>
               </div>
 
               <VerificationActionBar
@@ -418,6 +579,9 @@ const VerificationPage = () => {
                     {errors.bankName && (
                       <p className="text-[10px] text-rose-500 mt-1">{errors.bankName}</p>
                     )}
+                    {bankError && (
+                      <p className="text-[10px] text-rose-500 mt-1">{bankError}</p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -436,6 +600,16 @@ const VerificationPage = () => {
                       disabled
                       onChange={() => {}}
                       error={errors.accountName}
+                    />
+
+                    <VerificationField
+                      label="Set payment password"
+                      optional
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Enter password"
+                      value={profile.paymentPassword || ""}
+                      onChange={(e) => updateProfile("paymentPassword", e.target.value)}
                     />
                   </div>
 

@@ -13,6 +13,8 @@ export const API_PATHS = {
     FORGOT_PASSWORD: "/api/auth/forgot-password",
     VERIFY_RESET_CODE: "/api/auth/verify-reset-code",
     RESET_PASSWORD: "/api/auth/reset-password",
+    CHANGE_PASSWORD: "/api/auth/change-password",
+    LINKED_ACCOUNTS: "/api/auth/linked-accounts",
     RESEND_OTP: "/api/auth/resend-otp",
     REFRESH_TOKEN: "/api/auth/refresh-token",
     LOGOUT: "/api/auth/logout",
@@ -146,6 +148,7 @@ export const API_PATHS = {
     // User Management
     USERS_METRICS: "/api/admin/users/metrics",
     USERS_LIST: "/api/admin/users",
+    ADMINS_LIST: "/api/admin/users/admins",
     USER_BY_ID: (id) => `/api/admin/users/${id}`,
     UPDATE_USER_STATUS: (id) => `/api/admin/users/${id}/status`,
     VERIFICATION_QUEUE: "/api/admin/users/verification-queue",
@@ -213,6 +216,14 @@ export const API_PATHS = {
     GET_NOTIFICATIONS: "/api/notifications",
     MARK_AS_READ: (id) => `/api/notifications/${id}/read`,
     MARK_ALL_READ: "/api/notifications/mark-all-read",
+    PREFERENCES: "/api/notifications/preferences",
+  },
+
+  SUBSCRIPTIONS: {
+    ME: "/api/subscriptions/me",
+    INITIATE: "/api/subscriptions/initiate",
+    VERIFY: "/api/subscriptions/verify",
+    CANCEL: "/api/subscriptions/cancel",
   },
 
   MESSAGING: {
@@ -242,6 +253,7 @@ export const API_PATHS = {
     RESOLVE_ACCOUNT: "/api/verification/resolve-account",
     SUBMIT_PAYMENT: "/api/verification/payment",
     SUBMIT_ALL: "/api/verification/submit",
+    SUBMIT_BADGE_APPLICATION: "/api/verification/badge-application",
     PREVIEW: "/api/verification/preview",
     ADMIN: {
       LIST: "/api/admin/verifications",
@@ -266,4 +278,22 @@ export const API_PATHS = {
   },
 
   WAITLIST: "/api/waitlist",
+
+  COMMUNITY: {
+    POSTS: "/api/community/posts",
+    POST_BY_ID: (postId) => `/api/community/posts/${postId}`,
+    USER_POSTS: (userId) => `/api/community/users/${userId}/posts`,
+    REACTIONS: (postId) => `/api/community/posts/${postId}/reactions`,
+    COMMENTS: (postId) => `/api/community/posts/${postId}/comments`,
+    COMMENT_BY_ID: (commentId) => `/api/community/comments/${commentId}`,
+    COMMENT_LIKE: (commentId) => `/api/community/comments/${commentId}/like`,
+    SAVE_POST: (postId) => `/api/community/posts/${postId}/save`,
+    SAVED_POSTS: "/api/community/saved",
+    TRENDING_HASHTAGS: "/api/community/hashtags/trending",
+    POSTS_BY_HASHTAG: (tag) => `/api/community/hashtags/${encodeURIComponent(tag)}`,
+    FOLLOW_USER: (userId) => `/api/community/users/${userId}/follow`,
+    USER_FOLLOWERS: (userId) => `/api/community/users/${userId}/followers`,
+    USER_FOLLOWING: (userId) => `/api/community/users/${userId}/following`,
+    REPORTS: "/api/community/reports",
+  },
 };

@@ -1,11 +1,12 @@
-import React, { useState } from "react";
-import { FiArrowLeft, FiAlertTriangle, FiCheckSquare, FiInfo } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiArrowLeft, FiAlertTriangle, FiInfo } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import DisputeEvidenceUploader from "../../components/common/DisputeEvidenceUploader";
 import mediaService from "../../api/services/mediaService";
 import disputeService from "../../api/services/disputeService";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
+import { jobService } from "../../api/services/jobService";
 
 const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
   const [reason, setReason] = useState("");
@@ -13,15 +14,89 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
   const [refundAmount, setRefundAmount] = useState("");
   const [stagedEvidence, setStagedEvidence] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [job, setJob] = useState(null);
+  const [isLoadingJob, setIsLoadingJob] = useState(true);
+  const [jobError, setJobError] = useState("");
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadJob = async () => {
+      if (!jobId) {
+        setIsLoadingJob(false);
+        setJobError("Select a real project before opening a dispute.");
+        return;
+      }
+
+      setIsLoadingJob(true);
+      setJobError("");
+      try {
+        const response = await jobService.getJobById(jobId);
+        const liveJob = response?.data || response;
+        if (isMounted) setJob(liveJob);
+      } catch (error) {
+        if (isMounted) {
+          setJob(null);
+          setJobError(error?.response?.data?.message || "Could not load the selected project.");
+        }
+      } finally {
+        if (isMounted) setIsLoadingJob(false);
+      }
+    };
+
+    loadJob();
+    return () => {
+      isMounted = false;
+    };
+  }, [jobId]);
+
+  const assignmentId =
+    job?.assignment?.id || job?.assignmentId || job?.assignment_id || null;
+  const jobTitle = job?.title || "Project details unavailable";
+  const professionalName =
+    job?.acceptedProfessional?.fullName ||
+    job?.professional?.fullName ||
+    job?.professional?.name ||
+    job?.assignedProfessional?.name ||
+    "Professional unavailable";
+  const escrowBalance = Number(
+    job?.payment?.amount ??
+    job?.assignment?.acceptedBudget ??
+    job?.acceptedBudget ??
+    job?.budget ??
+    0
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!jobId || !assignmentId) {
+      toast.error("This dispute requires a valid project and assignment.");
+      return;
+    }
     if (!reason) {
       toast.error("Please select a reason for the dispute");
       return;
     }
     if (!explanation.trim()) {
       toast.error("Please explain your dispute details");
+      return;
+    }
+    if (isLoadingJob) {
+      toast.error("Please wait while the selected project loads.");
+      return;
+    }
+    if (jobError) {
+      toast.error(jobError);
+      return;
+    }
+
+    const requestedRefund = refundAmount ? Number(refundAmount) : 0;
+    if (!Number.isFinite(requestedRefund) || requestedRefund < 0) {
+      toast.error("Requested refund must be a valid amount.");
+      return;
+    }
+    if (escrowBalance > 0 && requestedRefund > escrowBalance) {
+      toast.error("Requested refund exceeds the available escrow balance.");
       return;
     }
 
@@ -39,35 +114,52 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
       }
 
       // 2. File the dispute request
-      let disputeId = null;
-      if (jobId) {
-        try {
-          const disputeRes = await axiosInstance.patch(API_PATHS.ASSIGNMENTS.DISPUTE_SATISFACTION(jobId), {
-            reason: `${reason}: ${explanation}`,
-            requestedRefund: refundAmount ? Number(refundAmount) : undefined,
-          });
-          disputeId = disputeRes.data?.data?.dispute?.id || disputeRes.data?.data?.id;
-        } catch (apiErr) {
-          console.warn("Dispute assignment API warning:", apiErr);
+      const disputeRes = await axiosInstance.patch(
+        API_PATHS.ASSIGNMENTS.DISPUTE_SATISFACTION(assignmentId),
+        {
+          reason: `${reason}: ${explanation}`,
+          notes: requestedRefund > 0
+            ? `Requested refund: ${requestedRefund}`
+            : undefined,
         }
-      }
+      );
+      const disputeId =
+        disputeRes.data?.data?.dispute?.id ||
+        disputeRes.data?.data?.id ||
+        null;
 
       // 3. Link uploaded evidence to the dispute if disputeId is available
-      if (disputeId && uploadedMedia.length > 0) {
-        for (let i = 0; i < uploadedMedia.length; i++) {
-          try {
-            await disputeService.submitEvidence(disputeId, {
-              mediaId: uploadedMedia[i].mediaId,
-              caption: uploadedMedia[i].caption,
-              sortOrder: i,
-            });
-          } catch (evErr) {
-            console.warn("Evidence link warning:", evErr);
+      let linkedEvidenceCount = 0;
+      let failedEvidenceCount = 0;
+      if (uploadedMedia.length > 0) {
+        if (!disputeId) {
+          failedEvidenceCount = uploadedMedia.length;
+        } else {
+          for (let i = 0; i < uploadedMedia.length; i++) {
+            try {
+              await disputeService.submitEvidence(disputeId, {
+                mediaId: uploadedMedia[i].mediaId,
+                caption: uploadedMedia[i].caption,
+                sortOrder: i,
+              });
+              linkedEvidenceCount += 1;
+            } catch (evErr) {
+              console.warn("Evidence link warning:", evErr);
+              failedEvidenceCount += 1;
+            }
           }
         }
       }
 
-      toast.success("Dispute raised successfully with supporting evidence! Support team will review shortly.");
+      if (failedEvidenceCount > 0) {
+        toast.error(
+          `Dispute created, but ${failedEvidenceCount} evidence file${failedEvidenceCount > 1 ? "s" : ""} could not be attached.`
+        );
+      } else if (linkedEvidenceCount > 0) {
+        toast.success("Dispute raised successfully with supporting evidence! Support team will review shortly.");
+      } else {
+        toast.success("Dispute raised successfully! Support team will review shortly.");
+      }
       onBack();
     } catch (err) {
       console.error("Dispute submission error:", err);
@@ -105,15 +197,25 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
       {/* Form Container */}
       <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-sm">
         <form onSubmit={handleSubmit} className="space-y-5">
+          {isLoadingJob && (
+            <div className="rounded-2xl bg-slate-50 p-4 text-xs font-semibold text-gray-500">
+              Loading selected project...
+            </div>
+          )}
+          {jobError && (
+            <div className="rounded-2xl border border-rose-100 bg-rose-50 p-4 text-xs font-semibold text-rose-700">
+              {jobError}
+            </div>
+          )}
           {/* Project display */}
           <div className="bg-slate-50 p-4 rounded-full border border-slate-100/30 flex items-center justify-between gap-4">
             <div>
               <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">Dispute regarding project</span>
-              <span className="text-xs font-bold text-gray-800">Wardrobe Installation (ID: {jobId || "ORD657783"})</span>
+              <span className="text-xs font-bold text-gray-800">{jobTitle} (ID: {jobId})</span>
             </div>
             <div className="text-right">
               <span className="text-[9px] text-gray-400 font-bold block uppercase tracking-wider">With Professional</span>
-              <span className="text-xs font-bold text-gray-800">Johnathan David</span>
+              <span className="text-xs font-bold text-gray-800">{professionalName}</span>
             </div>
           </div>
 
@@ -157,7 +259,11 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
               className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-full text-xs outline-none focus:bg-white focus:border-rose-500 transition-all font-semibold text-gray-700"
             />
             <span className="text-[9px] text-gray-400 mt-1 block">
-              Note: You can request up to the maximum remaining escrow balance (₦350,000).
+              {isLoadingJob
+                ? "Loading available escrow balance..."
+                : escrowBalance > 0
+                  ? `Available escrow balance: ₦${escrowBalance.toLocaleString()}`
+                  : "Available escrow balance: ₦0"}
             </span>
           </div>
 
@@ -178,7 +284,7 @@ const EmployerOpenDisputeSubpage = ({ jobId, onBack }) => {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || isLoadingJob || Boolean(jobError) || !assignmentId}
               className="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-full text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm shadow-rose-100"
             >
               <FiAlertTriangle className="w-3.5 h-3.5" />

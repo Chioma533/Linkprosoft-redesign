@@ -47,7 +47,7 @@ const ProfessionalVerification = ({
 
             <VerificationField
               label="Bio"
-              placeholder="(+234)"
+              placeholder="Briefly describe your professional experience"
               value={profile.bio || ""}
               onChange={(e) => updateProfile("bio", e.target.value)}
               error={errors.bio}

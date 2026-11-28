@@ -1,15 +1,68 @@
-import React, { useState } from "react";
-import { Check, X, Crown, ShieldCheck, RefreshCw } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import { Check, X, Crown, ShieldCheck, RefreshCw, Loader2, AlertCircle } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "../../store/authStore";
 import VerificationBadge from "../../components/common/VerificationBadge";
 import { isSubscriptionLapsed } from "../../utils/verificationBadge";
+import subscriptionService from "../../api/services/subscriptionService";
 
 const PremiumSubpage = () => {
-  const { user } = useAuthStore();
+  const { user, syncSubscription } = useAuthStore();
   const [selectedPlan, setSelectedPlan] = useState("pro"); // default to pro for badge maintenance
+  const [subscription, setSubscription] = useState(null);
+  const [isLoadingSub, setIsLoadingSub] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isLapsed = isSubscriptionLapsed(user);
+  const isActiveSub = Boolean(subscription?.isActive);
+
+  const loadSubscription = useCallback(async () => {
+    setIsLoadingSub(true);
+    try {
+      const data = await subscriptionService.getMySubscription();
+      setSubscription(data);
+      if (data?.plan === "pro" && data?.isActive) {
+        setSelectedPlan("pro");
+      }
+      syncSubscription?.(data);
+    } catch (err) {
+      console.warn("[PremiumSubpage] Could not load subscription:", err);
+    } finally {
+      setIsLoadingSub(false);
+    }
+  }, [syncSubscription]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const reference = params.get("reference") || params.get("trxref");
+
+    const verifyIfNeeded = async () => {
+      if (reference) {
+        setIsSubmitting(true);
+        try {
+          const verified = await subscriptionService.verifySubscription(reference);
+          setSubscription(verified);
+          syncSubscription?.(verified);
+          toast.success("Subscription activated! Your verification badge is now active.");
+          params.delete("reference");
+          params.delete("trxref");
+          const nextSearch = params.toString();
+          window.history.replaceState(
+            {},
+            "",
+            `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}`
+          );
+        } catch (err) {
+          toast.error(err?.response?.data?.message || "Could not verify subscription payment.");
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+      await loadSubscription();
+    };
+
+    verifyIfNeeded();
+  }, [loadSubscription, syncSubscription]);
 
   const features = [
     { name: "Create a professional profile", free: true, pro: true },
@@ -27,11 +80,46 @@ const PremiumSubpage = () => {
     { name: "Certified Trade Credential Audit", free: false, pro: true },
   ];
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (selectedPlan === "free") {
-      toast.success("You are currently using the Free plan.");
-    } else {
-      toast.success("Connecting to secure payment portal for Badge Maintenance Subscription ($10/mo)...");
+      if (isActiveSub && !subscription?.cancelAtPeriodEnd) {
+        await handleCancelSubscription();
+      } else {
+        toast.success("You are currently using the Free plan.");
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const callbackUrl = `${window.location.origin}${window.location.pathname}`;
+      const res = await subscriptionService.initiateSubscription({
+        plan: "pro",
+        callbackUrl,
+      });
+      if (res?.authorizationUrl) {
+        window.location.href = res.authorizationUrl;
+      } else {
+        toast.error("Payment gateway URL was not returned. Please try again.");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to initialize subscription payment.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    setIsSubmitting(true);
+    try {
+      const updated = await subscriptionService.cancelSubscription();
+      setSubscription(updated);
+      syncSubscription?.(updated);
+      toast.success("Subscription cancellation scheduled for the end of your billing period.");
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to cancel subscription.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -178,16 +266,60 @@ const PremiumSubpage = () => {
           <div className="flex items-center justify-between border-t border-gray-100 pt-4 text-xs font-bold text-gray-800">
             <span>Total Due Today</span>
             <span className="text-base font-extrabold text-[#016EA6]">
-              ${selectedPlan === "free" ? "0" : "10"}
+              {selectedPlan === "free" ? "₦0" : "₦15,000"}
             </span>
           </div>
 
+          {isLapsed && !isActiveSub && (
+            <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px] text-amber-800">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+              <span>Your badge maintenance subscription has lapsed. Renew to restore your public verification badge.</span>
+            </div>
+          )}
+
+          {isActiveSub && (
+            <div className="rounded-xl border border-emerald-100 bg-emerald-50/70 p-3 text-[11px] text-emerald-800 space-y-1">
+              <div className="flex items-center justify-between font-bold">
+                <span>Active Subscription</span>
+                <span>{subscription.cancelAtPeriodEnd ? "Cancels at period end" : "Auto-renewing"}</span>
+              </div>
+              {subscription.currentPeriodEnd && (
+                <p className="text-[10px] text-emerald-700">
+                  Current period ends: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          )}
+
           <button
             onClick={handleContinue}
-            className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
+            disabled={isSubmitting || isLoadingSub}
+            className="w-full bg-[#016EA6] hover:bg-[#061EA6] text-white py-3 rounded-full text-xs font-bold shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {selectedPlan === "free" ? "Stay on Free Plan" : "Maintain Active Badge ($10/mo)"}
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            <span>
+              {selectedPlan === "free"
+                ? isActiveSub && !subscription?.cancelAtPeriodEnd
+                  ? "Cancel Subscription"
+                  : "Stay on Free Plan"
+                : isActiveSub
+                  ? "Extend Subscription (₦15,000/mo)"
+                  : isLapsed
+                    ? "Renew & Restore Badge (₦15,000/mo)"
+                    : "Maintain Active Badge (₦15,000/mo)"}
+            </span>
           </button>
+
+          {isActiveSub && !subscription?.cancelAtPeriodEnd && selectedPlan === "pro" && (
+            <button
+              type="button"
+              onClick={handleCancelSubscription}
+              disabled={isSubmitting}
+              className="w-full py-2 text-[11px] font-semibold text-gray-500 hover:text-rose-600 transition-colors cursor-pointer"
+            >
+              Cancel Subscription
+            </button>
+          )}
         </div>
 
         {/* Footer Terms */}

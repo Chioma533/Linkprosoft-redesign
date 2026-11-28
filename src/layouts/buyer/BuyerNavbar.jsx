@@ -39,7 +39,7 @@ const BuyerNavbar = ({ activePage = "browse" }) => {
     { id: "browse", label: "Browse Professionals", path: "/home" },
     { id: "dashboard", label: "My Dashboard", path: "/employer/dashboard" },
     { id: "community", label: "Community", path: "/community" },
-    { id: "trending", label: "Trending Professionals", path: "/trending-professionals" },
+    { id: "trending", label: "Trending Professionals", path: "/trending" },
   ];
 
   const userName = user?.fullName || user?.full_name || "Employer User";

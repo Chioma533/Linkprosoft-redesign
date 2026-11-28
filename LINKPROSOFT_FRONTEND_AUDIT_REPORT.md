@@ -176,9 +176,10 @@ The public catch-all is registered after fixed routes, so it can consume unknown
 
 ### Employer dashboard
 
-- **Status:** Partial/live plus hardcoded fallback.
+- **Status:** Partial/live; LP-F-004 removed the hardcoded job selection.
 - Tab subpages include overview, manage jobs, job details, disputes, messages, profile, settings, browse professionals, and wallet.
-- [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx:20) initializes `selectedJobId` to hardcoded `ORD657783`. If navigation does not set a job ID, details/open-dispute views can show the wrong job.
+- [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx) initializes no fallback job ID. Missing selections show an explicit empty state.
+- [src/pages/employer/EmployerOpenDisputeSubpage.jsx](./src/pages/employer/EmployerOpenDisputeSubpage.jsx) loads the selected job and assignment live and derives the escrow balance from the live job/payment data.
 - `EmployerOverviewSubpage` obtains live jobs through `useEmployerOverview`, with loading/error/empty states.
 - Employer browse and invitations need verification for real API dispatch.
 
@@ -201,8 +202,8 @@ The public catch-all is registered after fixed routes, so it can consume unknown
 - Admin subpages exist for overview, users, jobs, disputes, payments/finance, verification, and settings.
 - [src/api/services/adminService.js](./src/api/services/adminService.js) has extensive live service methods.
 - Static sample arrays remain in finance/dispute components.
-- Admin settings [stores configuration, admin accounts, and deletes entirely in component state](./src/pages/admin/AdminSettingsSubpage.jsx:37).
-- Admin settings save actions do not call `adminService`.
+- Admin settings load and persist configuration through the commission settings API.
+- Administrator roster add/revoke actions use live admin lifecycle endpoints.
 
 ## 5. Button and Interactive Element Audit
 
@@ -215,20 +216,20 @@ The public catch-all is registered after fixed routes, so it can consume unknown
 | Reset code | Verify code | Verify code via backend | Calls `/api/auth/verify-reset-code`; route failures are surfaced | **Implemented** | Uses `otp_code` and passes the returned reset token to password reset |
 | Public buyer | Trending link | Route to trending professionals | Links to `/trending`, route absent | **Confirmed missing** | Add route/component or remove link |
 | Public professionals | Job cards/pagination/filter | Live jobs | Replaced with public `/api/jobs` feed, server pagination, and API-backed filters | **Implemented** | Verify against production data |
-| Settings | Change password | Password update flow | “Not available” toast | **Missing** | Build API-backed password change |
-| Settings | Linked accounts | Link/unlink provider accounts | “Not available” toast | **Missing** | Implement/confirm provider requirements |
-| Settings | Privacy policy | Open or route to policy | “Not available” toast | **Missing** | Add route/document |
-| Settings | Terms | Open or route to terms | “Not available” toast | **Missing** | Add route/document |
+| Settings | Change password | Password update flow | Authenticated modal calls `/api/auth/change-password` | **Implemented** | Verify with authenticated browser session |
+| Settings | Linked accounts | Link/unlink provider accounts | Backend provider list and Google unlink; Google connect reuses OAuth | **Implemented** | Verify OAuth link flow |
+| Settings | Privacy policy | Open or route to policy | `/privacy` opens an in-app policy page | **Implemented** | Confirm final approved copy |
+| Settings | Terms | Open or route to terms | `/terms` opens an in-app terms page | **Implemented** | Confirm final approved copy |
 | Settings | Push/email switches | Persist preference | Local state only | **Partial** | Add backend preference API/local persistence |
 | Settings | Theme | Change app theme | Live theme provider | **Implemented/verify persistence** | Verify all dark/light states |
 | Settings | Account mode | Switch role | Other mode disabled | **Partial** | Confirm role switching policy |
 | Settings | Payment method | Open wallet/payment screen | Changes dashboard tab | **Partial** | Confirm method management exists |
-| Employer dashboard | View project | Select real job | Fallback `ORD657783` may be used | **Broken fallback** | Remove hardcoded ID |
+| Employer dashboard | View project | Select real job | Requires a real selected job; missing selections show an empty state | **Implemented** | LP-F-004 |
 | Employer browse | Invite professional | Create invitation/request | Some handlers only toast | **Partial** | Trace invitation endpoint/contact workflow |
 | Employer job details | Message/send | Open approved chat/thread | Toast or local navigation | **Unverified** | Verify thread and approved-contact rules |
 | Professional premium | Free/Pro Continue | Persist subscription or enforce policy | Free toast or payment toast only | **Missing** | Add payment/subscription API |
-| Admin settings | Save settings | Persist global settings | Local state/toast | **Missing** | Add admin configuration API |
-| Admin settings | Add/delete admin | Persist admin lifecycle | Mutates local array | **Missing** | Use backend admin lifecycle endpoints |
+| Admin settings | Save settings | Persist global settings | Calls the commission/platform settings API | **Implemented** | Verify persisted reload |
+| Admin settings | Add/delete admin | Persist admin lifecycle | Calls live administrator create/revoke endpoints | **Implemented** | Verify roster reload and permissions |
 | Admin verification | Approve/reject | Persist review | Service and local state need contract check | **Partial** | Verify response and refresh |
 | Admin payouts/refunds | Approve/reject/process | Execute action | UI may call service | **Partial/unverified** | Runtime and backend contract verification |
 | Admin announcements | Send/Save draft | Persist announcement | Some handlers use draft-success only | **Partial** | Confirm endpoint and draft semantics |
@@ -269,7 +270,7 @@ The matrix summarizes frontend-defined integrations. “Unverified” means sour
 | Disputes | `/api/disputes...` | POST/GET/DELETE | Implemented/partial | Evidence/link contracts | Confirm |
 | Admin overview/users/jobs | `/api/admin/...` | GET/PATCH/POST | Implemented service coverage | Runtime UI contract uncertain | Verify response normalization |
 | Admin finance | `/api/admin/finance...` | GET/POST/PATCH | Implemented/partial | Static fallback arrays coexist | Verify actions and exports |
-| Admin settings | No dedicated frontend service calls | N/A | Missing | Configuration values local only | Backend endpoints required |
+| Admin settings | `/api/admin/finance/commission/settings` and `/api/admin/users/admins` | GET/PUT/POST/DELETE | Implemented | Persisted configuration and administrator roster | Verify migration/runtime database state |
 | Subscription | No dedicated payment/subscription service | N/A | Missing | UI is success toast only | Backend/payment endpoints required |
 
 ## 7. Hardcoded, Mock and Placeholder Data Inventory
@@ -277,9 +278,9 @@ The matrix summarizes frontend-defined integrations. “Unverified” means sour
 | File | Description | Status | Backend replacement |
 |---|---|---|---|
 | [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx) | Public job feed | **Implemented** | Public `/api/jobs` endpoint with server-side filters and pagination |
-| [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx:20) | Default job ID `ORD657783` | **Confirmed bad fallback** | Empty state or selected route job ID |
-| [src/pages/employer/EmployerOpenDisputeSubpage.jsx](./src/pages/employer/EmployerOpenDisputeSubpage.jsx:112) | Default job title and fixed `₦350,000` | **Confirmed placeholder** | Selected job and live escrow balance |
-| [src/pages/admin/AdminSettingsSubpage.jsx](./src/pages/admin/AdminSettingsSubpage.jsx:37) | Static administrator list and local-only settings | **Confirmed fake persistence** | Admin settings/user APIs |
+| [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx) | Default job selection | **Fixed in LP-F-004** | Missing selection shows an empty state; valid navigation state or user selection is required |
+| [src/pages/employer/EmployerOpenDisputeSubpage.jsx](./src/pages/employer/EmployerOpenDisputeSubpage.jsx) | Default title, professional, and fixed escrow balance | **Fixed in LP-F-004** | Loads the selected job live and derives professional and escrow data |
+| [src/pages/admin/AdminSettingsSubpage.jsx](./src/pages/admin/AdminSettingsSubpage.jsx) | Static administrator list and local-only settings | **Fixed in LP-F-008** | Commission/platform settings and admin lifecycle APIs |
 | [src/pages/admin/components/finance/FinancePayoutsTab.jsx](./src/pages/admin/components/finance/FinancePayoutsTab.jsx:21) | Static payout rows and names | **Confirmed fallback/sample** | Finance payouts API |
 | [src/pages/admin/components/finance/FinanceRefundsTab.jsx](./src/pages/admin/components/finance/FinanceRefundsTab.jsx:15) | Static refund rows | **Confirmed fallback/sample** | Finance refunds API |
 | [src/pages/admin/AdminDisputesSubpage.jsx](./src/pages/admin/AdminDisputesSubpage.jsx:36) | Static dispute records | **Confirmed fallback/sample** | Disputes API |
@@ -462,13 +463,13 @@ The development team must provide or confirm:
 | LP-F-001 | Signup OTP | Fix undefined redirect/preloader identifiers and remove fake resend | [src/pages/auth/SignupPage.jsx](./src/pages/auth/SignupPage.jsx:75) | Auth resend backend contract | **P0** | Successful OTP redirects to correct role dashboard; resend calls backend and reports success/error |
 | LP-F-002 | Public professional jobs | Replace generated mock listings with the paginated public jobs API | [src/pages/professional/PublicProfessionalScreen.jsx](./src/pages/professional/PublicProfessionalScreen.jsx) | Public `/api/jobs` contract | **Completed** | Server-backed jobs, filters, pagination, loading, empty, and error/retry states verified |
 | LP-F-003 | Reset password | Remove `404` success fallback and confirm resend endpoint | [src/api/services/authService.js](./src/api/services/authService.js) | Backend reset routes | **Completed** | Reset-code failures surface; resend and token-based reset use confirmed backend contracts |
-| LP-F-004 | Employer dashboard | Remove fallback selected job ID and prevent mismatched job/dispute | [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx:20) | Job navigation state | **P1** | Details always use a real selected job or empty state |
-| LP-F-005 | Settings | Implement change password, linked accounts, legal links | [src/pages/SettingsSubpage.jsx](./src/pages/SettingsSubpage.jsx) | Backend/account requirements | **P1** | No “not available” controls remain if features are in scope |
+| LP-F-004 | Employer dashboard | Remove fallback selected job ID and prevent mismatched job/dispute | [src/pages/employer/EmployerDashboardPage.jsx](./src/pages/employer/EmployerDashboardPage.jsx), [src/pages/employer/EmployerOpenDisputeSubpage.jsx](./src/pages/employer/EmployerOpenDisputeSubpage.jsx) | Job/navigation and assignment contracts | **Completed** | No fallback job ID; missing selections show an empty state; dispute and completion use the live assignment ID |
+| LP-F-005 | Settings | Implement change password, linked accounts, legal links | [src/pages/SettingsSubpage.jsx](./src/pages/SettingsSubpage.jsx) | Backend/account requirements | **Completed** | Password, linked-account, privacy, and terms flows use real UI/backend destinations |
 | LP-F-006 | Notification settings | Persist push/email preferences | [src/pages/SettingsSubpage.jsx](./src/pages/SettingsSubpage.jsx) | Preference API/schema | **P1** | Preference survives reload and updates backend |
-| LP-F-007 | Premium | Integrate subscription/payment state | [src/pages/professionals/PremiumSubpage.jsx](./src/pages/professionals/PremiumSubpage.jsx:30) | Payment/subscription APIs | **P1** | User can activate/renew/cancel; badge state follows subscription |
-| LP-F-008 | Admin settings | Persist platform config/admin lifecycle | [src/pages/admin/AdminSettingsSubpage.jsx](./src/pages/admin/AdminSettingsSubpage.jsx:37) | Admin settings APIs | **P1** | Reload reflects persisted values and admin changes |
+| LP-F-007 | Premium | Integrate subscription/payment state | [src/pages/professionals/PremiumSubpage.jsx](./src/pages/professionals/PremiumSubpage.jsx:30) | Payment/subscription APIs | **Completed** | User can activate/renew/cancel; badge state follows subscription |
+| LP-F-008 | Admin settings | Persist platform config/admin lifecycle | [src/pages/admin/AdminSettingsSubpage.jsx](./src/pages/admin/AdminSettingsSubpage.jsx), [src/api/services/adminService.js](./src/api/services/adminService.js) | Admin settings APIs | **Completed** | Reload reflects persisted commission/platform configuration and live administrator roster |
 | LP-F-009 | Public buyer | Add `/trending` or remove link | [src/pages/buyer/PublicBuyerScreen.jsx](./src/pages/buyer/PublicBuyerScreen.jsx) | Route/product decision | **P1** | No navigational 404 |
-| LP-F-010 | App routing | Add 404/not-found behavior | [src/App.jsx](./src/App.jsx) | UX requirement | **P2** | Unknown routes have intentional UI |
+| LP-F-010 | App routing | Add 404/not-found behavior | [src/App.jsx](./src/App.jsx), [src/pages/NotFoundPage.jsx](./src/pages/NotFoundPage.jsx) | UX requirement | **Completed** | Unknown routes have an intentional 404 page with back and home actions |
 | LP-F-011 | Project service | Stop silent empty fallbacks for actual API failures | [src/api/services/projectService.js](./src/api/services/projectService.js) | Error UX | **P1** | Failures show retry/error; only true empty responses show empty state |
 | LP-F-012 | Verification | Complete and test all verification pathways | [src/pages/verification/](./src/pages/verification) | Backend/media contracts | **P1** | Every pathway submits real payload and reflects status |
 | LP-F-013 | Messaging | Verify thread/socket/attachment/approved-contact flow | [src/api/services/messagingService.js](./src/api/services/messagingService.js) | Backend socket/chat contracts | **P1** | End-to-end send/read/accept/decline works |
@@ -485,7 +486,7 @@ The development team must provide or confirm:
 1. Fix signup OTP redirect and resend behavior. **Completed in LP-F-001.**
 2. Remove reset-code fallback and confirm reset resend contract. **Completed in LP-F-003.**
 3. Replace public mock jobs and set verified public browse endpoint. **Completed in LP-F-002.**
-4. Remove employer hardcoded job fallback.
+4. Remove employer hardcoded job fallback. **Completed in LP-F-004.**
 5. Verify role routing, sessions, Google callback, and logout.
 6. Complete core professional/employer job/application/escrow journeys.
 7. Complete messaging and evidence/attachments.
@@ -501,7 +502,7 @@ The development team must provide or confirm:
 The frontend has a strong breadth of implemented screens and a substantial API service layer. However, the presence of a component or API service does not prove end-to-end correctness. Release preparation is blocked until at least:
 
 - The signup OTP P0 defect and public professional jobs mock are fixed.
-- Hardcoded job IDs and admin settings/mock finance/dispute data are removed from release-critical flows.
+- Hardcoded employer job IDs and admin settings/mock finance/dispute data are removed or isolated from release-critical flows.
 - Settings and subscription controls stop presenting simulated success.
 - Reset-code verification and resend behavior are made honest and backend-backed.
 - Backend response envelopes and cookie/OAuth behavior are verified runtime.

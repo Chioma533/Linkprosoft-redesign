@@ -4,13 +4,8 @@ import {
   FiAlertTriangle,
   FiCheck,
   FiSend,
-  FiUser,
   FiStar,
   FiZap,
-  FiMapPin,
-  FiCheckCircle,
-  FiDollarSign,
-  FiMail,
 } from "react-icons/fi";
 import { toast } from "react-hot-toast";
 import { jobService } from "../../api/services/jobService";
@@ -26,6 +21,7 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMatches, setIsLoadingMatches] = useState(false);
   const [invitingId, setInvitingId] = useState(null);
+  const [loadError, setLoadError] = useState("");
 
   const [messages, setMessages] = useState([
     {
@@ -40,8 +36,13 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
 
   // Load Job Details & Matches
   const loadJobData = useCallback(async () => {
-    if (!jobId) return;
+    if (!jobId) {
+      setLoadError("Select a real project before viewing details.");
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
+    setLoadError("");
     try {
       const jobRes = await jobService.getJobById(jobId);
       const jobData = jobRes?.data || jobRes;
@@ -81,8 +82,9 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
       } finally {
         setIsLoadingMatches(false);
       }
-    } catch (err) {
+    } catch {
       console.error("Failed to load job details:", err);
+      setLoadError(err.response?.data?.message || "Failed to load the selected project.");
       toast.error("Failed to load job details");
     } finally {
       setIsLoading(false);
@@ -110,13 +112,16 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
 
   const handleMarkAsCompleted = async () => {
     try {
-      if (jobId) {
-        await axiosInstance.patch(API_PATHS.ASSIGNMENTS.APPROVE_SATISFACTION(jobId), {});
+      const assignmentId = job?.assignment?.id || job?.assignmentId || job?.assignment_id;
+      if (!assignmentId) {
+        toast.error("This project does not have an assignment that can be completed.");
+        return;
       }
+      await axiosInstance.patch(API_PATHS.ASSIGNMENTS.APPROVE_SATISFACTION(assignmentId), {});
       toast.success("Project marked as completed! Satisfaction approved.");
       if (job) setJob((prev) => ({ ...prev, status: "completed" }));
-    } catch (err) {
-      toast.success("Project marked as completed!");
+    } catch {
+      toast.error(err.response?.data?.message || "Failed to mark the project as completed.");
     }
   };
 
@@ -130,7 +135,7 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
         acceptedBudget: job?.budget || candidate.hourlyRate * 8,
       });
       toast.success(`Invitation sent to ${candidate.user?.firstName || candidate.name || "professional"}!`);
-    } catch (err) {
+    } catch {
       // Fallback feedback if assignment already exists
       toast.success(`Invitation dispatched to ${candidate.user?.firstName || candidate.name || "professional"}!`);
     } finally {
@@ -148,6 +153,10 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
   const rawStatus = (job?.status || "").toLowerCase();
   const isJobInProgress = isEscrowFunded || rawStatus === "in_progress" || rawStatus === "in progress";
   const displayStatus = isJobInProgress ? "In Progress" : job?.status || "Posted";
+  const assignmentId = job?.assignment?.id || job?.assignmentId || job?.assignment_id || null;
+  const canOpenDispute =
+    Boolean(assignmentId) &&
+    ["completed", "complete"].includes(String(job?.status || "").toLowerCase());
 
   const jobTitle = job?.title || "Job Details";
   const jobCategory = job?.category?.name || job?.category || "Services";
@@ -156,6 +165,25 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
 
   return (
     <div className="space-y-6 animate-fade-in pb-8">
+      {isLoading && (
+        <div className="rounded-3xl border border-gray-100 bg-white p-8 text-center text-sm text-gray-500">
+          Loading project details...
+        </div>
+      )}
+      {!isLoading && loadError && (
+        <div className="rounded-3xl border border-rose-100 bg-rose-50 p-8 text-center">
+          <p className="text-sm font-semibold text-rose-700">{loadError}</p>
+          <button
+            type="button"
+            onClick={onBack}
+            className="mt-4 rounded-full bg-[#016EA6] px-6 py-2.5 text-xs font-bold text-white"
+          >
+            Go to My Jobs
+          </button>
+        </div>
+      )}
+      {!isLoading && !loadError && (
+        <>
       {/* Title Header with Back arrow */}
       <div className="flex items-center gap-4">
         <button
@@ -208,6 +236,7 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
         <div className="flex flex-wrap items-center gap-3 w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
           <button
             onClick={handleMarkAsCompleted}
+            disabled={!assignmentId}
             className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#22C55E] hover:bg-[#16A34A] text-white px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer"
           >
             <FiCheck className="w-4 h-4" />
@@ -215,7 +244,8 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
           </button>
           <button
             onClick={onOpenDispute}
-            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer"
+            disabled={!canOpenDispute}
+            className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 px-5 py-2.5 rounded-full text-xs font-bold transition-all duration-300 shadow-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
           >
             <FiAlertTriangle className="w-4 h-4" />
             <span>Open a dispute</span>
@@ -405,6 +435,8 @@ const EmployerJobDetailsSubpage = ({ jobId, onBack, onOpenDispute }) => {
           </form>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 };

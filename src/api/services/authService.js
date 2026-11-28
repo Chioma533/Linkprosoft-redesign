@@ -95,5 +95,25 @@ export const authService = {
       new_password: password,
     });
     return response.data;
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    const response = await axiosInstance.patch(API_PATHS.AUTH.CHANGE_PASSWORD, {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+    return response.data;
+  },
+
+  getLinkedAccounts: async () => {
+    const response = await axiosInstance.get(API_PATHS.AUTH.LINKED_ACCOUNTS);
+    return response.data;
+  },
+
+  unlinkLinkedAccount: async (provider) => {
+    const response = await axiosInstance.delete(
+      `${API_PATHS.AUTH.LINKED_ACCOUNTS}/${encodeURIComponent(provider)}`
+    );
+    return response.data;
   }
 };

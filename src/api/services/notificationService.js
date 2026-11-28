@@ -188,4 +188,14 @@ export const notificationService = {
       return [];
     }
   },
+
+  getNotificationPreferences: async () => {
+    const response = await axiosInstance.get(API_PATHS.NOTIFICATIONS.PREFERENCES);
+    return response.data?.data ?? response.data;
+  },
+
+  updateNotificationPreferences: async (preferences) => {
+    const response = await axiosInstance.patch(API_PATHS.NOTIFICATIONS.PREFERENCES, preferences);
+    return response.data?.data ?? response.data;
+  },
 };

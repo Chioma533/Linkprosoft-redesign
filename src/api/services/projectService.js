@@ -33,7 +33,7 @@ export const projectService = {
       return extractArray(response);
     } catch (error) {
       console.warn("Live jobs endpoint error:", error.message);
-      return [];
+      throw error;
     }
   },
 
@@ -45,7 +45,7 @@ export const projectService = {
       return extractArray(response);
     } catch (error) {
       console.warn("Live user contracted jobs endpoint error:", error.message);
-      return [];
+      throw error;
     }
   },
 
@@ -58,7 +58,7 @@ export const projectService = {
       return extractArray(response);
     } catch (error) {
       console.warn("Live applications endpoint error:", error.message);
-      return [];
+      throw error;
     }
   },
 

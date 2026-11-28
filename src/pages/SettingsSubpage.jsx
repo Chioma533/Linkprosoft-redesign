@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
+import { notificationService } from "../api/services/notificationService";
 import {
   Bell,
   ChevronRight,
@@ -16,12 +18,13 @@ import {
   Moon,
   UserRound,
 } from "lucide-react";
-import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import Avatar from "../components/common/Avatar";
 import { useDashboardStore } from "../store/dashboardStore";
 import { useTheme } from "../context/useTheme";
+import ChangePasswordModal from "../components/settings/ChangePasswordModal";
+import LinkedAccountsModal from "../components/settings/LinkedAccountsModal";
 
 const SettingRow = ({ icon: Icon, label, onClick, iconClass = "", trailing }) => {
   const contents = (
@@ -135,19 +138,111 @@ const ThemePreferenceSetting = () => {
   );
 };
 
+const getNotificationPrefsStorageKey = (userId) =>
+  `linkprosoft_notification_prefs_${userId || "guest"}`;
+
+const readStoredNotificationPrefs = (userId) => {
+  try {
+    const raw = localStorage.getItem(getNotificationPrefsStorageKey(userId));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return {
+      pushEnabled: typeof parsed.pushEnabled === "boolean" ? parsed.pushEnabled : true,
+      emailEnabled: typeof parsed.emailEnabled === "boolean" ? parsed.emailEnabled : true,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const writeStoredNotificationPrefs = (userId, prefs) => {
+  try {
+    localStorage.setItem(getNotificationPrefsStorageKey(userId), JSON.stringify(prefs));
+  } catch {
+    // Ignore storage quota / privacy mode errors
+  }
+};
+
 const SettingsSubpage = () => {
   const { user, logout } = useAuthStore();
   const { setActiveTab } = useDashboardStore();
   const navigate = useNavigate();
-  const [pushEnabled, setPushEnabled] = useState(true);
-  const [emailEnabled, setEmailEnabled] = useState(true);
+  const userId = user?.id || user?.userId;
+  const storedPrefs = readStoredNotificationPrefs(userId);
+  const [pushEnabled, setPushEnabled] = useState(
+    storedPrefs?.pushEnabled ?? user?.pushNotifications ?? user?.push_notifications ?? true
+  );
+  const [emailEnabled, setEmailEnabled] = useState(
+    storedPrefs?.emailEnabled ?? user?.emailNotifications ?? user?.email_notifications ?? true
+  );
+  const [isSavingPrefs, setIsSavingPrefs] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showLinkedAccounts, setShowLinkedAccounts] = useState(false);
   const role = user?.role || "professional";
   const currentMode = role === "employer" ? "Client" : "Professional";
   const name = user?.fullName || user?.full_name || user?.name || "Your account";
   const avatar = user?.avatar || user?.avatarUrl || user?.avatar_url;
 
-  const showUnavailable = (setting) => {
-    toast(`${setting} settings are not available yet.`);
+  useEffect(() => {
+    let isMounted = true;
+    const localPrefs = readStoredNotificationPrefs(userId);
+    if (localPrefs) {
+      setPushEnabled(localPrefs.pushEnabled);
+      setEmailEnabled(localPrefs.emailEnabled);
+    }
+
+    const syncPreferences = async () => {
+      try {
+        const remote = await notificationService.getNotificationPreferences();
+        if (!isMounted || !remote) return;
+        const nextPush =
+          remote.pushEnabled ?? remote.push_enabled ?? remote.pushNotifications ?? localPrefs?.pushEnabled ?? true;
+        const nextEmail =
+          remote.emailEnabled ?? remote.email_enabled ?? remote.emailNotifications ?? localPrefs?.emailEnabled ?? true;
+        const normalized = { pushEnabled: Boolean(nextPush), emailEnabled: Boolean(nextEmail) };
+        setPushEnabled(normalized.pushEnabled);
+        setEmailEnabled(normalized.emailEnabled);
+        writeStoredNotificationPrefs(userId, normalized);
+      } catch {
+        // Backend preference endpoint may not exist yet; keep localStorage state
+      }
+    };
+
+    syncPreferences();
+    return () => {
+      isMounted = false;
+    };
+  }, [userId]);
+
+  const handleToggleNotification = async (channel, nextValue) => {
+    const prevPrefs = { pushEnabled, emailEnabled };
+    const nextPrefs = {
+      pushEnabled: channel === "push" ? nextValue : pushEnabled,
+      emailEnabled: channel === "email" ? nextValue : emailEnabled,
+    };
+
+    setPushEnabled(nextPrefs.pushEnabled);
+    setEmailEnabled(nextPrefs.emailEnabled);
+    writeStoredNotificationPrefs(userId, nextPrefs);
+    setIsSavingPrefs(true);
+
+    try {
+      await notificationService.updateNotificationPreferences(nextPrefs);
+      toast.success("Notification preferences updated");
+    } catch (err) {
+      const status = err?.response?.status;
+      if (status === 404 || status === 405 || status === 501) {
+        // Endpoint not yet deployed on backend; localStorage persistence still applies
+        toast.success("Notification preference saved");
+      } else {
+        setPushEnabled(prevPrefs.pushEnabled);
+        setEmailEnabled(prevPrefs.emailEnabled);
+        writeStoredNotificationPrefs(userId, prevPrefs);
+        toast.error(err?.response?.data?.message || "Failed to update notification preferences");
+      }
+    } finally {
+      setIsSavingPrefs(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -203,7 +298,7 @@ const SettingsSubpage = () => {
           icon={KeyRound}
           label="Change password"
           iconClass="bg-[#FFF6E8] text-[#D28A21]"
-          onClick={() => showUnavailable("Password change")}
+          onClick={() => setShowChangePassword(true)}
         />
         <ThemePreferenceSetting />
       </SettingSection>
@@ -214,14 +309,14 @@ const SettingsSubpage = () => {
           label="Push notification"
           iconClass="bg-[#FFF4E7] text-[#D8891C]"
           enabled={pushEnabled}
-          onToggle={setPushEnabled}
+          onToggle={(val) => !isSavingPrefs && handleToggleNotification("push", val)}
         />
         <NotificationSwitch
           icon={Mail}
           label="Email notification"
           iconClass="bg-[#EAF5FF] text-[#2980C8]"
           enabled={emailEnabled}
-          onToggle={setEmailEnabled}
+          onToggle={(val) => !isSavingPrefs && handleToggleNotification("email", val)}
         />
       </SettingSection>
 
@@ -236,7 +331,7 @@ const SettingsSubpage = () => {
           icon={Link2}
           label="Linked accounts"
           iconClass="bg-[#EEF5F8] text-[#5D7E91]"
-          onClick={() => showUnavailable("Linked account")}
+          onClick={() => setShowLinkedAccounts(true)}
         />
       </SettingSection>
 
@@ -245,13 +340,13 @@ const SettingsSubpage = () => {
           icon={ShieldCheck}
           label="Privacy policy"
           iconClass="bg-[#FFF2E8] text-[#C87937]"
-          onClick={() => showUnavailable("Privacy policy")}
+          onClick={() => navigate("/privacy")}
         />
         <SettingRow
           icon={FileText}
           label="Terms and conditions"
           iconClass="bg-[#EEF4FF] text-[#5184D5]"
-          onClick={() => showUnavailable("Terms and conditions")}
+          onClick={() => navigate("/terms")}
         />
       </SettingSection>
 
@@ -272,6 +367,8 @@ const SettingsSubpage = () => {
           onClick={handleLogout}
         />
       </div>
+      <ChangePasswordModal open={showChangePassword} onClose={() => setShowChangePassword(false)} />
+      <LinkedAccountsModal open={showLinkedAccounts} onClose={() => setShowLinkedAccounts(false)} />
     </div>
   );
 };

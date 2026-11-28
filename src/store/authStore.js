@@ -240,6 +240,23 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
+  syncSubscription: (subscription) => {
+    set((state) => {
+      if (!state.user || !subscription) return state;
+      const isActive = Boolean(subscription.isActive ?? subscription.status === "active");
+      return {
+        user: {
+          ...state.user,
+          subscription,
+          subscription_status: subscription.status,
+          subscriptionStatus: subscription.status,
+          has_active_subscription: isActive,
+          is_subscription_active: isActive,
+        },
+      };
+    });
+  },
+
   logout: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -295,6 +312,19 @@ export const useAuthStore = create((set, get) => ({
       return data;
     } catch (error) {
       const errorMsg = error.response?.data?.message || error.message || "Reset password failed";
+      set({ error: errorMsg, isLoading: false });
+      throw errorMsg;
+    }
+  },
+
+  changePassword: async (currentPassword, newPassword) => {
+    set({ isLoading: true, error: null });
+    try {
+      const data = await authService.changePassword(currentPassword, newPassword);
+      set({ isLoading: false });
+      return data;
+    } catch (error) {
+      const errorMsg = error.response?.data?.message || error.message || "Change password failed";
       set({ error: errorMsg, isLoading: false });
       throw errorMsg;
     }

@@ -1,24 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { 
   Percent, 
   DollarSign, 
   Clock, 
-  ShieldCheck, 
   UserPlus, 
   Save, 
   Info,
   Trash2,
-  Lock,
-  User,
   Star,
-  Award,
-  Building2,
   Landmark,
-  Sliders,
-  CheckCircle2
+  Sliders
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { DEFAULT_VERIFICATION_CONFIG } from "../../utils/verificationConfig";
+import { adminService } from "../../api/services/adminService";
 
 const AdminSettingsSubpage = () => {
   const [commissionRate, setCommissionRate] = useState(10); // 10%
@@ -34,48 +29,124 @@ const AdminSettingsSubpage = () => {
   const [enforceProSubscription, setEnforceProSubscription] = useState(true);
   const [enforceCompanySubscription, setEnforceCompanySubscription] = useState(true);
 
-  const [adminList, setAdminList] = useState([
-    { id: "ADM-001", name: "System Master", email: "master@linkprosoft.com", role: "Super Admin", lastActive: "Just now" },
-    { id: "ADM-002", name: "Auditor Smith", email: "smith.a@linkprosoft.com", role: "Payments Manager", lastActive: "2 hours ago" },
-    { id: "ADM-003", name: "Support Agent Jane", email: "jane.s@linkprosoft.com", role: "Support Staff", lastActive: "Yesterday" }
-  ]);
+  const [adminList, setAdminList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [newAdminName, setNewAdminName] = useState("");
   const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
   const [newAdminRole, setNewAdminRole] = useState("Support Staff");
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const handleSaveConfigs = () => {
-    toast.success("Platform settings and verification thresholds saved successfully!");
-  };
+  useEffect(() => {
+    let active = true;
+    const loadSettings = async () => {
+      setIsLoading(true);
+      try {
+        const [settingsResponse, adminsResponse] = await Promise.all([
+          adminService.getCommissionSettings(),
+          adminService.getAdmins(),
+        ]);
+        if (!active) return;
 
-  const handleAddAdmin = (e) => {
-    e.preventDefault();
-    if (!newAdminName.trim() || !newAdminEmail.trim()) {
-      toast.error("Please fill in name and email fields.");
-      return;
-    }
-    const newAdmin = {
-      id: `ADM-00${adminList.length + 1}`,
-      name: newAdminName,
-      email: newAdminEmail,
-      role: newAdminRole,
-      lastActive: "Never"
+        const settings = settingsResponse?.data || settingsResponse || {};
+        setCommissionRate(Number(settings.standard_commission_percentage ?? settings.standardCommissionPercentage ?? 10));
+        setPayoutMin(Number(settings.minimum_wallet_payout ?? settings.minimumWalletPayout ?? 50));
+        setSessionExpiry(Number(settings.admin_session_expiry_hours ?? settings.adminSessionExpiryHours ?? 24));
+        setMinRating(Number(settings.rating_min_average ?? settings.ratingMinAverage ?? 4.5));
+        setMinJobs(Number(settings.rating_min_completed_jobs ?? settings.ratingMinCompletedJobs ?? 10));
+        setMinReviews(Number(settings.rating_min_genuine_reviews ?? settings.ratingMinGenuineReviews ?? 5));
+        setFraudProtection(Boolean(settings.fraud_protection_enabled ?? settings.fraudProtectionEnabled ?? true));
+        setEnforceProSubscription(Boolean(settings.subscription_professional_enabled ?? settings.subscriptionProfessionalEnabled ?? true));
+        setEnforceCompanySubscription(Boolean(settings.subscription_company_enabled ?? settings.subscriptionCompanyEnabled ?? true));
+        setGracePeriodDays(Number(settings.subscription_grace_period_days ?? settings.subscriptionGracePeriodDays ?? 7));
+
+        const admins = adminsResponse?.data || adminsResponse || [];
+        setAdminList(Array.isArray(admins) ? admins.map((admin) => ({
+          id: String(admin.id),
+          name: admin.full_name || admin.name || "Administrator",
+          email: admin.email,
+          role: admin.role || "Support Staff",
+          lastActive: admin.updated_at ? new Date(admin.updated_at).toLocaleString() : "Never",
+          active: admin.account_status !== "suspended" && admin.is_active !== false,
+        })) : []);
+      } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to load admin settings.");
+      } finally {
+        if (active) setIsLoading(false);
+      }
     };
-    setAdminList([...adminList, newAdmin]);
-    setNewAdminName("");
-    setNewAdminEmail("");
-    setShowAddModal(false);
-    toast.success(`${newAdminName} added as an Administrator.`);
+    loadSettings();
+    return () => { active = false; };
+  }, []);
+
+  const handleSaveConfigs = async () => {
+    setIsSaving(true);
+    try {
+      await adminService.updateCommissionSettings({
+        standardCommissionPercentage: commissionRate,
+        tieredCommissionEnabled: false,
+        automaticPayoutsEnabled: false,
+        minimumWalletPayout: payoutMin,
+        adminSessionExpiryHours: sessionExpiry,
+        ratingMinAverage: minRating,
+        ratingMinCompletedJobs: minJobs,
+        ratingMinGenuineReviews: minReviews,
+        fraudProtectionEnabled: fraudProtection,
+        subscriptionProfessionalEnabled: enforceProSubscription,
+        subscriptionCompanyEnabled: enforceCompanySubscription,
+        subscriptionGracePeriodDays: gracePeriodDays,
+        tiers: [],
+      });
+      toast.success("Platform settings and verification thresholds saved successfully!");
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to save platform settings.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDeleteAdmin = (id, name) => {
-    if (id === "ADM-001") {
-      toast.error("Cannot delete the Super Admin master account.");
+  const handleAddAdmin = async (event) => {
+    event.preventDefault();
+    if (!newAdminName.trim() || !newAdminEmail.trim() || !newAdminPassword) {
+      toast.error("Please fill in name, email, and password fields.");
       return;
     }
-    setAdminList(adminList.filter(a => a.id !== id));
-    toast.success(`${name} account access revoked.`);
+    try {
+      const response = await adminService.createAdmin({
+        name: newAdminName,
+        email: newAdminEmail,
+        password: newAdminPassword,
+        role: newAdminRole,
+      });
+      const admin = response?.data || response;
+      setAdminList((current) => [...current, {
+        id: String(admin.id),
+        name: admin.full_name || newAdminName,
+        email: admin.email || newAdminEmail,
+        role: admin.role || newAdminRole,
+        lastActive: "Never",
+        active: true,
+      }]);
+      setNewAdminName("");
+      setNewAdminEmail("");
+      setNewAdminPassword("");
+      setShowAddModal(false);
+      toast.success(`${newAdminName} added as an Administrator.`);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to add administrator.");
+    }
+  };
+
+  const handleDeleteAdmin = async (id, name) => {
+    try {
+      await adminService.revokeAdmin(id);
+      setAdminList((current) => current.filter((admin) => admin.id !== id));
+      toast.success(`${name} account access revoked.`);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to revoke administrator access.");
+    }
   };
 
   return (
@@ -252,9 +323,10 @@ const AdminSettingsSubpage = () => {
               <div className="flex flex-col justify-end">
                 <button 
                   onClick={handleSaveConfigs}
-                  className="w-full py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                  disabled={isLoading || isSaving}
+                  className="w-full py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-xl text-xs font-bold transition-all text-center flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  <Save className="w-4 h-4" /> Save Global Configuration
+                  <Save className="w-4 h-4" /> {isSaving ? "Saving..." : "Save Global Configuration"}
                 </button>
               </div>
             </div>
@@ -284,7 +356,13 @@ const AdminSettingsSubpage = () => {
             </div>
 
             <div className="space-y-4">
-              {adminList.map((admin) => (
+              {isLoading && (
+                <p className="py-6 text-center text-xs text-gray-400">Loading administrators...</p>
+              )}
+              {!isLoading && adminList.length === 0 && (
+                <p className="py-6 text-center text-xs text-gray-400">No administrator accounts found.</p>
+              )}
+              {adminList.filter((admin) => admin.active !== false).map((admin) => (
                 <div key={admin.id} className="flex items-start justify-between p-3.5 border border-gray-50 rounded-xl hover:bg-gray-50/30 transition-colors">
                   <div className="flex items-start gap-2.5">
                     <div className="w-8 h-8 rounded-full bg-blue-50 text-[#016EA6] flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
@@ -298,7 +376,7 @@ const AdminSettingsSubpage = () => {
                   </div>
                   <div className="flex flex-col items-end gap-2 text-right">
                     <span className="text-[8px] text-gray-400 font-semibold uppercase">{admin.lastActive}</span>
-                    {admin.id !== "ADM-001" && (
+                    {admin.role !== "Super Admin" && (
                       <button 
                         onClick={() => handleDeleteAdmin(admin.id, admin.name)}
                         className="text-gray-400 hover:text-rose-600 transition-colors cursor-pointer"
@@ -341,6 +419,17 @@ const AdminSettingsSubpage = () => {
                   onChange={(e) => setNewAdminEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#016EA6]"
                   placeholder="alex@linkprosoft.com"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 mb-1">Initial Password</label>
+                <input
+                  type="password"
+                  required
+                  value={newAdminPassword}
+                  onChange={(e) => setNewAdminPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#016EA6]"
+                  placeholder="8+ chars, uppercase, number, symbol"
                 />
               </div>
               <div>

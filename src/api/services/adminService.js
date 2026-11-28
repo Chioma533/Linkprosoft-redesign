@@ -118,6 +118,36 @@ export const adminService = {
     }
   },
 
+  getAdmins: async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.ADMINS_LIST);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getAdmins error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  createAdmin: async (payload) => {
+    try {
+      const response = await axiosInstance.post(API_PATHS.ADMIN.ADMINS_LIST, payload);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] createAdmin error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  revokeAdmin: async (id) => {
+    try {
+      const response = await axiosInstance.delete(`${API_PATHS.ADMIN.ADMINS_LIST}/${encodeURIComponent(id)}`);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] revokeAdmin error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
   /**
    * Fetch paginated users with multi-filter parameters
    * GET /api/admin/users
@@ -622,6 +652,138 @@ export const adminService = {
       return response.data;
     } catch (error) {
       console.warn("[adminService] processRefund error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch finance earnings breakdown
+   * GET /api/admin/finance/earnings-breakdown
+   * @param {object} params
+   */
+  getEarningsBreakdown: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.FINANCE_EARNINGS_BREAKDOWN, { params });
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getEarningsBreakdown error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch finance escrow summary
+   * GET /api/admin/finance/escrow-summary
+   */
+  getEscrowSummary: async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.FINANCE_ESCROW_SUMMARY);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getEscrowSummary error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch finance payout summary
+   * GET /api/admin/finance/payout-summary
+   */
+  getPayoutSummary: async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.FINANCE_PAYOUT_SUMMARY);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getPayoutSummary error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Export finance transactions
+   * GET /api/admin/finance/transactions/export
+   * @param {object} params
+   */
+  exportFinanceTransactions: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.FINANCE_EXPORT_TRANSACTIONS, { params });
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] exportFinanceTransactions error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch commission metrics
+   * GET /api/admin/finance/commission/metrics
+   */
+  getCommissionMetrics: async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.COMMISSION_METRICS);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getCommissionMetrics error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch commission settings
+   * GET /api/admin/finance/commission/settings
+   */
+  getCommissionSettings: async () => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.COMMISSION_SETTINGS);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getCommissionSettings error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Update commission settings
+   * PUT /api/admin/finance/commission/settings
+   * @param {object} data
+   */
+  updateCommissionSettings: async (data) => {
+    try {
+      const response = await axiosInstance.put(API_PATHS.ADMIN.COMMISSION_SETTINGS, data);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] updateCommissionSettings error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetch category commission overrides
+   * GET /api/admin/finance/commission/categories
+   * @param {object} params
+   */
+  getCommissionCategories: async (params = {}) => {
+    try {
+      const response = await axiosInstance.get(API_PATHS.ADMIN.COMMISSION_CATEGORIES, { params });
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] getCommissionCategories error:", error.response?.data || error.message);
+      throw error;
+    }
+  },
+
+  /**
+   * Update a category commission override
+   * PATCH /api/admin/finance/commission/categories/:id
+   * @param {string} id
+   * @param {object} data
+   */
+  updateCommissionCategory: async (id, data) => {
+    try {
+      const response = await axiosInstance.patch(API_PATHS.ADMIN.COMMISSION_CATEGORY_BY_ID(id), data);
+      return response.data;
+    } catch (error) {
+      console.warn("[adminService] updateCommissionCategory error:", error.response?.data || error.message);
       throw error;
     }
   },

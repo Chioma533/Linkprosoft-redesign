@@ -25,6 +25,8 @@ import BadgeVerificationPage from "./pages/verification/BadgeVerificationPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PublicProfessionalProfile from "./pages/professional/PublicProfessionalProfile";
 import EmployerTrendingProfessionalsPage from "./pages/employer/EmployerTrendingProfessionalsPage";
+import LegalPage from "./pages/LegalPage";
+import NotFoundPage from "./pages/NotFoundPage";
 const HomeRouteResolver = () => {
   const { user } = useAuthStore();
   if (user?.role === "professional") {
@@ -50,6 +52,8 @@ const App = () => {
             <Route path="/waitlist" element={<Waitlist />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/privacy" element={<LegalPage type="privacy" />} />
+            <Route path="/terms" element={<LegalPage type="terms" />} />
 
             <Route
               path="/auth/google/callback"
@@ -80,7 +84,7 @@ const App = () => {
 
             <Route element={<PrivateRoutes allowedRoles={["employer"]} />}>
               <Route
-                path="/trending-professionals"
+                path="/trending"
                 element={<EmployerTrendingProfessionalsPage />}
               />
               <Route
@@ -120,6 +124,7 @@ const App = () => {
             </Route>
 
             {/* Keep this after every fixed route: a public profile owns one path segment. */}
+            <Route path="*" element={<NotFoundPage />} />
             <Route path="/:slug" element={<PublicProfessionalProfile />} />
           </Routes>
           <Toaster

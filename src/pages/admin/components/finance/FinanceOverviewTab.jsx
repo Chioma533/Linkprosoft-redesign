@@ -5,20 +5,43 @@ import RevenueEscrowWaveChart from "../overview/RevenueEscrowWaveChart";
 
 const FinanceOverviewTab = () => {
   const [metrics, setMetrics] = useState(null);
+  const [breakdown, setBreakdown] = useState(null);
+  const [escrowSummary, setEscrowSummary] = useState(null);
+  const [payoutSummary, setPayoutSummary] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
-    const fetchMetrics = async () => {
+    const fetchOverviewData = async () => {
+      setIsLoading(true);
       try {
-        const res = await adminService.getFinanceOverviewMetrics();
-        if (isMounted && res?.data) {
-          setMetrics(res.data);
+        const [metricsRes, breakdownRes, escrowRes, payoutRes] = await Promise.allSettled([
+          adminService.getFinanceOverviewMetrics(),
+          adminService.getEarningsBreakdown(),
+          adminService.getEscrowSummary(),
+          adminService.getPayoutSummary(),
+        ]);
+
+        if (!isMounted) return;
+        if (metricsRes.status === "fulfilled" && metricsRes.value?.data) {
+          setMetrics(metricsRes.value.data);
+        }
+        if (breakdownRes.status === "fulfilled" && breakdownRes.value?.data) {
+          setBreakdown(breakdownRes.value.data);
+        }
+        if (escrowRes.status === "fulfilled" && escrowRes.value?.data) {
+          setEscrowSummary(escrowRes.value.data);
+        }
+        if (payoutRes.status === "fulfilled" && payoutRes.value?.data) {
+          setPayoutSummary(payoutRes.value.data);
         }
       } catch (err) {
-        console.warn("[FinanceOverviewTab] Error fetching finance metrics:", err);
+        console.warn("[FinanceOverviewTab] Error fetching finance overview:", err);
+      } finally {
+        if (isMounted) setIsLoading(false);
       }
     };
-    fetchMetrics();
+    fetchOverviewData();
     return () => {
       isMounted = false;
     };
@@ -29,8 +52,15 @@ const FinanceOverviewTab = () => {
     return typeof val === "number" ? `₦${val.toLocaleString()}` : val;
   };
 
+  const formatCompactOrCurrency = (val) => {
+    if (val === undefined || val === null) return isLoading ? "..." : "₦0";
+    if (typeof val !== "number") return val;
+    if (val >= 1_000_000) return `₦${(val / 1_000_000).toFixed(2).replace(/\.00$/, "")}M`;
+    return `₦${val.toLocaleString()}`;
+  };
+
   const formatTrend = (trend) => {
-    if (trend === undefined || trend === null) return /* "+20% this week" */ "";
+    if (trend === undefined || trend === null) return "";
     if (typeof trend === "number") {
       const sign = trend >= 0 ? "+" : "";
       return `${sign}${trend}% this week`;
@@ -38,12 +68,29 @@ const FinanceOverviewTab = () => {
     return trend;
   };
 
+  const totalVolumeData = metrics?.totalTransactionVolume ?? metrics?.totalVolume;
   const statCards = [
-    { id: "volume", title: "Total Transaction Volume", value: formatCurrency(metrics?.totalVolume?.value ?? metrics?.totalVolume ?? metrics?.volume) || /* "₦48.6M" */ "₦0", trend: formatTrend(metrics?.totalVolume?.growthPercentage ?? metrics?.totalVolumeTrend) },
-    { id: "revenue", title: "Platform Revenue", value: formatCurrency(metrics?.platformRevenue?.value ?? metrics?.platformRevenue ?? metrics?.revenue) || /* "₦4.8M" */ "₦0", trend: formatTrend(metrics?.platformRevenue?.growthPercentage ?? metrics?.platformRevenueTrend) },
-    { id: "escrow", title: "Escrow Balance", value: formatCurrency(metrics?.escrowBalance?.value ?? metrics?.escrowBalance ?? metrics?.escrow) || /* "₦12.4M" */ "₦0", trend: formatTrend(metrics?.escrowBalance?.growthPercentage ?? metrics?.escrowBalanceTrend) },
-    { id: "payouts", title: "Pending Payouts", value: formatCurrency(metrics?.pendingPayouts?.value ?? metrics?.pendingPayouts ?? metrics?.payouts) || /* "₦3.2M" */ "₦0", trend: formatTrend(metrics?.pendingPayouts?.growthPercentage ?? metrics?.pendingPayoutsTrend) },
+    { id: "volume", title: "Total Transaction Volume", value: formatCurrency(totalVolumeData?.value ?? totalVolumeData ?? metrics?.volume) || (isLoading ? "..." : "₦0"), trend: formatTrend(totalVolumeData?.growthPercentage ?? metrics?.totalVolumeTrend) },
+    { id: "revenue", title: "Platform Revenue", value: formatCurrency(metrics?.platformRevenue?.value ?? metrics?.platformRevenue ?? metrics?.revenue) || (isLoading ? "..." : "₦0"), trend: formatTrend(metrics?.platformRevenue?.growthPercentage ?? metrics?.platformRevenueTrend) },
+    { id: "escrow", title: "Escrow Balance", value: formatCurrency(metrics?.escrowBalance?.value ?? metrics?.escrowBalance ?? metrics?.escrow) || (isLoading ? "..." : "₦0"), trend: formatTrend(metrics?.escrowBalance?.growthPercentage ?? metrics?.escrowBalanceTrend) },
+    { id: "payouts", title: "Pending Payouts", value: formatCurrency(metrics?.pendingPayouts?.value ?? metrics?.pendingPayouts ?? metrics?.payouts) || (isLoading ? "..." : "₦0"), trend: formatTrend(metrics?.pendingPayouts?.growthPercentage ?? metrics?.pendingPayoutsTrend) },
   ];
+
+  const circumference = 2 * Math.PI * 40;
+  const segments = [
+    { key: "escrow", color: "#0284C7", amount: breakdown?.escrow?.amount ?? 0, pct: breakdown?.escrow?.percentage ?? 0 },
+    { key: "payouts", color: "#10B981", amount: breakdown?.payouts?.amount ?? 0, pct: breakdown?.payouts?.percentage ?? 0 },
+    { key: "refunds", color: "#EF4444", amount: breakdown?.refunds?.amount ?? 0, pct: breakdown?.refunds?.percentage ?? 0 },
+    { key: "commissions", color: "#F59E0B", amount: breakdown?.commissions?.amount ?? 0, pct: breakdown?.commissions?.percentage ?? 0 },
+  ];
+  const totalAssets = breakdown?.total ?? segments.reduce((sum, s) => sum + s.amount, 0);
+  let cumulativeOffset = 0;
+  const donutSegments = segments.map((seg) => {
+    const length = (Math.max(0, Math.min(100, seg.pct)) / 100) * circumference;
+    const dashOffset = -cumulativeOffset;
+    cumulativeOffset += length;
+    return { ...seg, length, dashOffset };
+  });
 
   return (
     <div className="space-y-6">
@@ -94,18 +141,27 @@ const FinanceOverviewTab = () => {
               <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
                 {/* Background Ring */}
                 <circle cx="50" cy="50" r="40" fill="none" stroke="#F1F5F9" strokeWidth="10" />
-                {/* Escrow (Blue) ~55% */}
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#0284C7" strokeWidth="10" strokeDasharray="138 251" strokeDashoffset="0" />
-                {/* Payouts (Green) ~30% */}
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#10B981" strokeWidth="10" strokeDasharray="75 251" strokeDashoffset="-138" />
-                {/* Refunds (Red) ~5% */}
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#EF4444" strokeWidth="10" strokeDasharray="15 251" strokeDashoffset="-213" />
-                {/* Commission (Amber) ~10% */}
-                <circle cx="50" cy="50" r="40" fill="none" stroke="#F59E0B" strokeWidth="10" strokeDasharray="25 251" strokeDashoffset="-228" />
+                {donutSegments.map((seg) =>
+                  seg.length > 0 ? (
+                    <circle
+                      key={seg.key}
+                      cx="50"
+                      cy="50"
+                      r="40"
+                      fill="none"
+                      stroke={seg.color}
+                      strokeWidth="10"
+                      strokeDasharray={`${seg.length} ${circumference}`}
+                      strokeDashoffset={seg.dashOffset}
+                    />
+                  ) : null
+                )}
               </svg>
               {/* Center Text */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-2xl font-extrabold text-[#1E1B4B]">₦48.6M</span>
+                <span className="text-2xl font-extrabold text-[#1E1B4B]">
+                  {formatCompactOrCurrency(totalAssets)}
+                </span>
                 <span className="text-[10px] font-semibold text-gray-400">Total assets</span>
               </div>
             </div>
@@ -118,25 +174,25 @@ const FinanceOverviewTab = () => {
                 <span className="w-2.5 h-2.5 rounded-full bg-[#0284C7]" />
                 <span className="text-gray-600">Escrow</span>
               </div>
-              <span className="font-extrabold text-gray-800">₦28.2M</span>
+              <span className="font-extrabold text-gray-800">{formatCompactOrCurrency(breakdown?.escrow?.amount)}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#10B981]" />
                 <span className="text-gray-600">Payouts</span>
               </div>
-              <span className="font-extrabold text-gray-800">₦15.4M</span>
+              <span className="font-extrabold text-gray-800">{formatCompactOrCurrency(breakdown?.payouts?.amount)}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" />
                 <span className="text-gray-600">Refunds</span>
               </div>
-              <span className="font-extrabold text-gray-800">₦0.86M</span>
+              <span className="font-extrabold text-gray-800">{formatCompactOrCurrency(breakdown?.refunds?.amount)}</span>
             </div>
             <div className="flex items-center justify-between pt-1">
               <span className="text-gray-600">Commissions</span>
-              <span className="font-extrabold text-gray-800">₦4.14M</span>
+              <span className="font-extrabold text-gray-800">{formatCompactOrCurrency(breakdown?.commissions?.amount)}</span>
             </div>
           </div>
         </div>
@@ -154,19 +210,27 @@ const FinanceOverviewTab = () => {
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div className="bg-[#F8FAFC] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-gray-500 block">Total Held</span>
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">₦12.4M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">
+                {formatCompactOrCurrency(escrowSummary?.totalHeld)}
+              </span>
             </div>
             <div className="bg-[#F8FAFC] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-gray-500 block">Awaiting Completion</span>
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">₦7.8M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">
+                {formatCompactOrCurrency(escrowSummary?.awaitingCompletion)}
+              </span>
             </div>
             <div className="bg-[#F8FAFC] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-gray-500 block">Ready for Release</span>
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">₦3.2M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">
+                {formatCompactOrCurrency(escrowSummary?.readyForRelease)}
+              </span>
             </div>
             <div className="bg-[#FFF1F2] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-rose-700 block">Under Dispute</span>
-              <span className="text-lg sm:text-xl font-extrabold text-rose-600 block mt-1">₦12.4M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-rose-600 block mt-1">
+                {formatCompactOrCurrency(escrowSummary?.underDispute)}
+              </span>
             </div>
           </div>
         </div>
@@ -181,19 +245,27 @@ const FinanceOverviewTab = () => {
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div className="bg-[#FFF9F4] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-amber-700 block">Pending</span>
-              <span className="text-lg sm:text-xl font-extrabold text-amber-900 block mt-1">₦3.2M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-amber-900 block mt-1">
+                {formatCompactOrCurrency(payoutSummary?.pending)}
+              </span>
             </div>
             <div className="bg-[#F8FAFC] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-gray-500 block">Processing</span>
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">₦1.8M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">
+                {formatCompactOrCurrency(payoutSummary?.processing)}
+              </span>
             </div>
             <div className="bg-[#F8FAFC] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-gray-500 block">Completed</span>
-              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">₦22.4M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-gray-900 block mt-1">
+                {formatCompactOrCurrency(payoutSummary?.completed)}
+              </span>
             </div>
             <div className="bg-[#FFF1F2] rounded-2xl p-4 border-none relative overflow-hidden">
               <span className="text-xs font-semibold text-rose-700 block">Failed</span>
-              <span className="text-lg sm:text-xl font-extrabold text-rose-600 block mt-1">₦12.4M</span>
+              <span className="text-lg sm:text-xl font-extrabold text-rose-600 block mt-1">
+                {formatCompactOrCurrency(payoutSummary?.failed)}
+              </span>
             </div>
           </div>
         </div>

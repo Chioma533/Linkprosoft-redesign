@@ -53,7 +53,7 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
           location: item.location || "Remote",
           budget: item.budget || 0,
           currency: item.currency || "NGN",
-          professional: item.professional || (item.assignedProfessional && item.assignedProfessional.name) || "Johnathan David",
+          professional: item.professional || (item.assignedProfessional && item.assignedProfessional.name) || "No professional assigned",
           status: normalizeStatus(item.status),
         }));
 

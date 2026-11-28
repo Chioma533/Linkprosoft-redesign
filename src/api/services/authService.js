@@ -71,6 +71,11 @@ export const authService = {
     return response.data;
   },
 
+  updateMe: async (payload) => {
+    const response = await axiosInstance.patch(API_PATHS.AUTH.UPDATE_ME, payload);
+    return response.data?.data?.user || response.data?.user || response.data?.data || response.data;
+  },
+
   logout: async () => {
     const response = await axiosInstance.post(API_PATHS.AUTH.LOGOUT, undefined, { withCredentials: true });
     return response.data;

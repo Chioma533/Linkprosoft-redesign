@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { X, Check, Star } from "lucide-react";
+import { X, Star } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { profileService } from "../../api/services/profileService";
 import { toast } from "react-hot-toast";
@@ -15,6 +15,7 @@ const EXPERIENCE_PRESETS = [1, 3, 5, 7];
 const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) => {
   const [catalog, setCatalog] = useState([]);
   const [isLoadingCatalog, setIsLoadingCatalog] = useState(false);
+  const [catalogError, setCatalogError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
@@ -32,21 +33,23 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
     let isMounted = true;
     const fetchCatalog = async () => {
       setIsLoadingCatalog(true);
+      setCatalogError("");
       try {
         const list = await profileService.getSkillsCatalog();
         if (isMounted) {
-          setCatalog(list || []);
-          // Auto-select first available skill if not selected
+          const availableSkills = Array.isArray(list) ? list : [];
+          setCatalog(availableSkills);
           const existingIds = new Set(
             existingSkills.map((s) => s.skillId || s.id || s.skill?.id)
           );
-          const firstAvailable = list.find((s) => !existingIds.has(s.id));
-          if (firstAvailable && !selectedSkillId) {
-            setSelectedSkillId(firstAvailable.id);
-          }
+          const firstAvailable = availableSkills.find((s) => !existingIds.has(s.id));
+          setSelectedSkillId((current) => current || firstAvailable?.id || "");
         }
       } catch (err) {
-        console.warn("Failed to load skills catalog", err);
+        if (isMounted) {
+          setCatalogError(err.response?.data?.message || err.message || "Failed to load available skills");
+          toast.error(err.response?.data?.message || err.message || "Failed to load available skills");
+        }
       } finally {
         if (isMounted) setIsLoadingCatalog(false);
       }
@@ -56,7 +59,7 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
     return () => {
       isMounted = false;
     };
-  }, [isOpen, existingSkills, selectedSkillId]);
+  }, [isOpen, existingSkills]);
 
   // Set of already added skill IDs / names for deduping
   const existingSkillIds = useMemo(() => {
@@ -269,6 +272,10 @@ const AddSkillModal = ({ isOpen, onClose, existingSkills = [], onSkillAdded }) =
                   {isLoadingCatalog ? (
                     <div className="col-span-2 py-8 sm:py-12 text-center text-xs text-gray-400">
                       Loading available skills...
+                    </div>
+                  ) : catalogError ? (
+                    <div className="col-span-2 py-8 sm:py-12 text-center text-xs text-red-500">
+                      {catalogError}
                     </div>
                   ) : filteredSkills.length === 0 ? (
                     <div className="col-span-2 py-8 sm:py-12 text-center text-xs text-gray-400">

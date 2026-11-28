@@ -72,6 +72,10 @@ export const useAuthStore = create((set, get) => ({
     });
   },
 
+<<<<<<< HEAD
+  updateUser: (updates) =>
+    set((state) => state.user ? { user: { ...state.user, ...updates } } : {}),
+=======
   expireSession: () => {
     socketManager.disconnect();
     useMessagingStore.getState().reset();
@@ -85,6 +89,7 @@ export const useAuthStore = create((set, get) => ({
       isLoading: false,
     });
   },
+>>>>>>> 0d1dc91bb2d26fd3b7d13858cf4bb99a7faf6ed8
 
   setUserAvatar: ({ avatar, avatarMediaId }) =>
     set((state) => {

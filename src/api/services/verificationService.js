@@ -108,6 +108,19 @@ export const verificationService = {
     }
   },
 
+  submitBadgeApplication: async (payload) => {
+    try {
+      const response = await axiosInstance.post(
+        API_PATHS.VERIFICATION.SUBMIT_BADGE_APPLICATION,
+        payload
+      );
+      return response.data?.data || response.data;
+    } catch (error) {
+      console.warn("Failed to submit badge application:", error.message);
+      throw error;
+    }
+  },
+
   // Get consolidated preview
   getPreview: async () => {
     try {

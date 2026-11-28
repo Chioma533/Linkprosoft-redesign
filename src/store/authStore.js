@@ -6,6 +6,7 @@ import { clearPersistedAuth } from "../utils/cookieSession";
 import { useDashboardStore } from "./dashboardStore";
 import { profileService } from "../api/services/profileService";
 import mediaService from "../api/services/mediaService";
+import { dispatchSessionExpired, isProtectedRoute } from "../utils/sessionExpiry";
 
 
 const extractUser = (response) => {
@@ -71,6 +72,20 @@ export const useAuthStore = create((set, get) => ({
     });
   },
 
+  expireSession: () => {
+    socketManager.disconnect();
+    useMessagingStore.getState().reset();
+    useDashboardStore.getState().reset();
+    clearPersistedAuth();
+    set({
+      user: null,
+      token: null,
+      isAuthenticated: false,
+      isSessionLoading: false,
+      isLoading: false,
+    });
+  },
+
   setUserAvatar: ({ avatar, avatarMediaId }) =>
     set((state) => {
       if (!state.user) return {};
@@ -127,10 +142,11 @@ export const useAuthStore = create((set, get) => ({
     } catch (error) {
       // A failed cookie refresh means this identity is no longer authoritative.
       if (error.response?.status === 401 || error.status === 401) {
-        clearPersistedAuth();
-        useDashboardStore.getState().reset();
-        useMessagingStore.getState().reset();
-        set({ user: null, token: null, isAuthenticated: false, isSessionLoading: false });
+        if (typeof window !== "undefined" && isProtectedRoute(window.location.pathname)) {
+          dispatchSessionExpired(window);
+        } else {
+          get().expireSession();
+        }
       } else {
         set({ isSessionLoading: false });
       }

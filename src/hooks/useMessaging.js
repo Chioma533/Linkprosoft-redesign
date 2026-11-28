@@ -7,16 +7,22 @@ import { SOCKET_EVENTS } from "../constants/messagingConstants";
 export const useMessaging = () => {
   const { token, user } = useAuthStore();
   const store = useMessagingStore();
+  const handleNewMessage = store.handleNewMessage;
+  const handleTypingIndicator = store.handleTypingIndicator;
+  const handlePresenceUpdate = store.handlePresenceUpdate;
+  const handleMessageRead = store.handleMessageRead;
+  const handleRequestAccepted = store.handleRequestAccepted;
+  const handleRequestDeclined = store.handleRequestDeclined;
 
   useEffect(() => {
-    if (!token || !user?.id) return undefined;
+    if (!user?.id) return undefined;
     const socket = socketManager.connect(token);
-    const onMessage = ({ message }) => store.handleNewMessage(message, user.id);
-    const onTyping = ({ threadId, userId, isTyping }) => store.handleTypingIndicator(threadId, userId, isTyping);
-    const onPresence = ({ userId, isOnline }) => store.handlePresenceUpdate(userId, isOnline);
-    const onRead = ({ threadId, messageId, userId, readAt }) => store.handleMessageRead(threadId, messageId, userId, readAt);
-    const onRequestAccepted = ({ threadId }) => store.handleRequestAccepted(threadId);
-    const onRequestDeclined = ({ threadId }) => store.handleRequestDeclined(threadId);
+    const onMessage = ({ message }) => handleNewMessage(message, user.id);
+    const onTyping = ({ threadId, userId, isTyping }) => handleTypingIndicator(threadId, userId, isTyping);
+    const onPresence = ({ userId, isOnline }) => handlePresenceUpdate(userId, isOnline);
+    const onRead = ({ threadId, messageId, userId, readAt }) => handleMessageRead(threadId, messageId, userId, readAt);
+    const onRequestAccepted = ({ threadId }) => handleRequestAccepted(threadId);
+    const onRequestDeclined = ({ threadId }) => handleRequestDeclined(threadId);
     socket?.on(SOCKET_EVENTS.NEW_MESSAGE, onMessage);
     socket?.on(SOCKET_EVENTS.TYPING, onTyping);
     socket?.on(SOCKET_EVENTS.PRESENCE_UPDATE, onPresence);
@@ -31,7 +37,16 @@ export const useMessaging = () => {
       socket?.off(SOCKET_EVENTS.REQUEST_ACCEPTED, onRequestAccepted);
       socket?.off(SOCKET_EVENTS.REQUEST_DECLINED, onRequestDeclined);
     };
-  }, [token, user?.id]);
+  }, [
+    token,
+    user?.id,
+    handleNewMessage,
+    handleTypingIndicator,
+    handlePresenceUpdate,
+    handleMessageRead,
+    handleRequestAccepted,
+    handleRequestDeclined,
+  ]);
 
   return { ...store, currentUser: user };
 };

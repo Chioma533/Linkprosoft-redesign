@@ -5,11 +5,10 @@ let socket = null;
 
 export const socketManager = {
   connect(token) {
-    if (!token) return null;
     if (socket?.connected) return socket;
     if (socket) socket.disconnect();
     socket = io(API_BASE_URL, {
-      auth: { token },
+      auth: token ? { token } : {},
       withCredentials: true,
       transports: ["websocket", "polling"],
       reconnection: true,

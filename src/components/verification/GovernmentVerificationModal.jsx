@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { X, Landmark, Upload, FileText, ShieldAlert, CheckCircle2 } from "lucide-react";
+import { X, Landmark, Upload, FileText, ShieldAlert } from "lucide-react";
 import { toast } from "react-hot-toast";
+import mediaService from "../../api/services/mediaService";
+import verificationService from "../../api/services/verificationService";
 
 /**
  * Government Agency / Institutional Verification Modal.
@@ -32,7 +34,7 @@ const GovernmentVerificationModal = ({ isOpen, onClose, onSubmitSuccess }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.agencyName.trim() || !formData.officialEmail.trim()) {
       toast.error("Please fill in agency name and official government email.");
@@ -45,7 +47,13 @@ const GovernmentVerificationModal = ({ isOpen, onClose, onSubmitSuccess }) => {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const { mediaId } = await mediaService.uploadFile(selectedFile, "certificate");
+      await verificationService.submitBadgeApplication({
+        pathway: "government",
+        documentMediaId: mediaId,
+        applicationData: { ...formData, documentName: selectedFile.name },
+      });
       setIsSubmitting(false);
       toast.success("Institutional verification dossier submitted to Compliance Director!");
       onSubmitSuccess?.({
@@ -56,7 +64,10 @@ const GovernmentVerificationModal = ({ isOpen, onClose, onSubmitSuccess }) => {
         submittedAt: new Date().toISOString(),
       });
       onClose();
-    }, 800);
+    } catch (error) {
+      setIsSubmitting(false);
+      toast.error(error?.response?.data?.message || "Failed to submit institutional verification.");
+    }
   };
 
   return (

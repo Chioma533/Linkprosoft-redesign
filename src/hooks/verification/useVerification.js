@@ -8,28 +8,6 @@ import {
   INITIAL_PROFILE,
 } from "../../constants/verification";
 
-const FALLBACK_BANKS = [
-  { code: "044", name: "Access Bank" },
-  { code: "058", name: "Guaranty Trust Bank (GTB)" },
-  { code: "011", name: "First Bank of Nigeria" },
-  { code: "033", name: "United Bank for Africa (UBA)" },
-  { code: "057", name: "Zenith Bank" },
-  { code: "050", name: "Ecobank Nigeria" },
-  { code: "070", name: "Fidelity Bank" },
-  { code: "214", name: "First City Monument Bank (FCMB)" },
-  { code: "030", name: "Heritage Bank" },
-  { code: "082", name: "Keystone Bank" },
-  { code: "221", name: "Stanbic IBTC Bank" },
-  { code: "232", name: "Sterling Bank" },
-  { code: "032", name: "Union Bank of Nigeria" },
-  { code: "215", name: "Unity Bank" },
-  { code: "035", name: "Wema Bank" },
-  { code: "090110", name: "Kuda Bank" },
-  { code: "999992", name: "OPay Digital Services" },
-  { code: "999991", name: "PalmPay" },
-  { code: "100004", name: "Moniepoint MFB" },
-];
-
 const useVerification = () => {
   const { user } = useAuthStore();
 
@@ -67,12 +45,16 @@ const useVerification = () => {
   const [selfieMediaId, setSelfieMediaId] = useState(null);
   const [selfiePreviewUrl, setSelfiePreviewUrl] = useState(null);
 
-  const [banks, setBanks] = useState(FALLBACK_BANKS);
+  const [banks, setBanks] = useState([]);
+  const [bankError, setBankError] = useState("");
   const [isResolvingAccount, setIsResolvingAccount] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [showSuccess, setShowSuccess] = useState(false);
+  const [overallStatus, setOverallStatus] = useState("unverified");
+  const [rejectionReason, setRejectionReason] = useState(null);
+  const [rejectedStep, setRejectedStep] = useState(null);
 
   // Load verification status & banks on mount
   useEffect(() => {
@@ -84,8 +66,12 @@ const useVerification = () => {
         const bankList = await verificationService.getBanks();
         if (isMounted && Array.isArray(bankList) && bankList.length > 0) {
           setBanks(bankList);
+          setBankError("");
+        } else if (isMounted) {
+          setBanks([]);
+          setBankError("Bank list is unavailable. Please try again later.");
         }
-      } catch (err) {
+      } catch {
         console.warn("Using fallback banks list:", err.message);
       }
 
@@ -93,6 +79,9 @@ const useVerification = () => {
         // 2. Fetch User Verification Status
         const statusRes = await verificationService.getVerificationStatus();
         if (isMounted && statusRes) {
+          setOverallStatus(statusRes.overallStatus || "unverified");
+          setRejectionReason(statusRes.rejectionReason || null);
+          setRejectedStep(statusRes.rejectedStep || null);
           const completed = statusRes.completedSteps || [];
           setCompletedSteps(completed);
 
@@ -102,11 +91,34 @@ const useVerification = () => {
               ...statusRes.steps.identity.data,
             }));
           }
+          if (statusRes.steps?.professional?.data) {
+            setProfile((prev) => ({
+              ...prev,
+              ...statusRes.steps.professional.data,
+              selectedCategories: statusRes.steps.professional.data.selectedCategories || [],
+              skills: statusRes.steps.professional.data.skills || [],
+            }));
+          }
+          if (statusRes.steps?.face?.data) {
+            setSelfieMediaId(statusRes.steps.face.data.selfieMediaId || null);
+            setSelfiePreviewUrl(statusRes.steps.face.data.selfieUrl || null);
+            setSelfieCaptured(Boolean(statusRes.steps.face.data.selfieMediaId || statusRes.steps.face.data.selfieUrl));
+          }
+          if (statusRes.steps?.payment?.data) {
+            setProfile((prev) => ({
+              ...prev,
+              bankName: statusRes.steps.payment.data.bankName || "",
+              bankCode: statusRes.steps.payment.data.bankCode || "",
+              accountNumber: statusRes.steps.payment.data.accountNumber || "",
+              accountName: statusRes.steps.payment.data.accountName || "",
+              account_name: statusRes.steps.payment.data.accountName || "",
+            }));
+          }
 
-          const stepCount = completed.length + 1;
-          setHighestReachedStep(Math.min(stepCount, 4));
+          const stepCount = Math.max(completed.length, statusRes.currentStep || 1);
+          setHighestReachedStep(Math.min(Math.max(stepCount, 1), 5));
         }
-      } catch (err) {
+      } catch {
         // If not started yet or endpoint not responding, start gracefully
         console.info("Verification status initialized for new submission");
       }
@@ -118,7 +130,7 @@ const useVerification = () => {
     };
   }, []);
 
-  const updateProfile = (field, value) => {
+  const updateProfile = useCallback((field, value) => {
     setProfile((prev) => {
       const updated = {
         ...prev,
@@ -135,7 +147,7 @@ const useVerification = () => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
-  };
+  }, [errors]);
 
   const handleIdentityUpload = (file) => {
     if (!file) return;
@@ -164,13 +176,18 @@ const useVerification = () => {
     };
 
     const targetStep = viewToStep[nextView] ?? 1;
+    const canContinueToFace =
+      nextView === VERIFICATION_VIEWS.FACE &&
+      completedSteps.includes("identity") &&
+      completedSteps.includes("professional");
 
     // Allow overview or any step that is unlocked
     if (
       nextView === VERIFICATION_VIEWS.OVERVIEW ||
       nextView === VERIFICATION_VIEWS.REVIEW ||
       targetStep <= highestReachedStep ||
-      completedSteps.includes(nextView)
+      completedSteps.includes(nextView) ||
+      canContinueToFace
     ) {
       setView(nextView);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -179,7 +196,7 @@ const useVerification = () => {
     }
   };
 
-  const handleStepClick = (stepNumber, stepKey) => {
+  const handleStepClick = (stepNumber) => {
     const viewMap = {
       1: VERIFICATION_VIEWS.IDENTITY,
       2: VERIFICATION_VIEWS.PROFESSIONAL,
@@ -198,7 +215,11 @@ const useVerification = () => {
     if (!profile.firstName?.trim()) newErrors.firstName = "First name is required";
     if (!profile.lastName?.trim()) newErrors.lastName = "Last name is required";
     if (!profile.phone?.trim()) newErrors.phone = "Phone number is required";
-    if (!profile.dateOfBirth?.trim()) newErrors.dateOfBirth = "Date of birth is required";
+    if (!profile.dateOfBirth?.trim()) {
+      newErrors.dateOfBirth = "Date of birth is required";
+    } else if (!/^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{2}$/.test(profile.dateOfBirth.trim())) {
+      newErrors.dateOfBirth = "Use DD/MM/YY format";
+    }
     if (!profile.address?.trim()) newErrors.address = "Residential address is required";
     if (!profile.nationality?.trim()) newErrors.nationality = "Nationality is required";
     if (!idDocumentFile) newErrors.idDocument = "Identity document is required";
@@ -225,7 +246,7 @@ const useVerification = () => {
       setCompletedSteps((prev) => Array.from(new Set([...prev, "identity"])));
       setHighestReachedStep((prev) => Math.max(prev, 2));
       toast.success("Identity details saved!");
-      setView(VERIFICATION_VIEWS.PROFESSIONAL);
+      setView(VERIFICATION_VIEWS.OVERVIEW);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return true;
     } catch (err) {
@@ -258,6 +279,7 @@ const useVerification = () => {
         bio: profile.bio || "",
         category: profile.category,
         selectedCategories: profile.selectedCategories || [profile.category],
+        skills: profile.skills || [],
       };
 
       await verificationService.submitProfessional(payload);
@@ -320,7 +342,7 @@ const useVerification = () => {
     } finally {
       setIsResolvingAccount(false);
     }
-  }, []);
+  }, [updateProfile]);
 
   // Step 4: Submit Payment
   const submitPaymentStep = async () => {
@@ -378,12 +400,15 @@ const useVerification = () => {
   const submitFinalVerification = async () => {
     setIsLoading(true);
     try {
-      await verificationService.submitVerification({ agreeToTerms: true });
+      const result = await verificationService.submitVerification({ agreeToTerms: true });
+      setOverallStatus(result?.overallStatus || "pending_review");
       setShowSuccess(true);
       toast.success("Your verification has been submitted successfully!");
+      return true;
     } catch (err) {
       const msg = err.response?.data?.message || err.message || "Failed to submit verification.";
       toast.error(msg);
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -400,6 +425,7 @@ const useVerification = () => {
     updateProfile,
     errors,
 
+    idDocumentFile,
     uploadedFile,
     handleIdentityUpload,
 
@@ -412,6 +438,7 @@ const useVerification = () => {
     setSelfiePreviewUrl,
 
     banks,
+    bankError,
     isResolvingAccount,
     resolveBankAccount,
 
@@ -424,6 +451,9 @@ const useVerification = () => {
     submitFaceStep,
     submitPaymentStep,
     submitFinalVerification,
+    overallStatus,
+    rejectionReason,
+    rejectedStep,
   };
 };
 

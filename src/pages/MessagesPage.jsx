@@ -18,7 +18,7 @@ const MessagesPage = () => {
     threads, activeThreadId, messages, pagination, messageInput, sendingMessage, messagesLoading,
     onlineUsers, typingUsers, currentUser, loadThreads, setActiveThread, loadMessages,
     markThreadAsRead, sendMessage, setMessageInput, approvedContacts, approvedContactsLoading,
-    loadApprovedContacts, startConversation, respondToMessageRequest,
+    loadApprovedContacts, startConversation, respondToMessageRequest, deleteAttachment,
   } = useMessaging();
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -28,7 +28,12 @@ const MessagesPage = () => {
   const typingActive = useRef(false);
   const endRef = useRef(null);
 
-  useEffect(() => { if (currentUser?.id) { loadThreads(currentUser.id); loadApprovedContacts(); } }, [currentUser?.id]);
+  useEffect(() => {
+    if (currentUser?.id) {
+      loadThreads(currentUser.id);
+      loadApprovedContacts();
+    }
+  }, [currentUser?.id, loadApprovedContacts, loadThreads]);
 
   const uiThreads = useMemo(() => threads.map((thread) => {
     const participant = thread.participant ?? {};
@@ -45,15 +50,15 @@ const MessagesPage = () => {
     if (activeTab === "Unread") return matchesSearch && thread.unread > 0;
     if (activeTab === "Requests") return matchesSearch && thread.status === "request" && thread.initiatorId !== currentUser?.id;
     return matchesSearch;
-  }), [uiThreads, activeTab, searchQuery]);
+  }), [uiThreads, activeTab, searchQuery, currentUser?.id]);
 
   useEffect(() => {
     if (!activeThreadId) return undefined;
-    loadMessages(activeThreadId, 1);
+    loadMessages(activeThreadId, 1, currentUser?.id);
     socketManager.emit(SOCKET_EVENTS.JOIN_THREAD, { threadId: activeThreadId });
     markThreadAsRead(activeThreadId).catch(() => {});
     return () => socketManager.emit(SOCKET_EVENTS.LEAVE_THREAD, { threadId: activeThreadId });
-  }, [activeThreadId]);
+  }, [activeThreadId, currentUser?.id, loadMessages, markThreadAsRead]);
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: "smooth" }); }, [activeThreadId, messages.length]);
   useEffect(() => () => clearTimeout(typingTimeout.current), []);
 
@@ -100,9 +105,9 @@ const MessagesPage = () => {
         {activeThread ? <>
           <ConversationHeader thread={activeThread} onBackMobile={() => setShowConversation(false)} />
           <div className="flex-1 overflow-y-auto px-5 py-6 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-gray-200 [&::-webkit-scrollbar-thumb]:rounded-full">
-            {pagination.page < pagination.totalPages && <button onClick={() => loadMessages(activeThreadId, pagination.page + 1)} className="block mx-auto mb-5 text-xs font-semibold text-[#016EA6]">Load earlier messages</button>}
+            {pagination.page < pagination.totalPages && <button onClick={() => loadMessages(activeThreadId, pagination.page + 1, currentUser?.id)} className="block mx-auto mb-5 text-xs font-semibold text-[#016EA6]">Load earlier messages</button>}
             {messagesLoading && <p className="text-center text-xs text-gray-400">Loading messages…</p>}
-            {messages.map((message) => <MessageBubble key={message.id} msg={message} currentUserId={currentUser?.id} />)}
+            {messages.map((message) => <MessageBubble key={message.id} msg={message} currentUserId={currentUser?.id} onDeleteAttachment={deleteAttachment} />)}
             {isOtherTyping && <p className="text-xs text-gray-400 italic mt-2">{activeThread.sender} is typing…</p>}
             <div ref={endRef} />
           </div>

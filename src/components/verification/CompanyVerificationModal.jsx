@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-import { X, Building2, Upload, FileText, AlertCircle, ShieldCheck } from "lucide-react";
+import { X, Building2, Upload, FileText, ShieldCheck } from "lucide-react";
 import { toast } from "react-hot-toast";
+import mediaService from "../../api/services/mediaService";
+import verificationService from "../../api/services/verificationService";
 
 /**
  * Company / Employer Verification Modal.
@@ -33,7 +35,7 @@ const CompanyVerificationModal = ({ isOpen, onClose, onSubmitSuccess }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.companyName.trim() || !formData.registrationNumber.trim()) {
       toast.error("Please enter company name and registration number.");
@@ -46,7 +48,13 @@ const CompanyVerificationModal = ({ isOpen, onClose, onSubmitSuccess }) => {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      const { mediaId } = await mediaService.uploadFile(selectedFile, "certificate");
+      await verificationService.submitBadgeApplication({
+        pathway: "company",
+        documentMediaId: mediaId,
+        applicationData: { ...formData, documentName: selectedFile.name },
+      });
       setIsSubmitting(false);
       toast.success("Company verification documents submitted for administrative audit!");
       onSubmitSuccess?.({
@@ -57,7 +65,10 @@ const CompanyVerificationModal = ({ isOpen, onClose, onSubmitSuccess }) => {
         submittedAt: new Date().toISOString(),
       });
       onClose();
-    }, 800);
+    } catch (error) {
+      setIsSubmitting(false);
+      toast.error(error?.response?.data?.message || "Failed to submit company verification.");
+    }
   };
 
   return (

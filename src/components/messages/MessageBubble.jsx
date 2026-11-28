@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { CheckCheck, FileText, Download, ExternalLink, Film, Music, X } from "lucide-react";
+import { CheckCheck, FileText, Download, ExternalLink, Music, Trash2, X } from "lucide-react";
 
 const formatBytes = (bytes) => {
   if (!bytes) return "";
@@ -10,7 +10,7 @@ const formatBytes = (bytes) => {
   return `${(num / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const MessageBubble = ({ msg, currentUserId }) => {
+const MessageBubble = ({ msg, currentUserId, onDeleteAttachment }) => {
   const [activeMediaZoom, setActiveMediaZoom] = useState(null);
 
   const isMe = msg.senderId ? msg.senderId === currentUserId : msg.from === "me";
@@ -59,6 +59,22 @@ const MessageBubble = ({ msg, currentUserId }) => {
         {/* Attachments Section */}
         {attachments.length > 0 && (
           <div className="flex flex-col gap-2 w-full">
+            {isMe && onDeleteAttachment && (
+              <div className="flex flex-wrap justify-end gap-1">
+                {attachments.map((att) => (
+                  <button
+                    key={`delete-${att.id || att.mediaId}`}
+                    type="button"
+                    onClick={() => onDeleteAttachment(msg.id, att.mediaId)}
+                    disabled={!att.mediaId}
+                    className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-white px-2 py-1 text-[9px] font-semibold text-rose-500 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Remove attachment
+                  </button>
+                ))}
+              </div>
+            )}
             {attachments.map((att, idx) => {
               const isPdf =
                 att.contentType === "application/pdf" ||

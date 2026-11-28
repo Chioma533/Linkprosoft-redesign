@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { X, Star, CheckCircle, XCircle, ShieldCheck, AlertTriangle, ArrowRight } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { evaluateRatingEligibility, DEFAULT_VERIFICATION_CONFIG } from "../../utils/verificationConfig";
+import verificationService from "../../api/services/verificationService";
 
 /**
  * Pathway 2: Rating-based verification modal.
@@ -29,7 +30,11 @@ const RatingPathwayModal = ({
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
+    try {
+      await verificationService.submitBadgeApplication({
+        pathway: "rating",
+        applicationData: evaluation,
+      });
       setIsSubmitting(false);
       toast.success("Rating-based verification application submitted for administrative approval!");
       onSubmitSuccess?.({
@@ -39,7 +44,10 @@ const RatingPathwayModal = ({
         submittedAt: new Date().toISOString(),
       });
       onClose();
-    }, 800);
+    } catch (error) {
+      setIsSubmitting(false);
+      toast.error(error?.response?.data?.message || "Failed to submit rating application.");
+    }
   };
 
   return (

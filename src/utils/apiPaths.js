@@ -253,6 +253,7 @@ export const API_PATHS = {
     RESOLVE_ACCOUNT: "/api/verification/resolve-account",
     SUBMIT_PAYMENT: "/api/verification/payment",
     SUBMIT_ALL: "/api/verification/submit",
+    SUBMIT_BADGE_APPLICATION: "/api/verification/badge-application",
     PREVIEW: "/api/verification/preview",
     ADMIN: {
       LIST: "/api/admin/verifications",

@@ -71,6 +71,9 @@ export const useAuthStore = create((set, get) => ({
     });
   },
 
+  updateUser: (updates) =>
+    set((state) => state.user ? { user: { ...state.user, ...updates } } : {}),
+
   setUserAvatar: ({ avatar, avatarMediaId }) =>
     set((state) => {
       if (!state.user) return {};

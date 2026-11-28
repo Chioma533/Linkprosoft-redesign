@@ -77,7 +77,8 @@ export const profileService = {
   addCertification: async (payload) => {
     try {
       const response = await axiosInstance.post(API_PATHS.CERTIFICATIONS.ADD_CERTIFICATION, payload);
-      return response.data?.certification || response.data?.data || response.data;
+      const data = dataOf(response);
+      return data?.certification || data;
     } catch (error) {
       console.warn("Failed to add certification:", error.message);
       throw error;
@@ -104,7 +105,8 @@ export const profileService = {
   addPortfolioItem: async (payload) => {
     try {
       const response = await axiosInstance.post(API_PATHS.PORTFOLIO.ADD_PORTFOLIO_ITEM, payload);
-      return response.data?.portfolioItem || response.data?.data || response.data;
+      const data = dataOf(response);
+      return data?.portfolioItem || data;
     } catch (error) {
       console.warn("Failed to add portfolio item:", error.message);
       throw error;
@@ -213,7 +215,8 @@ export const profileService = {
   addMySkill: async (payload) => {
     try {
       const response = await axiosInstance.post(API_PATHS.SKILLS.ADD_MY_SKILL, payload);
-      return response.data;
+      const data = dataOf(response);
+      return data?.skill || data;
     } catch (error) {
       console.warn("Failed to add skill:", error.response?.data || error.message);
       throw error;

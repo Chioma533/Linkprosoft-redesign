@@ -1,774 +1,169 @@
-import React, { useState, useEffect } from "react";
-import { MapPin, Calendar, Edit3, Briefcase, Award, Star, Check, Plus, X, Upload, ExternalLink, Trash2 } from "lucide-react";
-import { useAuthStore } from "../../store/authStore";
-import { profileService } from "../../api/services/profileService";
-import AddSkillModal from "../../components/professional/AddSkillModal";
-import coverImg from "../../assets/images/IMG-20260704-WA0194.jpg";
-import avatarImg from "../../assets/images/handyman.jfif";
-import { toast } from "react-hot-toast";
-import VerificationBadge from "../../components/common/VerificationBadge";
-import Avatar from "../../components/common/Avatar";
+import React, { useState } from "react";
 import PublicProfileUrlCard from "../../components/professional/PublicProfileUrlCard";
-import MediaUploader from "../../components/common/MediaUploader";
-import mediaService from "../../api/services/mediaService";
-import { useDashboardStore } from "../../store/dashboardStore";
+import AddSkillModal from "../../components/professional/AddSkillModal";
 import SectionSpotlightTooltip from "../../components/common/SectionSpotlightTooltip";
+import ProfileHeader from "../../components/professional/profile/ProfileHeader";
+import ProfileAbout from "../../components/professional/profile/ProfileAbout";
+import ProfilePerformance from "../../components/professional/profile/ProfilePerformance";
+import ProfileSkills from "../../components/professional/profile/ProfileSkills";
+import ProfileCertifications from "../../components/professional/profile/ProfileCertifications";
+import ProfilePortfolio from "../../components/professional/profile/ProfilePortfolio";
+import ProfileReviews from "../../components/professional/profile/ProfileReviews";
+import ProfileEditModal from "../../components/professional/profile/ProfileEditModal";
+import ProfilePortfolioModal from "../../components/professional/profile/ProfilePortfolioModal";
+import ProfileCertificationModal from "../../components/professional/profile/ProfileCertificationModal";
+import { useProfessionalProfile } from "../../hooks/useProfessionalProfile";
+import { useDashboardStore } from "../../store/dashboardStore";
 
 const ProfileSubpage = () => {
-  const { user, setUserAvatar } = useAuthStore();
-  const { highlightSection, setHighlightSection } = useDashboardStore();
-  const userId = user?.id || user?.userId || user?.data?.id || user?.data?.userId;
-
-  const [profileData, setProfileData] = useState(null);
-  const [skills, setSkills] = useState([]);
-  const [certifications, setCertifications] = useState([]);
-  const [portfolio, setPortfolio] = useState([]);
-  const [reviews, setReviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  // Add Skill Modal State
+  const profile = useProfessionalProfile();
+  const highlightSection = useDashboardStore((state) => state.highlightSection);
+  const setHighlightSection = useDashboardStore((state) => state.setHighlightSection);
   const [isAddSkillModalOpen, setIsAddSkillModalOpen] = useState(false);
-  const [isDeletingSkillId, setIsDeletingSkillId] = useState(null);
-
-  // Edit Modal State
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const [isCertificationModalOpen, setIsCertificationModalOpen] = useState(false);
   const [isAvatarActionsOpen, setIsAvatarActionsOpen] = useState(false);
-  const [portfolioForm, setPortfolioForm] = useState({ title: "", description: "", linkUrl: "", coverMediaId: null });
-  const [certificationForm, setCertificationForm] = useState({ title: "", issuer: "", credentialMediaId: null });
-  const [editForm, setEditForm] = useState({
-    bio: user?.bio || "",
-    profession: user?.profession || "",
-    hourlyRate: "",
-    location: user?.location || "",
-    availabilityStatus: "available",
-  });
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
 
-  useEffect(() => {
-    let isMounted = true;
-    const fetchProfileInfo = async () => {
-      try {
-        const [profileRes, skillsRes, certsRes, portfolioRes, reviewsRes] = await Promise.allSettled([
-          profileService.getMyProfile(),
-          userId ? profileService.getUserSkills(userId) : Promise.resolve([]),
-          userId ? profileService.getCertifications(userId) : Promise.resolve([]),
-          userId ? profileService.getPortfolio(userId) : Promise.resolve([]),
-          userId ? profileService.getReviews(userId) : Promise.resolve([]),
-        ]);
+  const name =
+    profile.profileData?.user?.fullName ||
+    profile.profileData?.fullName ||
+    profile.user?.fullName ||
+    profile.user?.full_name ||
+    "";
+  const profession = profile.profileData?.profession || profile.user?.profession || "";
+  const bio = profile.profileData?.bio ?? profile.user?.bio ?? "";
+  const location =
+    profile.user?.location ||
+    profile.profileData?.user?.location ||
+    profile.profileData?.location ||
+    "";
+  const avatarUrl =
+    profile.user?.avatar ||
+    profile.user?.avatarUrl ||
+    profile.profileData?.avatarUrl ||
+    "";
+  const coverUrl = profile.profileData?.coverImageUrl || profile.user?.coverImageUrl || "";
 
-        if (isMounted) {
-          const profile = profileRes.status === "fulfilled" ? profileRes.value : null;
-          if (profile) {
-            const hydratedProfile = { ...profile };
-            try {
-              if (profile.avatarMediaId) hydratedProfile.avatarUrl = await mediaService.getUrl(profile.avatarMediaId);
-              if (profile.coverMediaId) hydratedProfile.coverImageUrl = await mediaService.getUrl(profile.coverMediaId);
-            } catch { /* fallback artwork remains available when storage is unavailable */ }
-            setProfileData(hydratedProfile);
-            setEditForm({
-              bio: profile.bio || user?.bio || "",
-              profession: profile.profession || user?.profession || "",
-              hourlyRate: profile.hourlyRate || profile.hourly_rate || "",
-              location: user?.location || profile.location || "",
-              availabilityStatus: profile.availabilityStatus || "available",
-            });
-          }
-
-          if (skillsRes.status === "fulfilled" && Array.isArray(skillsRes.value)) {
-            setSkills(skillsRes.value);
-          }
-          if (certsRes.status === "fulfilled" && Array.isArray(certsRes.value)) {
-            setCertifications(certsRes.value);
-          }
-          if (portfolioRes.status === "fulfilled" && Array.isArray(portfolioRes.value)) {
-            const hydrated = await Promise.all(portfolioRes.value.map(async (item) => {
-              if (!item.coverMediaId) return item;
-              try { return { ...item, imageUrl: await mediaService.getUrl(item.coverMediaId) }; } catch { return item; }
-            }));
-            setPortfolio(hydrated);
-          }
-          if (reviewsRes.status === "fulfilled" && Array.isArray(reviewsRes.value)) {
-            setReviews(reviewsRes.value);
-          }
-        }
-      } catch (err) {
-        console.warn("Failed to load profile details", err);
-      } finally {
-        if (isMounted) setIsLoading(false);
-      }
-    };
-
-    fetchProfileInfo();
-    return () => {
-      isMounted = false;
-    };
-  }, [userId, user]);
-
-  const handleSaveProfile = async (e) => {
-    e.preventDefault();
-    setIsSaving(true);
+  const openEditModal = () => setIsEditModalOpen(true);
+  const handleSaveProfile = async (payload) => {
+    setIsSavingProfile(true);
     try {
-      const payload = {
-        bio: editForm.bio,
-        profession: editForm.profession,
-        hourlyRate: editForm.hourlyRate ? Number(editForm.hourlyRate) : undefined,
-        availabilityStatus: editForm.availabilityStatus,
-      };
-      const savedProfile = profileData
-        ? await profileService.updateMyProfile(payload)
-        : await profileService.createMyProfile(payload);
-
-      setProfileData((prev) => ({
-        ...(savedProfile || {}),
-        bio: editForm.bio,
-        profession: editForm.profession,
-        hourlyRate: editForm.hourlyRate,
-        availabilityStatus: editForm.availabilityStatus,
-      }));
-      toast.success("Profile updated successfully!");
-      setIsEditModalOpen(false);
-    } catch (error) {
-      toast.error(error.message || "Failed to update profile");
+      if (await profile.saveProfile(payload)) setIsEditModalOpen(false);
     } finally {
-      setIsSaving(false);
+      setIsSavingProfile(false);
     }
   };
-
-  const handleAvatarUploaded = async ({ mediaId }) => {
-    try {
-      await profileService.setAvatar(mediaId);
-      const url = await mediaService.getUrl(mediaId);
-      setUserAvatar({ avatar: url, avatarMediaId: mediaId });
-      setProfileData((current) => ({ ...current, avatarMediaId: mediaId, avatarUrl: url }));
-      toast.success("Profile photo updated");
-    } catch (error) { toast.error(error.response?.data?.message || "Could not update profile photo"); }
-  };
-
-  const handleCoverUploaded = async ({ mediaId, file }) => {
-    try {
-      await profileService.setCover(mediaId);
-      const url = URL.createObjectURL(file);
-      setProfileData((current) => ({ ...current, coverMediaId: mediaId, coverImageUrl: url }));
-      toast.success("Cover image updated");
-    } catch (error) { toast.error(error.response?.data?.message || "Could not update cover image"); }
-  };
-
-  const createPortfolio = async (event) => {
-    event.preventDefault();
-    if (!portfolioForm.coverMediaId) return toast.error("Upload a portfolio image first.");
-    try {
-      const item = await profileService.addPortfolioItem(portfolioForm);
-      const imageUrl = await mediaService.getUrl(portfolioForm.coverMediaId);
-      setPortfolio((current) => [{ ...item, imageUrl }, ...current]);
-      setPortfolioForm({ title: "", description: "", linkUrl: "", coverMediaId: null });
-      setIsPortfolioModalOpen(false);
-      toast.success("Portfolio item added");
-    } catch (error) { toast.error(error.response?.data?.message || "Could not add portfolio item"); }
-  };
-
-  const deletePortfolioItem = async (portfolioItemId) => {
-    if (!window.confirm("Are you sure you want to delete this portfolio project?")) return;
-    try {
-      await profileService.deletePortfolioItem(portfolioItemId);
-      setPortfolio((current) => current.filter((item) => item.id !== portfolioItemId));
-      toast.success("Portfolio project removed");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Could not delete portfolio project");
-    }
-  };
-
-  const createCertification = async (event) => {
-    event.preventDefault();
-    if (!certificationForm.credentialMediaId) return toast.error("Upload the certificate document first.");
-    try {
-      const item = await profileService.addCertification(certificationForm);
-      setCertifications((current) => [item, ...current]);
-      setCertificationForm({ title: "", issuer: "", credentialMediaId: null });
-      setIsCertificationModalOpen(false);
-      toast.success("Certification added");
-    } catch (error) { toast.error(error.response?.data?.message || "Could not add certification"); }
-  };
-
-  const handleSkillAdded = (newSkill) => {
-    setSkills((prev) => {
-      const exists = prev.some(
-        (s) => (s.skillId || s.id) === (newSkill.skillId || newSkill.id)
-      );
-      if (exists) {
-        return prev.map((s) =>
-          (s.skillId || s.id) === (newSkill.skillId || newSkill.id) ? newSkill : s
-        );
-      }
-      return [...prev, newSkill];
-    });
-  };
-
-  const handleDeleteSkill = async (skillItem, e) => {
-    e.stopPropagation();
-    const skillIdToDelete = skillItem.skillId || skillItem.id;
-    if (!skillIdToDelete) return;
-
-    const skillName = skillItem.name || skillItem.skill?.name || "Skill";
-    setIsDeletingSkillId(skillIdToDelete);
-    try {
-      await profileService.deleteMySkill(skillIdToDelete);
-      setSkills((prev) =>
-        prev.filter((s) => (s.skillId || s.id) !== skillIdToDelete)
-      );
-      toast.success(`${skillName} removed`);
-    } catch (err) {
-      toast.error(err.response?.data?.message || `Failed to remove ${skillName}`);
-    } finally {
-      setIsDeletingSkillId(null);
-    }
-  };
-
-  const displayName = user?.fullName || user?.full_name || profileData?.user?.fullName || "Professional";
-  const displayProfession = profileData?.profession || user?.profession || "Skilled Craftsman & Service Professional";
-  const displayBio = profileData?.bio || user?.bio || "No biography provided yet. Click 'Edit Profile' to add your professional background, experience, and specialties.";
-  const displayLocation = user?.location || profileData?.location || "Nigeria";
-  const displayAvatar = user?.avatar || user?.avatarUrl || profileData?.avatarUrl || avatarImg;
-  const displayCover = profileData?.coverImageUrl || user?.coverImageUrl || coverImg;
-  const displayRating = profileData?.avgRating || profileData?.avg_rating || 5.0;
 
   const handleSpotlightAction = () => {
-    if (highlightSection === "avatar") {
-      setIsAvatarActionsOpen(true);
-    } else if (highlightSection === "bio" || highlightSection === "location") {
-      setIsEditModalOpen(true);
-    } else if (highlightSection === "skills") {
-      setIsAddSkillModalOpen(true);
-    } else if (highlightSection === "portfolio") {
-      setIsPortfolioModalOpen(true);
-    }
+    if (highlightSection === "avatar") setIsAvatarActionsOpen(true);
+    else if (highlightSection === "bio" || highlightSection === "location") openEditModal();
+    else if (highlightSection === "skills") setIsAddSkillModalOpen(true);
+    else if (highlightSection === "portfolio") setIsPortfolioModalOpen(true);
   };
+
+  if (profile.isLoading) {
+    return (
+      <div className="flex min-h-64 items-center justify-center rounded-3xl border border-gray-100/50 bg-white text-sm text-gray-500">
+        Loading your profile…
+      </div>
+    );
+  }
+
+  const loadErrors = Object.values(profile.loadErrors);
 
   return (
     <div className="space-y-8 animate-fade-in pb-12">
-      {/* Cover Banner & Profile Card */}
-      <div className="bg-white rounded-3xl border border-gray-100/50 shadow-xs overflow-hidden">
-        <div className="h-48 relative overflow-hidden bg-slate-800">
-          <img src={displayCover} className="w-full h-full object-cover opacity-90" alt="Cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-          <div className="absolute right-4 top-4"><MediaUploader compact purpose="cover" label="Change cover" onUploaded={handleCoverUploaded} /></div>
+      {loadErrors.length ? (
+        <div role="status" className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+          Some profile information could not be loaded: {loadErrors.join("; ")}
         </div>
+      ) : null}
 
-        {/* Profile Info Container */}
-        <div className="px-4 md:px-8 pb-6 md:pb-8 relative">
-          {/* Avatar floating */}
-      {/* Avatar floating */}
-<div className="absolute -top-16 left-4 md:left-8 flex items-end gap-5">
-  <div className="relative">
-    <button
-      id="profile-avatar-section"
-      type="button"
-      aria-label="Profile photo actions"
-      aria-expanded={isAvatarActionsOpen}
-      onClick={() => setIsAvatarActionsOpen((open) => !open)}
-      className={`relative w-28 h-28 rounded-full border-4 border-white bg-[#016EA6] overflow-hidden shrink-0 shadow-md transition-all duration-300 ${
-        highlightSection === "avatar"
-          ? "ring-4 ring-[#016EA6] ring-offset-2 border-[#016EA6] shadow-xl animate-pulse"
-          : ""
-      }`}
-    >
-      <Avatar
-        name={displayName}
-        avatar={displayAvatar}
-        imageClassName="w-full h-full object-cover"
-        fallback={<img src={avatarImg} className="w-full h-full object-cover" alt="" />}
+      <ProfileHeader
+        user={profile.user}
+        profile={profile.profileData}
+        name={name}
+        profession={profession}
+        location={location}
+        avatarUrl={avatarUrl}
+        coverUrl={coverUrl}
+        isAvatarActionsOpen={isAvatarActionsOpen}
+        onToggleAvatarActions={() => setIsAvatarActionsOpen((open) => !open)}
+        onAvatarUploaded={profile.updateAvatar}
+        onCoverUploaded={profile.updateCover}
+        onEdit={openEditModal}
+        highlightSection={highlightSection}
       />
-    </button>
-
-    {/* Floating Verification Badge - dynamic & strictly conditional */}
-    <VerificationBadge
-      user={user}
-      variant="avatar"
-      size="lg"
-      className="absolute bottom-4 right-0 translate-x-1/4 z-10"
-    />
-
-    {isAvatarActionsOpen && (
-      <div className="absolute left-full top-1/2 z-20 ml-3 -translate-y-1/2 rounded-xl border border-gray-100 bg-white p-2 shadow-lg">
-        <MediaUploader
-          compact
-          purpose="avatar"
-          label="Photo"
-          onUploaded={handleAvatarUploaded}
-        />
-      </div>
-    )}
-  </div>
-</div>
-
-          <div className="pt-16 flex flex-col md:flex-row md:items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-bold text-gray-900">{displayName}</h2>
-                <VerificationBadge user={user} />
-              </div>
-              <p className="text-xs text-gray-500 mt-1 font-semibold">
-                {displayProfession}
-              </p>
-              <div className="flex flex-wrap items-center gap-4 text-[10px] text-gray-400 font-semibold mt-3">
-                <span
-                  id="profile-location-section"
-                  className={`flex items-center gap-1 px-2 py-0.5 rounded-md transition-all duration-300 ${
-                    highlightSection === "location"
-                      ? "ring-2 ring-[#016EA6] bg-sky-50 text-[#016EA6] font-bold animate-pulse"
-                      : ""
-                  }`}
-                >
-                  <MapPin className="w-3.5 h-3.5 text-[#016EA6]" />
-                  <span>{displayLocation}</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                  <span>Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : "2026"}</span>
-                </span>
-                {profileData?.hourlyRate && (
-                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 font-bold rounded-md">
-                    ₦{Number(profileData.hourlyRate).toLocaleString()} / hr
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <button
-              onClick={() => setIsEditModalOpen(true)}
-              className="px-5 py-2.5 bg-sky-50/70 hover:bg-[#016EA6] text-[#016EA6] hover:text-white rounded-full text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer self-start shadow-xs"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>Edit Profile</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       <PublicProfileUrlCard
-        profile={profileData}
-        onSaved={(savedProfile) => setProfileData((current) => ({ ...current, ...savedProfile }))}
+        profile={profile.profileData}
+        onSaved={(savedProfile) => profile.setProfileData((current) => ({ ...(current || {}), ...savedProfile }))}
       />
 
-      {/* About Me card */}
-      <div
-        id="profile-bio-section"
-        className={`bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-3 transition-all duration-300 ${
-          highlightSection === "bio"
-            ? "border-2 border-[#016EA6] ring-4 ring-[#016EA6]/30 shadow-md"
-            : ""
-        }`}
-      >
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-gray-900">About me</h3>
-          <button
-            onClick={() => setIsEditModalOpen(true)}
-            className="text-xs font-semibold text-[#016EA6] hover:underline cursor-pointer"
-          >
-            Edit
-          </button>
-        </div>
-        <p className="text-xs text-gray-500 leading-relaxed font-normal">
-          {displayBio}
-        </p>
+      <ProfileAbout bio={bio} onEdit={openEditModal} highlightSection={highlightSection} />
+
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <ProfilePerformance profile={profile.profileData} />
+        <ProfileSkills
+          skills={profile.skills}
+          isDeletingSkillId={profile.isDeletingSkillId}
+          onAdd={() => setIsAddSkillModalOpen(true)}
+          onDelete={profile.deleteSkill}
+          highlightSection={highlightSection}
+        />
+        <ProfileCertifications
+          certifications={profile.certifications}
+          onAdd={() => setIsCertificationModalOpen(true)}
+        />
       </div>
 
-      {/* Layout Columns: Metrics, Skills, Certifications */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Performance indicators */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-gray-900 mb-2">Performance</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/30 text-center">
-              <div className="w-12 h-12 rounded-full border-4 border-emerald-400 flex items-center justify-center font-bold text-xs text-emerald-500">
-                100%
-              </div>
-              <span className="text-[10px] text-gray-400 font-semibold mt-2">Job success</span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/30 text-center">
-              <div className="w-12 h-12 bg-sky-50 text-[#016EA6] rounded-2xl flex items-center justify-center shrink-0 font-extrabold text-sm">
-                {profileData?.totalHoursWorked ?? 0}
-              </div>
-              <span className="text-[10px] text-gray-800 font-bold mt-2">Hours Worked</span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/30 text-center">
-              <div className="w-12 h-12 bg-amber-50 text-amber-500 rounded-2xl flex items-center justify-center shrink-0 font-extrabold text-sm gap-0.5">
-                <Star className="w-4 h-4 fill-current" />
-                <span>{displayRating}</span>
-              </div>
-              <span className="text-[10px] text-gray-400 font-semibold mt-2">Avg Rating</span>
-            </div>
-
-            <div className="flex flex-col items-center justify-center p-4 bg-gray-50/50 rounded-2xl border border-gray-100/30 text-center">
-              <div className="w-12 h-12 rounded-full border-4 border-blue-400 flex items-center justify-center font-bold text-xs text-[#016EA6]">
-                {profileData?.responseTimeHours ? `${profileData.responseTimeHours}h` : "< 2h"}
-              </div>
-              <span className="text-[10px] text-gray-400 font-semibold mt-2">Avg Response</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Skills and Services */}
-        <div
-          id="profile-skills-section"
-          className={`bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4 transition-all duration-300 ${
-            highlightSection === "skills"
-              ? "border-2 border-[#016EA6] ring-4 ring-[#016EA6]/30 shadow-md"
-              : ""
-          }`}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-gray-900">Skills and Services</h3>
-              {skills.length > 0 && (
-                <span className="text-[10px] font-bold text-[#016EA6] bg-[#016EA6]/10 px-2 py-0.5 rounded-full">
-                  {skills.length}
-                </span>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsAddSkillModalOpen(true)}
-              className="inline-flex items-center gap-1 px-3 py-1.5 bg-[#016EA6]/10 hover:bg-[#016EA6]/20 text-[#016EA6] rounded-full text-xs font-bold transition-all cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              Add Skill
-            </button>
-          </div>
-
-          {skills.length > 0 ? (
-            <div className="flex flex-wrap gap-2.5">
-              {skills.map((skill, idx) => {
-                const skillName =
-                  skill.name ||
-                  skill.skill?.name ||
-                  skill.title ||
-                  (typeof skill === "string" ? skill : `Skill #${idx + 1}`);
-                const isPrimarySkill = Boolean(skill.isPrimary || skill.primary);
-                const proficiency = skill.proficiencyLevel || skill.level;
-                const years = skill.yearsOfExperience;
-                const skillId = skill.skillId || skill.id;
-
-                return (
-                  <div
-                    key={skillId || idx}
-                    className="inline-flex items-center gap-2 px-3.5 py-1.5 border border-gray-200/80 bg-white hover:border-[#016EA6]/40 hover:bg-gray-50/70 rounded-full text-xs transition-all shadow-2xs group"
-                  >
-                    {isPrimarySkill && (
-                      <span className="flex items-center gap-0.5 text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200">
-                        <Star className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
-                        Primary
-                      </span>
-                    )}
-                    <span className="font-bold text-gray-800">{skillName}</span>
-                    {proficiency && (
-                      <span className="text-[9px] font-semibold capitalize text-[#016EA6] bg-[#016EA6]/10 px-1.5 py-0.5 rounded-full">
-                        {proficiency}
-                      </span>
-                    )}
-                    {years !== undefined && years !== null && (
-                      <span className="text-[9px] text-gray-400 font-medium">
-                        {years} {Number(years) === 1 ? "yr" : "yrs"}
-                      </span>
-                    )}
-                    {skillId && (
-                      <button
-                        type="button"
-                        title={`Remove ${skillName}`}
-                        disabled={isDeletingSkillId === skillId}
-                        onClick={(e) => handleDeleteSkill(skill, e)}
-                        className="opacity-40 group-hover:opacity-100 p-0.5 hover:bg-red-50 text-gray-400 hover:text-red-500 rounded-full transition-all cursor-pointer -mr-1"
-                      >
-                        {isDeletingSkillId === skillId ? (
-                          <div className="w-3 h-3 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <X className="w-3 h-3" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="py-8 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center gap-2.5">
-              <p className="text-xs text-gray-400 font-medium">No skills declared yet.</p>
-              <button
-                type="button"
-                onClick={() => setIsAddSkillModalOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow-xs"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Add Your First Skill
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Certifications list */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-900">Certifications</h3>
-            <button type="button" onClick={() => setIsCertificationModalOpen(true)} className="text-xs font-bold text-[#016EA6]">Add</button>
-          </div>
-          {certifications.length > 0 ? (
-            <div className="space-y-3">
-              {certifications.map((cert, idx) => (
-                <div key={cert.id || idx} className="flex gap-3 items-start hover:bg-gray-50/50 p-2 rounded-2xl transition-all">
-                  <div className="text-[#016EA6] mt-0.5 shrink-0">
-                    <Award className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-bold text-gray-800 leading-snug">{cert.title}</h4>
-                    <p className="text-[10px] text-gray-400 leading-tight">{cert.issuer || cert.body}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-6 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-100">
-              <p className="text-xs text-gray-400 font-medium">No certifications uploaded yet.</p>
-            </div>
-          )}
-        </div>
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <ProfilePortfolio
+          portfolio={profile.portfolio}
+          onAdd={() => setIsPortfolioModalOpen(true)}
+          onDelete={profile.deletePortfolioItem}
+          highlightSection={highlightSection}
+        />
+        <ProfileReviews reviews={profile.reviews} />
       </div>
 
-      {/* Portfolio Gallery grid & Reviews section columns */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Gallery */}
-        <div
-          id="profile-portfolio-section"
-          className={`lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4 transition-all duration-300 ${
-            highlightSection === "portfolio"
-              ? "border-2 border-[#016EA6] ring-4 ring-[#016EA6]/30 shadow-md"
-              : ""
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-bold text-gray-900">Portfolio & Case Studies</h3>
-            <button type="button" onClick={() => setIsPortfolioModalOpen(true)} className="text-xs font-bold text-[#016EA6]">Add project</button>
-          </div>
-
-          {portfolio.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {portfolio.map((port) => (
-                <div
-                  key={port.id}
-                  className="group relative rounded-2xl overflow-hidden aspect-video bg-slate-100 border border-gray-100 flex flex-col justify-end p-4 shadow-xs"
-                >
-                  {port.imageUrl && (
-                    <img
-                      src={port.imageUrl}
-                      alt={port.title}
-                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent z-10" />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deletePortfolioItem(port.id);
-                    }}
-                    title="Delete project"
-                    className="absolute top-2.5 right-2.5 z-30 p-1.5 rounded-full bg-black/50 text-white/80 hover:text-red-400 hover:bg-black/70 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="relative z-20 text-white">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-sky-200">
-                      {port.category || "Project"}
-                    </span>
-                    <h4 className="text-xs font-bold mt-0.5 leading-snug">{port.title}</h4>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-12 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-100 flex flex-col items-center justify-center">
-              <div className="text-[#016EA6] flex items-center justify-center mb-2">
-                <Briefcase className="w-7 h-7" />
-              </div>
-              <h5 className="text-xs font-bold text-gray-800">Your Portfolio is Empty</h5>
-              <p className="text-[11px] text-gray-400 font-medium mt-0.5">
-                Showcase your past work to attract clients and win more project bids.
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Reviews */}
-        <div className="bg-white p-6 rounded-3xl border border-gray-100/50 shadow-xs space-y-4">
-          <h3 className="text-sm font-bold text-gray-900">Client Reviews</h3>
-          {reviews.length > 0 ? (
-            <div className="space-y-4 divide-y divide-gray-50">
-              {reviews.map((rev, idx) => (
-                <div key={rev.id || idx} className={`${idx > 0 ? "pt-4" : ""} space-y-2`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center font-bold text-[#016EA6] text-[10px]">
-                        {rev.author ? rev.author.slice(0, 2).toUpperCase() : "CL"}
-                      </div>
-                      <div>
-                        <h4 className="text-[10px] font-bold text-gray-800 leading-tight">{rev.author || "Client"}</h4>
-                        <span className="text-[8px] text-gray-400 leading-none">{rev.date || "Verified Client"}</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-0.5 text-amber-500">
-                      {[...Array(rev.stars || rev.rating || 5)].map((_, s) => (
-                        <Star key={s} className="w-3 h-3 fill-current" />
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-gray-500 leading-relaxed font-normal italic">
-                    "{rev.text || rev.comment}"
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="py-10 text-center bg-gray-50/50 rounded-2xl border border-dashed border-gray-100">
-              <Star className="w-6 h-6 text-amber-400 mx-auto mb-1.5" />
-              <p className="text-xs font-bold text-gray-800">No Reviews Yet</p>
-              <p className="text-[10px] text-gray-400 mt-0.5">Reviews from completed jobs will appear here.</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Edit Profile Modal */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative animate-scale-up max-h-[90vh] overflow-y-auto">
-            <button
-              onClick={() => setIsEditModalOpen(false)}
-              className="absolute right-6 top-6 p-2 text-gray-400 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex items-center gap-3 mb-6">
-              <div className="text-[#016EA6] flex items-center justify-center">
-                <Edit3 className="w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Edit Professional Profile</h3>
-                <p className="text-xs text-gray-400 font-medium">Update your public details and specialties</p>
-              </div>
-            </div>
-
-            <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Profession / Headline</label>
-                <input
-                  type="text"
-                  value={editForm.profession}
-                  onChange={(e) => setEditForm({ ...editForm, profession: e.target.value })}
-                  placeholder="e.g. Master Carpenter & Cabinet Maker"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white font-medium text-gray-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Hourly Rate (₦ NGN)</label>
-                <input
-                  type="number"
-                  value={editForm.hourlyRate}
-                  onChange={(e) => setEditForm({ ...editForm, hourlyRate: e.target.value })}
-                  placeholder="e.g. 5000"
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white font-medium text-gray-800"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">About Me (Biography)</label>
-                <textarea
-                  rows={4}
-                  value={editForm.bio}
-                  onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
-                  placeholder="Describe your professional background, experience, and specialties..."
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white font-medium text-gray-800 resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-gray-700 mb-1">Availability Status</label>
-                <select
-                  value={editForm.availabilityStatus}
-                  onChange={(e) => setEditForm({ ...editForm, availabilityStatus: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs outline-none focus:border-[#016EA6] focus:bg-white font-medium text-gray-800 cursor-pointer"
-                >
-                  <option value="available">Available for Work</option>
-                  <option value="busy">Currently Busy</option>
-                  <option value="unavailable">Unavailable</option>
-                </select>
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-100">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-5 py-2.5 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded-full text-xs font-bold transition-all cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-6 py-2.5 bg-[#016EA6] hover:bg-[#061EA6] text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow-sm disabled:opacity-50"
-                >
-                  {isSaving ? "Saving..." : "Save Changes"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Add Skill Modal */}
+      {isEditModalOpen ? (
+        <ProfileEditModal
+          isOpen
+          profile={profile.profileData}
+          user={profile.user}
+          isSaving={isSavingProfile}
+          onClose={() => setIsEditModalOpen(false)}
+          onSave={handleSaveProfile}
+        />
+      ) : null}
       <AddSkillModal
         isOpen={isAddSkillModalOpen}
         onClose={() => setIsAddSkillModalOpen(false)}
-        existingSkills={skills}
-        onSkillAdded={handleSkillAdded}
+        existingSkills={profile.skills}
+        onSkillAdded={profile.addSkill}
+      />
+      <ProfilePortfolioModal
+        isOpen={isPortfolioModalOpen}
+        onClose={() => setIsPortfolioModalOpen(false)}
+        onCreate={profile.addPortfolioItem}
+      />
+      <ProfileCertificationModal
+        isOpen={isCertificationModalOpen}
+        onClose={() => setIsCertificationModalOpen(false)}
+        onCreate={profile.addCertification}
       />
 
-      {isPortfolioModalOpen && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-          <form onSubmit={createPortfolio} className="w-full max-w-md space-y-4 rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between"><h3 className="font-bold text-gray-900">Add portfolio project</h3><button type="button" onClick={() => setIsPortfolioModalOpen(false)}><X className="h-5 w-5" /></button></div>
-            <input required value={portfolioForm.title} onChange={(e) => setPortfolioForm((v) => ({ ...v, title: e.target.value }))} placeholder="Project title" className="w-full rounded-xl border p-3 text-sm" />
-            <textarea value={portfolioForm.description} onChange={(e) => setPortfolioForm((v) => ({ ...v, description: e.target.value }))} placeholder="Brief description" className="w-full rounded-xl border p-3 text-sm" rows={3} />
-            <input value={portfolioForm.linkUrl} onChange={(e) => setPortfolioForm((v) => ({ ...v, linkUrl: e.target.value }))} placeholder="Project link (optional)" className="w-full rounded-xl border p-3 text-sm" />
-            <MediaUploader purpose="portfolio" label="Upload cover image" onUploaded={({ mediaId }) => setPortfolioForm((v) => ({ ...v, coverMediaId: mediaId }))} />
-            <button className="w-full rounded-full bg-[#016EA6] py-3 text-sm font-bold text-white">Save project</button>
-          </form>
-        </div>
-      )}
-
-      {isCertificationModalOpen && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4">
-          <form onSubmit={createCertification} className="w-full max-w-md space-y-4 rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-center justify-between"><h3 className="font-bold text-gray-900">Add certification</h3><button type="button" onClick={() => setIsCertificationModalOpen(false)}><X className="h-5 w-5" /></button></div>
-            <input required value={certificationForm.title} onChange={(e) => setCertificationForm((v) => ({ ...v, title: e.target.value }))} placeholder="Certification title" className="w-full rounded-xl border p-3 text-sm" />
-            <input value={certificationForm.issuer} onChange={(e) => setCertificationForm((v) => ({ ...v, issuer: e.target.value }))} placeholder="Issuing organization" className="w-full rounded-xl border p-3 text-sm" />
-            <MediaUploader purpose="certificate" acceptDocuments label="Upload certificate" onUploaded={({ mediaId }) => setCertificationForm((v) => ({ ...v, credentialMediaId: mediaId }))} />
-            <button className="w-full rounded-full bg-[#016EA6] py-3 text-sm font-bold text-white">Save certification</button>
-          </form>
-        </div>
-      )}
-      {/* Dynamic Section Spotlight Tooltip */}
-      {highlightSection && (
+      {highlightSection ? (
         <SectionSpotlightTooltip
           sectionKey={highlightSection}
           targetSelector={`#profile-${highlightSection}-section`}
           onAction={handleSpotlightAction}
           onDismiss={() => setHighlightSection(null)}
         />
-      )}
+      ) : null}
     </div>
   );
 };

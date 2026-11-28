@@ -1,43 +1,53 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { FiArrowLeft, FiBell, FiCheck, FiMessageSquare, FiStar, FiLoader } from "react-icons/fi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "../../store/authStore";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import escrowIllustration from "../../assets/images/escrow_illustration.png";
+import { paymentService } from "../../api/services/paymentService";
 
-const DEFAULT_JOB = {
-  id: "JOB-1001",
-  title: "Wardrobe Installation",
-  description:
-    "Hi, I’m looking for an experienced carpenter to build and install a custom wardrobe for my master bedroom. The wardrobe should have sliding doors, multiple shelves, hanging sections, and drawers.",
-  budget: 10000,
-};
-
-const DEFAULT_OFFER = {
-  id: "pro-1",
-  name: "Jonathan David",
-  role: "Carpenter",
-  price: 22000,
-  reviews: 32,
-  rating: 5,
-  summary:
-    "Hello, I can handle this project successfully. I have vast years of experience in creating a professional and beautiful custom wardrobe.",
-};
-
-// Simulated wallet funding currently debits the quoted application amount only.
-const PLATFORM_FEE = 0;
+const CHECKOUT_STORAGE_KEY = "linkprosoft:pending-escrow-checkout";
+const BUYER_FEE_RATE = 0.01;
 
 const formatCurrency = (amount) => `₦${Number(amount || 0).toLocaleString()}`;
 
+const readStoredCheckout = () => {
+  try {
+    const checkout = sessionStorage.getItem(CHECKOUT_STORAGE_KEY);
+    return checkout ? JSON.parse(checkout) : null;
+  } catch {
+    return null;
+  }
+};
+
+const createCheckoutContext = (job, offer, assignmentId) => ({
+  job: {
+    id: job.id,
+    title: job.title,
+    description: job.description,
+    budget: job.budget,
+    createdAt: job.createdAt,
+  },
+  offer: {
+    applicationId: offer.applicationId,
+    name: offer.name,
+    role: offer.role,
+    price: offer.price,
+    summary: offer.summary,
+    rating: offer.rating,
+    reviews: offer.reviews,
+  },
+  assignmentId,
+});
+
 // ─── Progress Stepper ─────────────────────────────────────────────────────────
-const ProgressSteps = ({ isFunded = false }) => {
+const ProgressSteps = ({ paymentStarted = false, escrowFunded = false }) => {
   const steps = [
     { label: "Job posted", done: true },
     { label: "Offers received", done: true },
-    { label: "Fund escrow", done: isFunded },
-    { label: "Work in progress", done: isFunded },
+    { label: "Payment submitted", done: paymentStarted },
+    { label: "Work in progress", done: escrowFunded },
   ];
 
   return (
@@ -165,99 +175,88 @@ const AcceptedOfferCard = ({ offer }) => {
   );
 };
 
-// ─── Success Modal ────────────────────────────────────────────────────────────
-const EscrowSuccessModal = ({ professionalName, onClose, onDashboard }) => (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-    role="dialog"
-    aria-modal="true"
-    aria-label="Escrow funded successfully"
-  >
-    <div className="relative w-full max-w-[420px] overflow-hidden rounded-2xl bg-white px-9 pb-8 pt-11 text-center shadow-2xl">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 overflow-hidden">
-        {Array.from({ length: 18 }, (_, i) => (
-          <span
-            key={i}
-            className="absolute h-2 w-1.5 rounded-sm"
-            style={{
-              left: `${(i * 17) % 105}%`,
-              top: `${(i * 13) % 65}px`,
-              backgroundColor: ["#016EA6", "#f2c500", "#e11d48", "#10a86b"][i % 4],
-              transform: `rotate(${i * 31}deg)`,
-            }}
-          />
-        ))}
-      </div>
-      <img src={escrowIllustration} alt="" className="relative mx-auto h-[72px] w-[72px] object-contain" />
-      <h2 className="mt-4 text-[1.1rem] font-semibold text-[#171717]">Escrow Funded Successfully</h2>
-      <p className="mx-auto mt-1.5 max-w-[280px] text-[0.75rem] leading-5 text-[#7b7b7b]">
-        <strong className="text-gray-900">{professionalName || "The professional"}</strong> has been notified and can now begin work.
-      </p>
-      <button
-        type="button"
-        onClick={onDashboard}
-        className="mt-6 w-full rounded-full bg-[#016EA6] py-2.5 text-[0.78rem] font-medium text-white transition hover:bg-[#015a8a] cursor-pointer"
-      >
-        Go to Dashboard
-      </button>
-      <button
-        type="button"
-        onClick={onClose}
-        className="mt-2.5 w-full rounded-full bg-[#f5f5f5] py-2.5 text-[0.78rem] font-medium text-[#333] transition hover:bg-[#ebebeb] cursor-pointer"
-      >
-        Close
-      </button>
-    </div>
-  </div>
-);
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 const PaymentScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthStore();
 
-  const [showSuccess, setShowSuccess] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isFunded, setIsFunded] = useState(false);
-
-  // Read job and offer from navigation state, with robust fallback to default mock
-  const activeJob = location.state?.job || DEFAULT_JOB;
-  const rawOffer = location.state?.offer || DEFAULT_OFFER;
-
-  const parsedPrice =
-    typeof rawOffer.price === "number"
-      ? rawOffer.price
-      : Number(String(rawOffer.price || "").replace(/,/g, "")) || 22000;
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState("");
+  const [verifiedPayment, setVerifiedPayment] = useState(null);
+  const [checkoutContext, setCheckoutContext] = useState(
+    () => location.state?.job && location.state?.offer
+      ? { job: location.state.job, offer: location.state.offer }
+      : readStoredCheckout(),
+  );
+  const searchParams = new URLSearchParams(location.search);
+  const paymentReference = searchParams.get("reference") || searchParams.get("trxref");
+  const activeJob = checkoutContext?.job || location.state?.job;
+  const rawOffer = checkoutContext?.offer || location.state?.offer;
+  const parsedPrice = typeof rawOffer?.price === "number"
+    ? rawOffer.price
+    : Number(String(rawOffer?.price || "").replace(/,/g, ""));
 
   const activeOffer = {
-    ...rawOffer,
+    ...(rawOffer || {}),
     numericPrice: parsedPrice,
   };
 
   const userName = user?.fullName || user?.full_name || "Employer";
   const serviceCost = activeOffer.numericPrice;
-  const platformFee = PLATFORM_FEE;
+  const platformFee = Math.round(serviceCost * 100 * BUYER_FEE_RATE) / 100;
   const totalFee = serviceCost + platformFee;
+
+  const verifyPayment = useCallback(async (reference) => {
+    setIsVerifying(true);
+    setVerificationError("");
+    try {
+      const payment = await paymentService.verify(reference);
+      setVerifiedPayment(payment);
+      if (["pending_admin_approval", "held_in_escrow", "released"].includes(payment.status)) {
+        sessionStorage.removeItem(CHECKOUT_STORAGE_KEY);
+      }
+    } catch (err) {
+      setVerificationError(
+        err.response?.data?.message || err.message || "Unable to verify this payment yet.",
+      );
+    } finally {
+      setIsVerifying(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (paymentReference) verifyPayment(paymentReference);
+  }, [paymentReference, verifyPayment]);
 
   const handlePayToEscrow = async () => {
     setIsProcessing(true);
     try {
-      if (!activeJob?.id || !activeOffer?.applicationId) {
-        throw new Error("This offer is missing its application ID. Please return to Manage Jobs and try again.");
+      if (!activeJob?.id || !activeOffer?.applicationId || !Number.isFinite(serviceCost) || serviceCost <= 0) {
+        throw new Error("This offer is missing valid job, application, or price details. Return to Manage Jobs and select the offer again.");
       }
 
-      // The backend performs the full atomic acceptance/funding transaction.
-      await axiosInstance.post(
-        API_PATHS.JOBS.ACCEPT_AND_FUND_APPLICATION(activeJob.id, activeOffer.applicationId),
-        { paymentMethod: "simulated_wallet" },
-      );
+      let assignmentId = checkoutContext?.assignmentId;
+      if (!assignmentId) {
+        const acceptResponse = await axiosInstance.post(
+          API_PATHS.JOBS.ACCEPT_APPLICATION(activeJob.id, activeOffer.applicationId),
+        );
+        const acceptData = acceptResponse.data?.data ?? acceptResponse.data;
+        assignmentId = acceptData?.assignment?.id;
+        if (!assignmentId) {
+          throw new Error("The accepted offer did not return an assignment. Please try again or contact support.");
+        }
+      }
 
-      setIsFunded(true);
-      toast.success("Escrow funded! Professional notified to begin work.");
-      setShowSuccess(true);
+      const nextContext = createCheckoutContext(activeJob, activeOffer, assignmentId);
+      setCheckoutContext(nextContext);
+      sessionStorage.setItem(CHECKOUT_STORAGE_KEY, JSON.stringify(nextContext));
+
+      const checkout = await paymentService.initiate(assignmentId);
+      window.location.assign(checkout.authorization_url);
     } catch (err) {
-      console.error("Escrow funding error:", err);
+      console.error("Payment checkout error:", err);
       const message =
         err.response?.data?.message ||
         err.message ||
@@ -269,7 +268,10 @@ const PaymentScreen = () => {
   };
 
   const handleGoToDashboard = () => {
-    setShowSuccess(false);
+    if (!activeJob?.id) {
+      navigate("/manage-jobs");
+      return;
+    }
     navigate("/employer/dashboard", {
       state: {
         tab: "job-details",
@@ -277,6 +279,95 @@ const PaymentScreen = () => {
       },
     });
   };
+
+  if (paymentReference) {
+    const statusMessages = {
+      pending_payment: "The provider has not confirmed this payment yet. Check again in a moment before starting another payment.",
+      pending_admin_approval: "Payment received. Escrow will be funded after the platform review is complete.",
+      held_in_escrow: "Payment verified and held in escrow. The professional can begin work.",
+      released: "This payment has already been released.",
+      payment_rejected: "The payment was not completed. You can try checkout again.",
+    };
+    const canRetry = Boolean(
+      checkoutContext?.assignmentId &&
+      checkoutContext?.job?.id &&
+      checkoutContext?.offer?.applicationId &&
+      verifiedPayment?.status === "payment_rejected",
+    );
+
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f6f7] px-4 py-10">
+        <section className="w-full max-w-lg rounded-2xl bg-white p-8 text-center shadow-sm" aria-live="polite">
+          <h1 className="text-xl font-semibold text-gray-900">Payment status</h1>
+          {isVerifying ? (
+            <p className="mt-4 flex items-center justify-center gap-2 text-sm text-gray-600">
+              <FiLoader className="h-4 w-4 animate-spin" /> Verifying payment with the provider…
+            </p>
+          ) : null}
+          {verificationError ? (
+            <p role="alert" className="mt-4 text-sm text-rose-700">{verificationError}</p>
+          ) : null}
+          {verifiedPayment ? (
+            <p role="status" className="mt-4 text-sm leading-6 text-gray-600">
+              {statusMessages[verifiedPayment.status] || "Payment status returned by the provider: " + verifiedPayment.status}
+            </p>
+          ) : null}
+          {!isVerifying && !verifiedPayment && !verificationError ? (
+            <p className="mt-4 text-sm text-gray-600">Checking the payment provider…</p>
+          ) : null}
+          <div className="mt-6 flex flex-col gap-3">
+            {verifiedPayment?.status === "pending_payment" || verificationError ? (
+              <button
+                type="button"
+                disabled={isVerifying}
+                onClick={() => verifyPayment(paymentReference)}
+                className="rounded-full border border-[#016EA6] px-5 py-2.5 text-sm font-medium text-[#016EA6] disabled:opacity-60"
+              >
+                Check payment again
+              </button>
+            ) : null}
+            {canRetry ? (
+              <button
+                type="button"
+                disabled={isProcessing}
+                onClick={handlePayToEscrow}
+                className="rounded-full bg-[#016EA6] px-5 py-2.5 text-sm font-medium text-white disabled:opacity-60"
+              >
+                {isProcessing ? "Starting checkout…" : "Try payment again"}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleGoToDashboard}
+              className="rounded-full bg-gray-100 px-5 py-2.5 text-sm font-medium text-gray-700"
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
+  if (!activeJob?.id || !rawOffer?.applicationId || !Number.isFinite(serviceCost) || serviceCost <= 0) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f5f6f7] px-4 py-10">
+        <section className="w-full max-w-lg rounded-2xl bg-white p-8 text-center shadow-sm">
+          <h1 className="text-xl font-semibold text-gray-900">Offer details unavailable</h1>
+          <p className="mt-3 text-sm text-gray-600">
+            Return to Manage Jobs and select an offer before starting checkout.
+          </p>
+          <button
+            type="button"
+            onClick={() => navigate("/manage-jobs")}
+            className="mt-6 rounded-full bg-[#016EA6] px-5 py-2.5 text-sm font-medium text-white"
+          >
+            Return to Manage Jobs
+          </button>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f6f7] font-sans text-[#202020]">
@@ -335,7 +426,7 @@ const PaymentScreen = () => {
       <main className="mx-auto grid max-w-[1200px] grid-cols-1 gap-5 px-6 py-6 lg:grid-cols-[1fr_320px]">
         {/* Left */}
         <section className="space-y-4">
-          <ProgressSteps isFunded={isFunded} />
+          <ProgressSteps />
           <EscrowBanner />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <JobSummaryCard job={activeJob} />
@@ -352,7 +443,7 @@ const PaymentScreen = () => {
               <span className="text-[0.88rem] font-medium text-[#1a1a1a]">{formatCurrency(serviceCost)}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[0.8rem] text-[#888]">Platform Fee</span>
+              <span className="text-[0.8rem] text-[#888]">Platform Fee (1%)</span>
               <span className="text-[0.88rem] font-medium text-[#1a1a1a]">{formatCurrency(platformFee)}</span>
             </div>
             <div className="border-t border-[#ebebeb]" />
@@ -373,7 +464,7 @@ const PaymentScreen = () => {
             {isProcessing ? (
               <>
                 <FiLoader className="w-4 h-4 animate-spin" />
-                <span>Processing Escrow...</span>
+                <span>Opening secure checkout...</span>
               </>
             ) : (
               <span>Pay to escrow</span>
@@ -382,13 +473,6 @@ const PaymentScreen = () => {
         </aside>
       </main>
 
-      {showSuccess && (
-        <EscrowSuccessModal
-          professionalName={activeOffer.name}
-          onClose={() => setShowSuccess(false)}
-          onDashboard={handleGoToDashboard}
-        />
-      )}
     </div>
   );
 };

@@ -117,11 +117,12 @@ const ManageJobsPage = () => {
             const proRole = applicant.profession || applicant.role || "Craftsman";
             const rating = Number(applicant.avgRating || applicant.rating || 5);
             const reviewCount = Number(applicant.totalReviews || applicant.reviewCount || 12);
-            const priceNum =
-              cand.bidAmount ||
-              cand.bid_amount ||
-              cand.amount ||
-              (applicant.hourlyRate ? applicant.hourlyRate * 8 : pendingJob.budget || 22000);
+            const priceNum = Number(
+              cand.bidAmount ??
+              cand.bid_amount ??
+              cand.amount ??
+              (applicant.hourlyRate ? applicant.hourlyRate * 8 : pendingJob.budget),
+            );
 
             return {
               // The accept-and-fund endpoint requires the application ID,
@@ -142,7 +143,7 @@ const ManageJobsPage = () => {
               delivery: cand.estimatedDeliveryDays
                 ? `${cand.estimatedDeliveryDays} days delivery`
                 : "2-3 days delivery",
-              price: priceNum.toLocaleString(),
+              price: Number.isFinite(priceNum) && priceNum > 0 ? priceNum.toLocaleString() : "",
             };
           });
 

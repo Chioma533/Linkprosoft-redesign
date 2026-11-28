@@ -88,8 +88,8 @@ export const API_PATHS = {
     DELETE_JOB: (id) => `/api/jobs/${id}`,
     MATCH_JOB: (id) => `/api/jobs/${id}/matches`,
     GET_JOB_APPLICATIONS: (id) => `/api/jobs/${id}/applications`,
-    ACCEPT_AND_FUND_APPLICATION: (jobId, applicationId) =>
-      `/api/jobs/${jobId}/applications/${applicationId}/accept-and-fund`,
+    ACCEPT_APPLICATION: (jobId, applicationId) =>
+      `/api/jobs/${jobId}/applications/${applicationId}/accept`,
   },
 
   ASSIGNMENTS: {

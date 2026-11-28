@@ -406,7 +406,7 @@ const VerificationPage = () => {
                   <VerificationField
                     label="Nationality"
                     placeholder="Select nationality"
-                    value={profile.nationality || "Nigerian"}
+                    value={profile.nationality || ""}
                     onChange={(e) => updateProfile("nationality", e.target.value)}
                     error={errors.nationality}
                   />

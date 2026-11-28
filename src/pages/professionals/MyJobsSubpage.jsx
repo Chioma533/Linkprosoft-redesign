@@ -65,7 +65,7 @@ const MyJobsSubpage = () => {
     id: job.id || idx + 1,
     orderId: job.orderId || job.order_id || (job.id ? `ORD-${String(job.id).slice(0, 6)}` : `ORD-${idx + 1}`),
     title: job.title || job.jobTitle || "Contracted Assignment",
-    category: job.category?.name || job.category || "General Service",
+    category: job.skill?.name || job.category?.name || job.category || job.skill?.category || "General Service",
     client: job.client?.fullName || job.client?.name || job.client || job.employerName || "Direct Client",
     budget: Number(job.budget || job.totalAmount || job.agreedAmount || 0),
     status: job.status || "Active",

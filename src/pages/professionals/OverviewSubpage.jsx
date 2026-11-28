@@ -64,7 +64,7 @@ const OverviewSubpage = () => {
     jobs.map((job) => ({
       "Order ID": job.orderId || job.order_id || (job.id ? `ORD-${job.id}` : "—"),
       "Job Title": job.title || job.jobTitle || "Untitled Job",
-      Category: job.category?.name || job.category || "General",
+      Category: job.skill?.name || job.category?.name || job.category || job.skill?.category || "General",
       Client: job.client?.fullName || job.client?.name || job.client || job.employerName || "Direct Client",
       Status: job.status || "Active",
       Payment: job.paymentStatus || job.payment_status || "Pending",

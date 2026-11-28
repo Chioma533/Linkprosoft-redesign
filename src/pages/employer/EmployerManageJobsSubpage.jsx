@@ -94,6 +94,7 @@ const EmployerManageJobsSubpage = ({ onViewProject }) => {
     if (!rawStatus) return "Awaiting Offers";
     const s = String(rawStatus).toLowerCase();
     if (s === "draft" || s === "posted" || s.includes("offer")) return "Awaiting Offers";
+    if (s === "pending_payment") return "Awaiting Payment";
     if (s.includes("escrow")) return "Awaiting Escrow";
     if (s.includes("progress") || s === "active") return "In Progress";
     if (s.includes("complete")) return "Completed";

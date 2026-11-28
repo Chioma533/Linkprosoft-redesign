@@ -45,7 +45,13 @@ const ApplicationsSubpage = () => {
         app.client ||
         app.employerName ||
         "Direct Buyer",
-      category: app.job?.category?.name || app.category || "General Service",
+      category:
+        app.job?.skill?.name ||
+        app.job?.category?.name ||
+        app.job?.category ||
+        app.job?.skill?.category ||
+        app.category ||
+        "General Service",
       appliedOn:
         app.appliedOn ||
         (app.createdAt

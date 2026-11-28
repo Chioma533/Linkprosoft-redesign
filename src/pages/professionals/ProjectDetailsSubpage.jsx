@@ -54,7 +54,7 @@ const ProjectDetailsSubpage = () => {
     id: selectedJob.id || "job-1",
     orderId: selectedJob.orderId || selectedJob.order_id || `ORD-${String(selectedJob.id).slice(0, 6)}`,
     title: selectedJob.title || selectedJob.jobTitle || "Contracted Project",
-    category: selectedJob.category?.name || selectedJob.category || "General Service",
+    category: selectedJob.skill?.name || selectedJob.category?.name || selectedJob.category || selectedJob.skill?.category || "General Service",
     location: selectedJob.location || "Lekki, Lagos",
     budget: Number(selectedJob.budget || selectedJob.totalAmount || 0),
     client: selectedJob.client?.fullName || selectedJob.client?.name || selectedJob.client || selectedJob.employerName || "Direct Client",
